@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: '#007BFF',
+              secondary: '#F8F9FA',
+              success: '#28A945',
+              warning: '#F59E0B',
+              danger: '#DC2626',
+              gray: { light: '#CED4DA' }
+            }
+          }
+        }
+      }
+    </script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&display=swap">
+    <style>
+      body { font-family: 'Inter', sans-serif !important; }
+      .fa, .fas, .far, .fal, .fab { font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important; }
+      ::-webkit-scrollbar { display: none; }
+      html, body { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body>
+    <aside th:fragment="sidebar" class="w-16 md:w-64 bg-primary text-white flex flex-col fixed h-full">
+        <div class="p-4 flex items-center justify-center md:justify-start">
+            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-utensils text-primary"></i>
+            </div>
+            <span class="ml-3 text-xl font-bold hidden md:block">DSi Eats</span>
+        </div>
+        <nav class="mt-8">
+            <ul>
+                <li class="mb-2">
+                    <span class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer">
+                        <i class="fa-solid fa-calendar-week w-6 text-center"></i>
+                        <span class="ml-3 hidden md:block">Manage Weekly Plan</span>
+                    </span>
+                </li>
+                <li class="mb-2">
+                    <span class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer">
+                        <i class="fa-solid fa-pen-to-square w-6 text-center"></i>
+                        <span class="ml-3 hidden md:block">Update Today's Menu</span>
+                    </span>
+                </li>
+                <li class="mb-2">
+                    <span class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer">
+                        <i class="fa-solid fa-chart-pie w-6 text-center"></i>
+                        <span class="ml-3 hidden md:block">Food Stats</span>
+                    </span>
+                </li>
+                <li class="mb-2">
+                    <span class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer">
+                        <i class="fa-solid fa-comment-dots w-6 text-center"></i>
+                        <span class="ml-3 hidden md:block">Review Comments</span>
+                    </span>
+                </li>
+                <li class="mb-2">
+                    <span class="flex items-center px-4 py-3 bg-blue-700 hover:bg-blue-800 cursor-pointer">
+                        <i class="fa-solid fa-bowl-food w-6 text-center"></i>
+                        <span class="ml-3 hidden md:block">Dish Management</span>
+                    </span>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+    <header th:fragment="topnav" class="bg-white shadow-sm h-16 flex items-center justify-between px-6">
+        <div class="flex items-center">
+            <h1 class="text-xl font-semibold text-gray-800 mr-4" th:text="${pageTitle}">Meal Planner</h1>
+            <div class="bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-full text-sm font-medium" th:if="${dishCount != null}">
+                <i class="fa-solid fa-bowl-food mr-1"></i>
+                <span th:text="${dishCount} + ' Total Dishes'"></span>
+            </div>
+        </div>
+        <div class="flex items-center">
+            <div class="relative mr-4">
+                <button class="flex items-center text-gray-700 hover:text-primary">
+                    <i class="fa-regular fa-bell text-lg"></i>
+                    <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+                </button>
+            </div>
+            <div class="relative">
+                <button class="flex items-center text-gray-700">
+                    <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" class="w-8 h-8 rounded-full mr-2" alt="User Avatar">
+                    <span class="font-medium mr-1 hidden md:inline-block">John Doe</span>
+                    <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full hidden md:inline-block">Admin</span>
+                    <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+</body>
+</html> 

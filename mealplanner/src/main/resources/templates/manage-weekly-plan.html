@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head"></head>
+<body class="bg-gray-50 font-sans">
+    <div class="flex">
+        <aside th:replace="fragments/layout :: sidebar"></aside>
+        <div class="flex-1 ml-16 md:ml-64">
+            <header th:replace="fragments/layout :: topnav"></header>
+            <main class="px-6 py-6 overflow-y-auto">
+                <section id="weekly-plan-hero-section" class="bg-white rounded-xl shadow-sm mb-8">
+                    <div class="relative h-[150px] bg-gradient-to-r from-primary to-blue-600 rounded-xl overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-r from-primary/90 to-blue-600/70"></div>
+                        <div class="absolute bottom-0 left-0 p-6 text-white">
+                            <h2 class="text-2xl font-bold mb-1">Weekly Menu Planning</h2>
+                            <p class="text-base">Plan meals day by day across breakfast, lunch, and snacks</p>
+                        </div>
+                    </div>
+                </section>
+                <section id="weekly-calendar-section" class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800">Weekly Overview</h3>
+                        <div class="flex items-center space-x-2">
+                            <a th:href="@{'/weekly-plan?date=' + ${weekStart.minusWeeks(1)}}" class="p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-lg transition">
+                                <i class="fa-solid fa-chevron-left"></i>
+                            </a>
+                            <span class="text-sm text-gray-600 mx-3" th:text="${weekStart} + ' - ' + ${weekEnd}"></span>
+                            <a th:href="@{'/weekly-plan?date=' + ${weekStart.plusWeeks(1)}}" class="p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-lg transition">
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-3">
+                        <div th:each="day,iter : ${weekDays}"
+                             th:classappend="${day.equals(selectedDate)} ? 'bg-primary text-white border-primary' : 'bg-gray-100 text-gray-600 border-transparent hover:border-primary hover:bg-primary hover:text-white transition'"
+                             class="day-card rounded-lg p-4 cursor-pointer border-2"
+                             >
+                            <a th:href="@{'/weekly-plan?date=' + ${day}}">
+                                <div class="text-center">
+                                    <p class="text-xs font-medium mb-1" th:text="${#strings.toUpperCase(#temporals.format(day, 'EEE'))}"></p>
+                                    <p class="text-lg font-bold mb-2" th:text="${day.dayOfMonth}"></p>
+                                    <div class="w-5 h-5 bg-success rounded-full mx-auto flex items-center justify-center" th:if="${day.equals(selectedDate)}">
+                                        <i class="fa-solid fa-check text-white text-xs"></i>
+                                    </div>
+                                    <div class="w-5 h-5 bg-gray-300 rounded-full mx-auto" th:if="${!day.equals(selectedDate)}"></div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+                <section id="day-planning-section" class="bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-4">
+                            <h3 class="text-xl font-semibold text-gray-800" th:text="'Planning for ' + ${#temporals.format(selectedDate, 'EEEE, MMMM d')}"></h3>
+                            <div class="bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-full text-sm font-medium">
+                                <i class="fa-solid fa-calendar-day mr-1"></i>
+                                <span th:text="'Day ' + ${selectedDate.dayOfWeek.value}"></span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <a th:href="@{'/weekly-plan?date=' + ${selectedDate.minusDays(1)}}" class="px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-lg transition flex items-center">
+                                <i class="fa-solid fa-chevron-left mr-2"></i>
+                                <span>Previous Day</span>
+                            </a>
+                            <a th:href="@{'/weekly-plan?date=' + ${selectedDate.plusDays(1)}}" class="px-4 py-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded-lg transition flex items-center">
+                                <span>Next Day</span>
+                                <i class="fa-solid fa-chevron-right ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div id="meal-card-breakfast" th:replace="this :: mealCard(${selectedDate}, 'breakfast', ${weekPlan}, ${allDishes})"></div>
+                        <div id="meal-card-lunch" th:replace="this :: mealCard(${selectedDate}, 'lunch', ${weekPlan}, ${allDishes})"></div>
+                        <div id="meal-card-snacks" th:replace="this :: mealCard(${selectedDate}, 'snacks', ${weekPlan}, ${allDishes})"></div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+    <script>
+    function attachAddDishHandlers() {
+        document.querySelectorAll('.add-dish-form').forEach(function(form) {
+            const select = form.querySelector('select[name="dishId"]');
+            if (select) {
+                select.onchange = function() {
+                    if (select.value) {
+                        // Submit via AJAX
+                        const formData = new FormData(form);
+                        const meal = form.querySelector('input[name="mealPeriod"]').value;
+                        fetch(form.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        })
+                        .then(response => response.text())
+                        .then(html => {
+                            const mealCard = document.getElementById('meal-card-' + meal);
+                            if (mealCard) {
+                                mealCard.outerHTML = html;
+                                attachAddDishHandlers(); // re-attach
+                            }
+                        });
+                        // Reset dropdown
+                        select.value = '';
+                    }
+                };
+            }
+        });
+    }
+    document.addEventListener('DOMContentLoaded', attachAddDishHandlers);
+    </script>
+</body>
+</html>
+
+<!-- Meal Card Fragment -->
+<div th:fragment="mealCard(selectedDate, meal, weekPlan, allDishes)" th:id="|meal-card-${meal}|">
+    <div th:classappend="${meal == 'breakfast'} ? 'bg-yellow-50 border-yellow-200' : (meal == 'lunch' ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200')"
+         class="rounded-lg p-6 border">
+        <div class="flex items-center mb-4">
+            <div th:classappend="${meal == 'breakfast'} ? 'bg-yellow-100 text-yellow-600' : (meal == 'lunch' ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-600')"
+                 class="w-10 h-10 rounded-full flex items-center justify-center mr-3">
+                <i th:class="${meal == 'breakfast'} ? 'fa-solid fa-sun' : 'fa-solid fa-utensils'"></i>
+            </div>
+            <div>
+                <h4 class="font-semibold text-gray-800" th:text="${#strings.capitalize(meal)}"></h4>
+                <p class="text-sm text-gray-600" th:text="${meal == 'breakfast' ? '7:00 - 10:00 AM' : (meal == 'lunch' ? '12:00 - 2:00 PM' : '1:00 - 2:00 PM')}"></p>
+            </div>
+        </div>
+        <div class="space-y-3">
+            <th:block th:if="${weekPlan[selectedDate] != null and weekPlan[selectedDate][meal] != null}">
+                <div th:each="dishMap : ${weekPlan[selectedDate][meal]}" class="selected-dish bg-white rounded-lg p-3 border border-gray-200 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <img class="w-12 h-12 rounded-lg object-cover mr-3" th:src="${dishMap.dish?.imageUrl}" th:alt="${dishMap.dish?.name}">
+                        <div>
+                            <p class="font-medium text-gray-800" th:text="${dishMap.dish?.name}"></p>
+                            <span th:each="tag : ${dishMap.dish?.dietaryInfo}" th:text="${tag}" class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs mr-1"></span>
+                        </div>
+                    </div>
+                    <form th:if="${dishMap.overrideId != null}" th:action="@{/weekly-plan/remove}" method="post" class="remove-dish-form">
+                        <input type="hidden" name="overrideId" th:value="${dishMap.overrideId}" />
+                        <input type="hidden" name="date" th:value="${selectedDate}" />
+                        <button type="submit" class="text-gray-400 hover:text-danger"><i class="fa-solid fa-times text-xs"></i></button>
+                    </form>
+                </div>
+            </th:block>
+            <div th:if="${weekPlan[selectedDate] == null or weekPlan[selectedDate][meal] == null}" class="text-gray-400 text-sm italic">
+                No dishes planned for this meal.
+            </div>
+            <!-- Add Dish Dropdown -->
+            <form th:action="@{/weekly-plan/add}" method="post" class="w-full add-dish-form">
+                <input type="hidden" name="date" th:value="${selectedDate}" />
+                <input type="hidden" name="mealPeriod" th:value="${meal}" />
+                <div class="flex items-center gap-2">
+                    <select name="dishId" class="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-3 text-gray-500 focus:border-primary dish-select">
+                        <option value="">+ Add Dish</option>
+                        <option th:each="d : ${allDishes}" th:value="${d.id}" th:text="${d.name}"></option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> 
