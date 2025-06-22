@@ -1,0 +1,419 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>::-webkit-scrollbar { display: none;}</style>
+    <script>tailwind.config = {
+  "theme": {
+    "extend": {
+      "colors": {
+        "primary": "#007BFF",
+        "secondary": "#F8F9FA",
+        "success": "#28A945",
+        "warning": "#F59E0B",
+        "danger": "#DC2626",
+        "gray": {
+          "light": "#CED4DA"
+        }
+      },
+      "fontFamily": {
+        "sans": [
+          "Inter",
+          "sans-serif"
+        ]
+      }
+    }
+  }
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+      body {
+        font-family: 'Inter', sans-serif !important;
+      }
+      
+      /* Preserve Font Awesome icons */
+      .fa, .fas, .far, .fal, .fab {
+        font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+      }
+    </style><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <header id="header" class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center mr-3">
+                        <i class="fa-solid fa-utensils text-white"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-800">DSi Eats</h1>
+                    <div class="ml-6 bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-full text-sm font-medium">
+                        <i class="fa-regular fa-clock mr-1"></i>
+                        <span>Lunch Time - 1:30 PM</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <nav class="hidden md:flex space-x-6">
+                        <span class="text-primary font-medium cursor-pointer border-b-2 border-primary pb-1">Today's Menu</span>
+                        <span class="text-gray-600 hover:text-primary cursor-pointer">Weekly Menu</span>
+                        <span class="text-gray-600 hover:text-primary cursor-pointer">Food Stats</span>
+                    </nav>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="relative">
+                            <button class="flex items-center text-gray-700 hover:text-primary">
+                                <i class="fa-regular fa-bell text-lg"></i>
+                                <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
+                            </button>
+                        </div>
+                        
+                        <div class="relative">
+                            <button class="flex items-center text-gray-700">
+                                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" class="w-8 h-8 rounded-full mr-2" alt="User Avatar">
+                                <span class="font-medium mr-1 hidden md:inline-block">John Doe</span>
+                                <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full hidden md:inline-block">Developer</span>
+                                <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Hero Section - Current Meal Display -->
+        <section id="hero-section" class="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
+            <div class="relative h-[200px]">
+                <img class="absolute inset-0 w-full h-full object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/45c4c441d1-9309d05f107ea5096f78.png" alt="delicious lunch spread with pasta, salad, grilled chicken, and vegetables on a modern cafeteria table, bright and appetizing food photography">
+                <div class="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/40"></div>
+                <div class="absolute bottom-0 left-0 p-6 text-white">
+                    <h2 class="text-2xl font-bold mb-1">Good Afternoon!</h2>
+                    <p class="text-lg">Here's today's lunch menu</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Live Menu - What's Being Served Now -->
+        <section id="live-menu-section" class="mb-8">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Live Menu - What's Being Served Now</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Menu Card 1 -->
+                <div id="menu-card-1" class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <div class="h-48 relative">
+                        <img class="w-full h-full object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/6388b48b92-a51076be9804f960192c.png" alt="grilled chicken sandwich with avocado, lettuce, and tomato on whole grain bread, appetizing food photography">
+                        <div class="absolute top-2 right-2 flex space-x-1">
+                            <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs">Healthy</span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">Grilled Chicken Sandwich</h3>
+                        <p class="text-gray-600 text-sm mb-3">Juicy grilled chicken with fresh avocado, lettuce, and tomato on whole grain bread.</p>
+                        
+                        <div class="flex items-center space-x-2 mb-3">
+                            <span class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs flex items-center">
+                                <i class="fa-solid fa-leaf text-green-500 mr-1"></i> Healthy
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs flex items-center">
+                                <i class="fa-solid fa-wheat-awn text-amber-500 mr-1"></i> Whole Grain
+                            </span>
+                        </div>
+                        
+                        <div class="flex justify-between mb-3">
+                            <button class="flex items-center text-success hover:bg-success hover:bg-opacity-10 px-3 py-1.5 rounded-full transition">
+                                <i class="fa-solid fa-thumbs-up mr-1"></i>
+                                <span>89</span>
+                            </button>
+                            <button class="flex items-center text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded-full transition">
+                                <i class="fa-solid fa-thumbs-down mr-1"></i>
+                                <span>12</span>
+                            </button>
+                            <button class="flex items-center text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded-full transition">
+                                <i class="fa-solid fa-comment mr-1"></i>
+                                <span>8</span>
+                            </button>
+                        </div>
+                        
+                        <div class="text-xs text-primary">
+                            <span>You voted 👍 for this dish</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Menu Card 2 -->
+                <div id="menu-card-2" class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <div class="h-48 relative">
+                        <img class="w-full h-full object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/0d5150824a-c963f042266501d923bf.png" alt="vegetable curry with rice, colorful mix of vegetables in spicy sauce, appetizing food photography">
+                        <div class="absolute top-2 right-2 flex space-x-1">
+                            <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs">Vegetarian</span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">Vegetable Curry</h3>
+                        <p class="text-gray-600 text-sm mb-3">Aromatic curry with seasonal vegetables served with basmati rice.</p>
+                        
+                        <div class="flex items-center space-x-2 mb-3">
+                            <span class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs flex items-center">
+                                <i class="fa-solid fa-seedling text-green-500 mr-1"></i> Vegetarian
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs flex items-center">
+                                <i class="fa-solid fa-pepper-hot text-red-500 mr-1"></i> Spicy
+                            </span>
+                        </div>
+                        
+                        <div class="flex justify-between mb-3">
+                            <button class="flex items-center text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded-full transition">
+                                <i class="fa-solid fa-thumbs-up mr-1"></i>
+                                <span>64</span>
+                            </button>
+                            <button class="flex items-center text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded-full transition">
+                                <i class="fa-solid fa-thumbs-down mr-1"></i>
+                                <span>18</span>
+                            </button>
+                            <button class="flex items-center text-primary hover:bg-primary hover:bg-opacity-10 px-3 py-1.5 rounded-full transition">
+                                <i class="fa-solid fa-comment mr-1"></i>
+                                <span>23</span>
+                            </button>
+                        </div>
+                        
+                        <div class="text-xs text-gray-500">
+                            <span>You haven't voted for this dish yet</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Menu Card 3 -->
+                <div id="menu-card-3" class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <div class="h-48 relative">
+                        <img class="w-full h-full object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/926ce9561c-47dad750bd79cc4a4ca0.png" alt="mediterranean quinoa bowl with feta, olives, tomatoes, and cucumber, appetizing food photography">
+                        <div class="absolute top-2 right-2 flex space-x-1">
+                            <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs">Vegetarian</span>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">Mediterranean Bowl</h3>
+                        <p class="text-gray-600 text-sm mb-3">Quinoa bowl with feta cheese, olives, cherry tomatoes, cucumber, and Greek dressing.</p>
+                        
+                        <div class="flex items-center space-x-2 mb-3">
+                            <span class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs flex items-center">
+                                <i class="fa-solid fa-seedling text-green-500 mr-1"></i> Vegetarian
+                            </span>
+                            <span class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs flex items-center">
+                                <i class="fa-solid fa-leaf text-green-500 mr-1"></i> Healthy
+                            </span>
+                        </div>
+                        
+                        <div class="flex justify-between mb-3">
+                            <button class="flex items-center text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded-full transition">
+                                <i class="fa-solid fa-thumbs-up mr-1"></i>
+                                <span>78</span>
+                            </button>
+                            <button class="flex items-center text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded-full transition">
+                                <i class="fa-solid fa-thumbs-down mr-1"></i>
+                                <span>7</span>
+                            </button>
+                            <button class="flex items-center text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded-full transition">
+                                <i class="fa-solid fa-comment mr-1"></i>
+                                <span>15</span>
+                            </button>
+                        </div>
+                        
+                        <div class="text-xs text-gray-500">
+                            <span>You haven't voted for this dish yet</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Menu Card 4 -->
+                <div id="menu-card-4" class="bg-white rounded-lg shadow-sm overflow-hidden">
+                    <div class="h-48 relative">
+                        <img class="w-full h-full object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/41139a71f4-92818331e0cc27a1eeb0.png" alt="fish and chips with tartar sauce and lemon wedge, crispy golden fish, appetizing food photography">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-semibold text-lg mb-1">Fish &amp; Chips</h3>
+                        <p class="text-gray-600 text-sm mb-3">Crispy battered fish fillet served with golden fries, tartar sauce, and lemon wedge.</p>
+                        
+                        <div class="flex items-center space-x-2 mb-3">
+                            <span class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs flex items-center">
+                                <i class="fa-solid fa-fish text-blue-500 mr-1"></i> Seafood
+                            </span>
+                        </div>
+                        
+                        <div class="flex justify-between mb-3">
+                            <button class="flex items-center text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded-full transition">
+                                <i class="fa-solid fa-thumbs-up mr-1"></i>
+                                <span>42</span>
+                            </button>
+                            <button class="flex items-center text-danger hover:bg-danger hover:bg-opacity-10 px-3 py-1.5 rounded-full transition">
+                                <i class="fa-solid fa-thumbs-down mr-1"></i>
+                                <span>31</span>
+                            </button>
+                            <button class="flex items-center text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded-full transition">
+                                <i class="fa-solid fa-comment mr-1"></i>
+                                <span>18</span>
+                            </button>
+                        </div>
+                        
+                        <div class="text-xs text-danger">
+                            <span>You voted 👎 for this dish</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Two Column Layout for Stats and Weekly Overview -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Quick Stats Section -->
+            <div class="bg-white rounded-lg shadow-sm p-6 flex flex-col" id="quick-stats-section">
+                <h2 class="text-xl font-semibold text-gray-800 mb-6">Quick Stats - What Everyone's Saying</h2>
+                
+                <!-- Top Dishes Visual -->
+                <div class="mb-6 flex-1">
+                    <h3 class="text-sm font-medium text-gray-600 uppercase mb-4">Today's Top Dishes</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center bg-green-50 p-3 rounded-lg">
+                            <div class="w-3 h-3 bg-success rounded-full mr-3"></div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium">Grilled Chicken Sandwich</span>
+                                    <span class="text-success font-bold">89%</span>
+                                </div>
+                                <div class="w-full bg-green-200 rounded-full h-2 mt-1">
+                                    <div class="bg-success h-2 rounded-full" style="width: 89%"></div>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-arrow-trend-up text-success ml-3"></i>
+                        </div>
+                        
+                        <div class="flex items-center bg-red-50 p-3 rounded-lg">
+                            <div class="w-3 h-3 bg-danger rounded-full mr-3"></div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium">Fish &amp; Chips</span>
+                                    <span class="text-danger font-bold">58%</span>
+                                </div>
+                                <div class="w-full bg-red-200 rounded-full h-2 mt-1">
+                                    <div class="bg-danger h-2 rounded-full" style="width: 58%"></div>
+                                </div>
+                            </div>
+                            <i class="fa-solid fa-arrow-trend-down text-danger ml-3"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Featured Comment -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="text-sm font-medium text-gray-600 uppercase mb-3">Featured Comment</h3>
+                    <div class="bg-white rounded-lg p-3">
+                        <div class="flex items-center text-sm">
+                            <i class="fa-solid fa-quote-left text-primary mr-2"></i>
+                            <span class="italic text-gray-700">"Love the new quinoa salad option!"</span>
+                            <span class="text-primary ml-auto text-xs">You, 2 days ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Weekly Overview Section -->
+            <div class="bg-white rounded-lg shadow-sm p-6 flex flex-col" id="weekly-overview-section">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Weekly Overview - Plan Ahead</h2>
+                
+                <!-- Mini Calendar View showing 7 days -->
+                <div class="flex space-x-2 mb-6 overflow-x-auto pb-2">
+                    <div class="flex-shrink-0 w-20 h-20 bg-primary text-white rounded-lg flex flex-col items-center justify-center">
+                        <span class="text-xs">Today</span>
+                        <span class="text-xl font-bold">15</span>
+                        <span class="text-xs">Wed</span>
+                    </div>
+                    <div class="flex-shrink-0 w-20 h-20 bg-gray-100 rounded-lg flex flex-col items-center justify-center hover:bg-gray-200 cursor-pointer">
+                        <span class="text-xs text-gray-600">Thu</span>
+                        <span class="text-xl font-bold text-gray-800">16</span>
+                        <span class="text-xs text-gray-600"></span>
+                    </div>
+                    <div class="flex-shrink-0 w-20 h-20 bg-gray-100 rounded-lg flex flex-col items-center justify-center hover:bg-gray-200 cursor-pointer">
+                        <span class="text-xs text-gray-600">Fri</span>
+                        <span class="text-xl font-bold text-gray-800">17</span>
+                        <span class="text-xs text-gray-600">🍕</span>
+                    </div>
+                    <div class="flex-shrink-0 w-20 h-20 bg-gray-100 rounded-lg flex flex-col items-center justify-center hover:bg-gray-200 cursor-pointer">
+                        <span class="text-xs text-gray-600">Sat</span>
+                        <span class="text-xl font-bold text-gray-800">18</span>
+                        <span class="text-xs text-gray-600"></span>
+                    </div>
+                    <div class="flex-shrink-0 w-20 h-20 bg-gray-100 rounded-lg flex flex-col items-center justify-center hover:bg-gray-200 cursor-pointer">
+                        <span class="text-xs text-gray-600">Sun</span>
+                        <span class="text-xl font-bold text-gray-800">19</span>
+                        <span class="text-xs text-gray-600">🥗</span>
+                    </div>
+                    <div class="flex-shrink-0 w-20 h-20 bg-gray-100 rounded-lg flex flex-col items-center justify-center hover:bg-gray-200 cursor-pointer">
+                        <span class="text-xs text-gray-600">Mon</span>
+                        <span class="text-xl font-bold text-gray-800">20</span>
+                        <span class="text-xs text-gray-600"></span>
+                    </div>
+                    <div class="flex-shrink-0 w-20 h-20 bg-gray-100 rounded-lg flex flex-col items-center justify-center hover:bg-gray-200 cursor-pointer">
+                        <span class="text-xs text-gray-600">Tue</span>
+                        <span class="text-xl font-bold text-gray-800">21</span>
+                        <span class="text-xs text-gray-600"></span>
+                    </div>
+                </div>
+                
+                <!-- Tomorrow's Preview -->
+                <div class="mb-6">
+                    <h3 class="text-sm font-medium text-gray-600 uppercase mb-3">Tomorrow's Preview</h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-2">
+                                <i class="fa-solid fa-mug-hot text-amber-500 mr-2"></i>
+                                <h4 class="font-medium">Breakfast</h4>
+                            </div>
+                            <p class="text-sm text-gray-700">Pancakes &amp; Fresh Fruit</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-2">
+                                <i class="fa-solid fa-utensils text-primary mr-2"></i>
+                                <h4 class="font-medium">Lunch</h4>
+                            </div>
+                            <p class="text-sm text-gray-700">Italian Pasta Bar</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-2">
+                                <i class="fa-solid fa-cookie text-amber-700 mr-2"></i>
+                                <h4 class="font-medium">Snacks</h4>
+                            </div>
+                            <p class="text-sm text-gray-700">Homemade Cookies</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="w-full bg-primary text-white py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center">
+                    <span>View Full Weekly Menu</span>
+                    <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </main></body></html>

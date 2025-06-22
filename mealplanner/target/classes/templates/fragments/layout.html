@@ -49,6 +49,12 @@
                     </a>
                 </li>
                 <li class="mb-2">
+                    <a th:href="@{/dashboard}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
+                        <i class="fa-solid fa-clock w-6 text-center"></i>
+                        <span class="ml-3 hidden md:block">Today's Menu</span>
+                    </a>
+                </li>
+                <li class="mb-2">
                     <a th:href="@{/weekly-plan}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
                         <i class="fa-solid fa-calendar-week w-6 text-center"></i>
                         <span class="ml-3 hidden md:block">Manage Weekly Plan</span>
@@ -64,12 +70,6 @@
                     <a th:href="@{/dishes/new}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
                         <i class="fa-solid fa-plus w-6 text-center"></i>
                         <span class="ml-3 hidden md:block">Add New Dish</span>
-                    </a>
-                </li>
-                <li class="mb-2">
-                    <a href="#" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors opacity-50">
-                        <i class="fa-solid fa-pen-to-square w-6 text-center"></i>
-                        <span class="ml-3 hidden md:block">Update Today's Menu</span>
                     </a>
                 </li>
                 <li class="mb-2">
@@ -90,13 +90,17 @@
     <header th:fragment="topnav" class="bg-white shadow-sm h-16 flex items-center justify-between px-6">
         <div class="flex items-center">
             <h1 class="text-xl font-semibold text-gray-800 mr-4" th:text="${pageTitle}">Meal Planner</h1>
-            <div class="bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-full text-sm font-medium" th:if="${dishCount != null}">
-                <i class="fa-solid fa-bowl-food mr-1"></i>
+            <div class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium flex items-center" th:if="${weekStart != null and weekEnd != null}">
+                <i class="fa-solid fa-calendar-days mr-2"></i>
+                <span th:text="'Week of ' + ${#temporals.format(weekStart, 'MMM d')} + ' - ' + ${#temporals.format(weekEnd, 'd, yyyy')}"></span>
+            </div>
+            <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium flex items-center" th:if="${dishCount != null}">
+                <i class="fa-solid fa-bowl-food mr-2"></i>
                 <span th:text="${dishCount} + ' Total Dishes'"></span>
             </div>
-            <div class="bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-full text-sm font-medium flex items-center" th:if="${weekStart != null and weekEnd != null}">
-                <i class="fa-solid fa-calendar-days mr-2"></i>
-                <span th:text="'Week of ' + ${#temporals.format(weekStart, 'MMMM d')} + '-' + ${#temporals.format(weekEnd, 'd, yyyy')}"></span>
+            <div class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium flex items-center" th:if="${mealInfo != null}">
+                <i class="fa-regular fa-clock mr-2"></i>
+                <span th:text="${mealInfo}"></span>
             </div>
         </div>
         <div class="flex items-center">
