@@ -105,6 +105,7 @@
                             if (mealCard) {
                                 mealCard.outerHTML = html;
                                 attachAddDishHandlers(); // re-attach
+                                attachRemoveHandlers(); // re-attach remove handlers
                             } else {
                                 console.error('Could not find meal card with id: meal-card-' + meal);
                             }
@@ -119,7 +120,49 @@
             }
         });
     }
-    document.addEventListener('DOMContentLoaded', attachAddDishHandlers);
+
+    function attachRemoveHandlers() {
+        document.querySelectorAll('.remove-template-form').forEach(function(form) {
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                const meal = form.querySelector('input[name="mealPeriod"]').value;
+                const dishId = form.querySelector('input[name="dishId"]').value;
+                console.log('Removing dish for meal:', meal, 'dishId:', dishId);
+                
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => {
+                    console.log('Remove response status:', response.status);
+                    return response.text();
+                })
+                .then(html => {
+                    console.log('Remove response length:', html.length);
+                    
+                    const mealCard = document.getElementById('meal-card-' + meal);
+                    if (mealCard) {
+                        mealCard.outerHTML = html;
+                        attachAddDishHandlers(); // re-attach
+                        attachRemoveHandlers(); // re-attach remove handlers
+                    } else {
+                        console.error('Could not find meal card with id: meal-card-' + meal);
+                    }
+                })
+                .catch(error => {
+                    console.error('Remove AJAX error:', error);
+                });
+            };
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        attachAddDishHandlers();
+        attachRemoveHandlers();
+    });
     </script>
     
     <!-- Meal Card Fragment (hidden) -->
@@ -137,24 +180,6 @@
                 </div>
             </div>
             
-            <!-- Debug info (remove in production) -->
-            <div class="text-xs text-gray-500 mb-2">
-                Debug: selectedDate=<span th:text="${selectedDate}"></span>, 
-                meal=<span th:text="${meal}"></span>, 
-                weekPlan size=<span th:text="${weekPlan != null ? weekPlan.size() : 'null'}"></span>
-                <br>
-                <span th:if="${weekPlan != null and weekPlan.containsKey(selectedDate)}">
-                    Date exists in weekPlan. Meals: <span th:text="${weekPlan.get(selectedDate).keySet()}"></span>
-                    <br>
-                    <span th:if="${weekPlan.get(selectedDate).containsKey(meal)}">
-                        Meal exists. Dish count: <span th:text="${weekPlan.get(selectedDate).get(meal).size()}"></span>
-                        <br>
-                        Dish IDs: <span th:each="dishMap, iterStat : ${weekPlan.get(selectedDate).get(meal)}" 
-                                       th:text="${dishMap.dish?.id} + (${iterStat.index}) + ' '"></span>
-                    </span>
-                </span>
-            </div>
-            
             <div class="space-y-3">
                 <!-- Check if weekPlan contains the selectedDate -->
                 <th:block th:if="${weekPlan != null and weekPlan.containsKey(selectedDate)}">
@@ -168,10 +193,22 @@
                                     <span th:each="tag : ${dishMap.dish?.dietaryInfo}" th:text="${tag}" class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs mr-1"></span>
                                 </div>
                             </div>
+                            <!-- Remove button for overrides -->
                             <form th:if="${dishMap.overrideId != null}" th:action="@{/weekly-plan/remove}" method="post" class="remove-dish-form">
                                 <input type="hidden" name="overrideId" th:value="${dishMap.overrideId}" />
                                 <input type="hidden" name="date" th:value="${selectedDate}" />
-                                <button type="submit" class="text-gray-400 hover:text-danger"><i class="fa-solid fa-times text-xs"></i></button>
+                                <button type="submit" class="text-gray-400 hover:text-danger transition-colors">
+                                    <i class="fa-solid fa-times text-xs"></i>
+                                </button>
+                            </form>
+                            <!-- Remove button for template entries -->
+                            <form th:if="${dishMap.overrideId == null}" th:action="@{/weekly-plan/remove-template}" method="post" class="remove-template-form">
+                                <input type="hidden" name="dishId" th:value="${dishMap.dish?.id}" />
+                                <input type="hidden" name="date" th:value="${selectedDate}" />
+                                <input type="hidden" name="mealPeriod" th:value="${meal}" />
+                                <button type="submit" class="text-gray-400 hover:text-danger transition-colors">
+                                    <i class="fa-solid fa-times text-xs"></i>
+                                </button>
                             </form>
                         </div>
                     </th:block>

@@ -92,6 +92,7 @@ public class WeeklyPlanController {
             Map<String, Object> map = new HashMap<>();
             map.put("dish", entry.getDish());
             map.put("overrideId", null);
+            map.put("templateEntryId", entry.getId());
             result.add(map);
         }
         
@@ -269,6 +270,59 @@ public class WeeklyPlanController {
                                      @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         overrideRepo.deleteById(overrideId);
         return "redirect:/weekly-plan?date=" + date;
+    }
+
+    @PostMapping("/weekly-plan/remove-template")
+    public String removeDishFromTemplate(
+            @RequestParam("dishId") Long dishId,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam("mealPeriod") String mealPeriod,
+            Model model,
+            @RequestHeader(value = "X-Requested-With", required = false) String requestedWith) {
+        
+        try {
+            logger.info("Remove dish from template: date={}, mealPeriod={}, dishId={}", date, mealPeriod, dishId);
+            int dow = date.getDayOfWeek().getValue();
+            
+            // Find and delete the template entry
+            List<MenuTemplateEntry> entries = templateRepo.findByDayOfWeekAndMealPeriodOrderBySortOrder(dow, mealPeriod);
+            for (MenuTemplateEntry entry : entries) {
+                if (entry.getDish().getId().equals(dishId)) {
+                    templateRepo.delete(entry);
+                    templateRepo.flush();
+                    logger.info("Deleted MenuTemplateEntry: {} for dish: {}", entry.getId(), entry.getDish().getName());
+                    break;
+                }
+            }
+
+            if ("XMLHttpRequest".equals(requestedWith)) {
+                // Build updated weekPlan for AJAX response
+                Map<LocalDate, Map<String, List<Map<String, Object>>>> weekPlan = new LinkedHashMap<>();
+                Map<String, List<Map<String, Object>>> meals = new LinkedHashMap<>();
+                
+                for (String meal : MEAL_PERIODS) {
+                    List<Map<String, Object>> dishList = getUniqueDishesForMeal(dow, meal);
+                    meals.put(meal, dishList);
+                }
+                
+                weekPlan.put(date, meals);
+
+                model.addAttribute("selectedDate", date);
+                model.addAttribute("meal", mealPeriod);
+                model.addAttribute("weekPlan", weekPlan);
+                model.addAttribute("allDishes", dishRepo.findAll());
+                
+                return "manage-weekly-plan :: mealCard(selectedDate=${selectedDate}, meal=${meal}, weekPlan=${weekPlan}, allDishes=${allDishes})";
+            }
+
+            return "redirect:/weekly-plan?date=" + date;
+        } catch (Exception ex) {
+            logger.error("Error removing dish from template", ex);
+            if ("XMLHttpRequest".equals(requestedWith)) {
+                return handleAjaxError(ex.getMessage());
+            }
+            return "redirect:/weekly-plan?date=" + date + "&error=exception";
+        }
     }
 
     @ResponseBody
