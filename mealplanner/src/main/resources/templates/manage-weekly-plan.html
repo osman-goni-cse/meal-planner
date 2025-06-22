@@ -68,9 +68,9 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div id="meal-card-breakfast" th:replace="this :: mealCard(${selectedDate}, 'breakfast', ${weekPlan}, ${allDishes})"></div>
-                        <div id="meal-card-lunch" th:replace="this :: mealCard(${selectedDate}, 'lunch', ${weekPlan}, ${allDishes})"></div>
-                        <div id="meal-card-snacks" th:replace="this :: mealCard(${selectedDate}, 'snacks', ${weekPlan}, ${allDishes})"></div>
+                        <div th:insert="~{manage-weekly-plan :: mealCard(selectedDate=${selectedDate}, meal='breakfast', weekPlan=${weekPlan}, allDishes=${allDishes})}"></div>
+                        <div th:insert="~{manage-weekly-plan :: mealCard(selectedDate=${selectedDate}, meal='lunch', weekPlan=${weekPlan}, allDishes=${allDishes})}"></div>
+                        <div th:insert="~{manage-weekly-plan :: mealCard(selectedDate=${selectedDate}, meal='snacks', weekPlan=${weekPlan}, allDishes=${allDishes})}"></div>
                     </div>
                 </section>
             </main>
@@ -86,18 +86,31 @@
                         // Submit via AJAX
                         const formData = new FormData(form);
                         const meal = form.querySelector('input[name="mealPeriod"]').value;
+                        console.log('Submitting dish for meal:', meal, 'dishId:', select.value);
+                        
                         fetch(form.action, {
                             method: 'POST',
                             body: formData,
                             headers: { 'X-Requested-With': 'XMLHttpRequest' }
                         })
-                        .then(response => response.text())
+                        .then(response => {
+                            console.log('Response status:', response.status);
+                            return response.text();
+                        })
                         .then(html => {
+                            console.log('Received HTML response length:', html.length);
+                            console.log('HTML preview:', html.substring(0, 200));
+                            
                             const mealCard = document.getElementById('meal-card-' + meal);
                             if (mealCard) {
                                 mealCard.outerHTML = html;
                                 attachAddDishHandlers(); // re-attach
+                            } else {
+                                console.error('Could not find meal card with id: meal-card-' + meal);
                             }
+                        })
+                        .catch(error => {
+                            console.error('AJAX error:', error);
                         });
                         // Reset dropdown
                         select.value = '';
@@ -108,54 +121,83 @@
     }
     document.addEventListener('DOMContentLoaded', attachAddDishHandlers);
     </script>
-</body>
-</html>
-
-<!-- Meal Card Fragment -->
-<div th:fragment="mealCard(selectedDate, meal, weekPlan, allDishes)" th:id="|meal-card-${meal}|">
-    <div th:classappend="${meal == 'breakfast'} ? 'bg-yellow-50 border-yellow-200' : (meal == 'lunch' ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200')"
-         class="rounded-lg p-6 border">
-        <div class="flex items-center mb-4">
-            <div th:classappend="${meal == 'breakfast'} ? 'bg-yellow-100 text-yellow-600' : (meal == 'lunch' ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-600')"
-                 class="w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                <i th:class="${meal == 'breakfast'} ? 'fa-solid fa-sun' : 'fa-solid fa-utensils'"></i>
+    
+    <!-- Meal Card Fragment (hidden) -->
+    <div th:fragment="mealCard(selectedDate, meal, weekPlan, allDishes)" th:id="|meal-card-${meal != null ? meal : 'unknown'}|">
+        <div th:if="${meal != null}" th:classappend="${meal == 'breakfast'} ? 'bg-yellow-50 border-yellow-200' : (meal == 'lunch' ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200')"
+             class="rounded-lg p-6 border">
+            <div class="flex items-center mb-4">
+                <div th:classappend="${meal == 'breakfast'} ? 'bg-yellow-100 text-yellow-600' : (meal == 'lunch' ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-600')"
+                     class="w-10 h-10 rounded-full flex items-center justify-center mr-3">
+                    <i th:class="${meal == 'breakfast'} ? 'fa-solid fa-sun' : 'fa-solid fa-utensils'"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-800" th:text="${#strings.capitalize(meal)}"></h4>
+                    <p class="text-sm text-gray-600" th:text="${meal == 'breakfast' ? '7:00 - 10:00 AM' : (meal == 'lunch' ? '12:00 - 2:00 PM' : '1:00 - 2:00 PM')}"></p>
+                </div>
             </div>
-            <div>
-                <h4 class="font-semibold text-gray-800" th:text="${#strings.capitalize(meal)}"></h4>
-                <p class="text-sm text-gray-600" th:text="${meal == 'breakfast' ? '7:00 - 10:00 AM' : (meal == 'lunch' ? '12:00 - 2:00 PM' : '1:00 - 2:00 PM')}"></p>
+            
+            <!-- Debug info (remove in production) -->
+            <div class="text-xs text-gray-500 mb-2">
+                Debug: selectedDate=<span th:text="${selectedDate}"></span>, 
+                meal=<span th:text="${meal}"></span>, 
+                weekPlan size=<span th:text="${weekPlan != null ? weekPlan.size() : 'null'}"></span>
+                <br>
+                <span th:if="${weekPlan != null and weekPlan.containsKey(selectedDate)}">
+                    Date exists in weekPlan. Meals: <span th:text="${weekPlan.get(selectedDate).keySet()}"></span>
+                    <br>
+                    <span th:if="${weekPlan.get(selectedDate).containsKey(meal)}">
+                        Meal exists. Dish count: <span th:text="${weekPlan.get(selectedDate).get(meal).size()}"></span>
+                        <br>
+                        Dish IDs: <span th:each="dishMap, iterStat : ${weekPlan.get(selectedDate).get(meal)}" 
+                                       th:text="${dishMap.dish?.id} + (${iterStat.index}) + ' '"></span>
+                    </span>
+                </span>
             </div>
-        </div>
-        <div class="space-y-3">
-            <th:block th:if="${weekPlan[selectedDate] != null and weekPlan[selectedDate][meal] != null}">
-                <div th:each="dishMap : ${weekPlan[selectedDate][meal]}" class="selected-dish bg-white rounded-lg p-3 border border-gray-200 flex items-center justify-between">
-                    <div class="flex items-center">
-                        <img class="w-12 h-12 rounded-lg object-cover mr-3" th:src="${dishMap.dish?.imageUrl}" th:alt="${dishMap.dish?.name}">
-                        <div>
-                            <p class="font-medium text-gray-800" th:text="${dishMap.dish?.name}"></p>
-                            <span th:each="tag : ${dishMap.dish?.dietaryInfo}" th:text="${tag}" class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs mr-1"></span>
+            
+            <div class="space-y-3">
+                <!-- Check if weekPlan contains the selectedDate -->
+                <th:block th:if="${weekPlan != null and weekPlan.containsKey(selectedDate)}">
+                    <!-- Check if the meal exists for this date -->
+                    <th:block th:if="${weekPlan.get(selectedDate) != null and weekPlan.get(selectedDate).containsKey(meal)}">
+                        <div th:each="dishMap : ${weekPlan.get(selectedDate).get(meal)}" class="selected-dish bg-white rounded-lg p-3 border border-gray-200 flex items-center justify-between">
+                            <div class="flex items-center">
+                                <img class="w-12 h-12 rounded-lg object-cover mr-3" th:src="${dishMap.dish?.imageUrl}" th:alt="${dishMap.dish?.name}">
+                                <div>
+                                    <p class="font-medium text-gray-800" th:text="${dishMap.dish?.name}"></p>
+                                    <span th:each="tag : ${dishMap.dish?.dietaryInfo}" th:text="${tag}" class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs mr-1"></span>
+                                </div>
+                            </div>
+                            <form th:if="${dishMap.overrideId != null}" th:action="@{/weekly-plan/remove}" method="post" class="remove-dish-form">
+                                <input type="hidden" name="overrideId" th:value="${dishMap.overrideId}" />
+                                <input type="hidden" name="date" th:value="${selectedDate}" />
+                                <button type="submit" class="text-gray-400 hover:text-danger"><i class="fa-solid fa-times text-xs"></i></button>
+                            </form>
                         </div>
+                    </th:block>
+                    <!-- No dishes for this meal -->
+                    <div th:if="${weekPlan.get(selectedDate) == null or !weekPlan.get(selectedDate).containsKey(meal) or weekPlan.get(selectedDate).get(meal).isEmpty()}" class="text-gray-400 text-sm italic">
+                        No dishes planned for this meal.
                     </div>
-                    <form th:if="${dishMap.overrideId != null}" th:action="@{/weekly-plan/remove}" method="post" class="remove-dish-form">
-                        <input type="hidden" name="overrideId" th:value="${dishMap.overrideId}" />
-                        <input type="hidden" name="date" th:value="${selectedDate}" />
-                        <button type="submit" class="text-gray-400 hover:text-danger"><i class="fa-solid fa-times text-xs"></i></button>
-                    </form>
+                </th:block>
+                <!-- No data for this date -->
+                <div th:if="${weekPlan == null or !weekPlan.containsKey(selectedDate)}" class="text-gray-400 text-sm italic">
+                    No data available for this date.
                 </div>
-            </th:block>
-            <div th:if="${weekPlan[selectedDate] == null or weekPlan[selectedDate][meal] == null}" class="text-gray-400 text-sm italic">
-                No dishes planned for this meal.
+                
+                <!-- Add Dish Dropdown -->
+                <form th:action="@{/weekly-plan/add}" method="post" class="w-full add-dish-form">
+                    <input type="hidden" name="date" th:value="${selectedDate}" />
+                    <input type="hidden" name="mealPeriod" th:value="${meal}" />
+                    <div class="flex items-center gap-2">
+                        <select name="dishId" class="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-3 text-gray-500 focus:border-primary dish-select">
+                            <option value="">+ Add Dish</option>
+                            <option th:each="d : ${allDishes}" th:value="${d.id}" th:text="${d.name}"></option>
+                        </select>
+                    </div>
+                </form>
             </div>
-            <!-- Add Dish Dropdown -->
-            <form th:action="@{/weekly-plan/add}" method="post" class="w-full add-dish-form">
-                <input type="hidden" name="date" th:value="${selectedDate}" />
-                <input type="hidden" name="mealPeriod" th:value="${meal}" />
-                <div class="flex items-center gap-2">
-                    <select name="dishId" class="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-3 text-gray-500 focus:border-primary dish-select">
-                        <option value="">+ Add Dish</option>
-                        <option th:each="d : ${allDishes}" th:value="${d.id}" th:text="${d.name}"></option>
-                    </select>
-                </div>
-            </form>
         </div>
     </div>
-</div> 
+</body>
+</html> 
