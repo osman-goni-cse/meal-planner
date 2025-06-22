@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:fragment="head">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,6 +31,24 @@
       ::-webkit-scrollbar { display: none; }
       html, body { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
+    
+    <!-- Global dropdown function -->
+    <script>
+        // Simple function to toggle dropdown
+        function toggleDropdown() {
+            const dropdown = document.getElementById('user-dropdown-menu');
+            console.log('toggleDropdown called');
+            console.log('Dropdown element:', dropdown);
+            
+            if (dropdown) {
+                const isVisible = dropdown.style.display === 'block';
+                dropdown.style.display = isVisible ? 'none' : 'block';
+                console.log('Dropdown visibility changed to:', isVisible ? 'hidden' : 'visible');
+            } else {
+                console.error('Dropdown element not found');
+            }
+        }
+    </script>
 </head>
 <body>
     <aside th:fragment="sidebar" class="w-16 md:w-64 bg-primary text-white flex flex-col fixed h-full">
@@ -110,15 +128,73 @@
                     <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
                 </button>
             </div>
-            <div class="relative">
-                <button class="flex items-center text-gray-700">
-                    <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" class="w-8 h-8 rounded-full mr-2" alt="User Avatar">
-                    <span class="font-medium mr-1 hidden md:inline-block">John Doe</span>
-                    <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full hidden md:inline-block">Admin</span>
+            <div sec:authorize="isAuthenticated()" class="relative" id="user-dropdown">
+                <button id="user-dropdown-button" onclick="toggleDropdown()" class="flex items-center text-gray-700 hover:text-primary transition-colors">
+                    <img th:src="${#authentication.principal.attributes['picture']}" class="w-8 h-8 rounded-full mr-2" alt="User Avatar">
+                    <span th:text="${#authentication.principal.attributes['name']}" class="font-medium mr-1 hidden md:inline-block">John Doe</span>
                     <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
                 </button>
+                <!-- Enhanced dropdown for logout -->
+                <div id="user-dropdown-menu" class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200" style="display: none;">
+                    <div class="px-4 py-2 border-b border-gray-100">
+                        <p class="text-sm font-medium text-gray-900" th:text="${#authentication.principal.attributes['name']}">User Name</p>
+                        <p class="text-xs text-gray-500" th:text="${#authentication.principal.attributes['email']}">user@example.com</p>
+                    </div>
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left flex items-center">
+                            <i class="fa-solid fa-sign-out-alt mr-2"></i>
+                            Sign Out
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </header>
+    
+    <!-- User dropdown fragment for reuse -->
+    <div th:fragment="topnav-user" sec:authorize="isAuthenticated()" class="relative" id="user-dropdown">
+        <button id="user-dropdown-button" onclick="toggleDropdown()" class="flex items-center text-gray-700 hover:text-primary transition-colors">
+            <img th:src="${#authentication.principal.attributes['picture']}" class="w-8 h-8 rounded-full mr-2" alt="User Avatar">
+            <span th:text="${#authentication.principal.attributes['name']}" class="font-medium mr-1 hidden md:inline-block">John Doe</span>
+            <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
+        </button>
+        <!-- Enhanced dropdown for logout -->
+        <div id="user-dropdown-menu" class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200" style="display: none;">
+            <div class="px-4 py-2 border-b border-gray-100">
+                <p class="text-sm font-medium text-gray-900" th:text="${#authentication.principal.attributes['name']}">User Name</p>
+                <p class="text-xs text-gray-500" th:text="${#authentication.principal.attributes['email']}">user@example.com</p>
+            </div>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left flex items-center">
+                    <i class="fa-solid fa-sign-out-alt mr-2"></i>
+                    Sign Out
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('user-dropdown-menu');
+            const userButton = document.getElementById('user-dropdown-button');
+            
+            if (dropdown && userButton && !userButton.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+                console.log('Dropdown closed - clicked outside');
+            }
+        });
+        
+        // Close dropdown when pressing Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const dropdown = document.getElementById('user-dropdown-menu');
+                if (dropdown) {
+                    dropdown.style.display = 'none';
+                    console.log('Dropdown closed - Escape key pressed');
+                }
+            }
+        });
+    </script>
 </body>
 </html> 

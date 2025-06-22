@@ -1,0 +1,14 @@
+# Google OAuth2 Configuration
+# Copy these variables to your environment or create a .env file
+GOOGLE_CLIENT_ID=your-google-client-id-here
+GOOGLE_CLIENT_SECRET=your-google-client-secret-here
+
+# Database Configuration (if needed)
+# SPRING_DATASOURCE_URL=jdbc:h2:mem:testdb
+# SPRING_DATASOURCE_USERNAME=sa
+# SPRING_DATASOURCE_PASSWORD=
+
+# Instructions:
+# 1. Replace the placeholder values with your actual Google OAuth credentials
+# 2. Set these as environment variables before running the application
+# 3. Or use the set-env-vars.sh script to set them temporarily 
