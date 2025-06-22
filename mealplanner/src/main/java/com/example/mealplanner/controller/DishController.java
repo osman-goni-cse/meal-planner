@@ -36,6 +36,7 @@ public class DishController {
         model.addAttribute("dish", new Dish());
         model.addAttribute("categories", CATEGORIES);
         model.addAttribute("dietaryTags", DIETARY_TAGS);
+        model.addAttribute("pageTitle", "Add New Dish");
         return "add-dish";
     }
 
@@ -65,6 +66,8 @@ public class DishController {
     public String listDishes(Model model) {
         List<Dish> dishes = dishRepository.findAll();
         model.addAttribute("dishes", dishes);
+        model.addAttribute("pageTitle", "Dish Management");
+        model.addAttribute("dishCount", dishes.size());
         return "dish-management";
     }
 

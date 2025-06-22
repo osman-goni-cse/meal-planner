@@ -162,6 +162,7 @@ public class WeeklyPlanController {
         model.addAttribute("weekPlan", weekPlan);
         model.addAttribute("mealPeriods", MEAL_PERIODS);
         model.addAttribute("allDishes", dishRepo.findAll());
+        model.addAttribute("pageTitle", "Weekly Meal Planning");
         return "manage-weekly-plan";
     }
 

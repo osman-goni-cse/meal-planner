@@ -43,34 +43,46 @@
         <nav class="mt-8">
             <ul>
                 <li class="mb-2">
-                    <span class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer">
+                    <a th:href="@{/}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
+                        <i class="fa-solid fa-home w-6 text-center"></i>
+                        <span class="ml-3 hidden md:block">Home</span>
+                    </a>
+                </li>
+                <li class="mb-2">
+                    <a th:href="@{/weekly-plan}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
                         <i class="fa-solid fa-calendar-week w-6 text-center"></i>
                         <span class="ml-3 hidden md:block">Manage Weekly Plan</span>
-                    </span>
+                    </a>
                 </li>
                 <li class="mb-2">
-                    <span class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer">
-                        <i class="fa-solid fa-pen-to-square w-6 text-center"></i>
-                        <span class="ml-3 hidden md:block">Update Today's Menu</span>
-                    </span>
-                </li>
-                <li class="mb-2">
-                    <span class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer">
-                        <i class="fa-solid fa-chart-pie w-6 text-center"></i>
-                        <span class="ml-3 hidden md:block">Food Stats</span>
-                    </span>
-                </li>
-                <li class="mb-2">
-                    <span class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer">
-                        <i class="fa-solid fa-comment-dots w-6 text-center"></i>
-                        <span class="ml-3 hidden md:block">Review Comments</span>
-                    </span>
-                </li>
-                <li class="mb-2">
-                    <span class="flex items-center px-4 py-3 bg-blue-700 hover:bg-blue-800 cursor-pointer">
+                    <a th:href="@{/dishes}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
                         <i class="fa-solid fa-bowl-food w-6 text-center"></i>
                         <span class="ml-3 hidden md:block">Dish Management</span>
-                    </span>
+                    </a>
+                </li>
+                <li class="mb-2">
+                    <a th:href="@{/dishes/new}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
+                        <i class="fa-solid fa-plus w-6 text-center"></i>
+                        <span class="ml-3 hidden md:block">Add New Dish</span>
+                    </a>
+                </li>
+                <li class="mb-2">
+                    <a href="#" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors opacity-50">
+                        <i class="fa-solid fa-pen-to-square w-6 text-center"></i>
+                        <span class="ml-3 hidden md:block">Update Today's Menu</span>
+                    </a>
+                </li>
+                <li class="mb-2">
+                    <a href="#" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors opacity-50">
+                        <i class="fa-solid fa-chart-pie w-6 text-center"></i>
+                        <span class="ml-3 hidden md:block">Food Stats</span>
+                    </a>
+                </li>
+                <li class="mb-2">
+                    <a href="#" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors opacity-50">
+                        <i class="fa-solid fa-comment-dots w-6 text-center"></i>
+                        <span class="ml-3 hidden md:block">Review Comments</span>
+                    </a>
                 </li>
             </ul>
         </nav>
@@ -81,6 +93,10 @@
             <div class="bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-full text-sm font-medium" th:if="${dishCount != null}">
                 <i class="fa-solid fa-bowl-food mr-1"></i>
                 <span th:text="${dishCount} + ' Total Dishes'"></span>
+            </div>
+            <div class="bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-full text-sm font-medium flex items-center" th:if="${weekStart != null and weekEnd != null}">
+                <i class="fa-solid fa-calendar-days mr-2"></i>
+                <span th:text="'Week of ' + ${#temporals.format(weekStart, 'MMMM d')} + '-' + ${#temporals.format(weekEnd, 'd, yyyy')}"></span>
             </div>
         </div>
         <div class="flex items-center">
