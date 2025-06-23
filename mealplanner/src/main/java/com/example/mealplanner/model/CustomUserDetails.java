@@ -75,4 +75,8 @@ public class CustomUserDetails implements OAuth2User, UserDetails {
     public String getRole() {
         return user.getRole();
     }
+
+    public Long getId() {
+        return user.getId();
+    }
 } 
