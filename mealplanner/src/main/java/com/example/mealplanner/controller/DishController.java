@@ -65,7 +65,7 @@ public class DishController {
         // Handle dietary info
         dish.setDietaryInfo(dietaryInfo != null ? dietaryInfo : new ArrayList<>());
         dishRepository.save(dish);
-        return "redirect:/dishes/new?success";
+        return "redirect:/dishes";
     }
 
     @GetMapping("/dishes")
