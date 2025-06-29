@@ -74,19 +74,20 @@
                         <span class="ml-3 hidden md:block">Today's Menu</span>
                     </a>
                 </li>
-                <li class="mb-2">
+                <!-- Admin-only navigation items -->
+                <li class="mb-2" sec:authorize="hasAuthority('ROLE_ADMIN')">
                     <a th:href="@{/weekly-plan}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
                         <i class="fa-solid fa-calendar-week w-6 text-center"></i>
                         <span class="ml-3 hidden md:block">Manage Weekly Plan</span>
                     </a>
                 </li>
-                <li class="mb-2">
+                <li class="mb-2" sec:authorize="hasAuthority('ROLE_ADMIN')">
                     <a th:href="@{/dishes}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
                         <i class="fa-solid fa-bowl-food w-6 text-center"></i>
                         <span class="ml-3 hidden md:block">Dish Management</span>
                     </a>
                 </li>
-                <li class="mb-2">
+                <li class="mb-2" sec:authorize="hasAuthority('ROLE_ADMIN')">
                     <a th:href="@{/dishes/new}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
                         <i class="fa-solid fa-plus w-6 text-center"></i>
                         <span class="ml-3 hidden md:block">Add New Dish</span>

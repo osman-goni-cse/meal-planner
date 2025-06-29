@@ -14,6 +14,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -24,6 +26,8 @@ import java.util.Map;
 
 @Controller
 public class DashboardController {
+
+    private static final Logger logger = LoggerFactory.getLogger(DashboardController.class);
 
     @Autowired
     private MealService mealService;
@@ -36,6 +40,8 @@ public class DashboardController {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, @AuthenticationPrincipal OAuth2User oauth2User) {
+        logger.info("Dashboard accessed by user: {}", oauth2User != null ? oauth2User.getAttribute("email") : "anonymous");
+        
         LocalDate today = LocalDate.now();
         LocalTime now = LocalTime.now();
         String currentMealPeriod = mealService.getCurrentMealPeriod(now);
@@ -46,6 +52,9 @@ public class DashboardController {
         if (oauth2User != null) {
             String email = oauth2User.getAttribute("email");
             user = userRepository.findByEmail(email).orElse(null);
+            if (user != null) {
+                logger.info("User role: {}", user.getRole());
+            }
         }
 
         if (user != null && currentMealPeriod != null) {

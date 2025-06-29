@@ -20,20 +20,38 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Autowired
     private UserRepository userRepository;
 
+    public CustomOAuth2UserService() {
+        logger.info("=== CustomOAuth2UserService constructor called ===");
+    }
+
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        logger.info("=== CustomOAuth2UserService.loadUser() called ===");
+        logger.info("UserRequest: {}", userRequest.getClientRegistration().getRegistrationId());
+        
         OAuth2User oauth2User = super.loadUser(userRequest);
         String email = oauth2User.getAttribute("email");
         
         logger.info("Google OAuth2 login attempt for email: {}", email);
+        logger.info("Original OAuth2User authorities: {}", oauth2User.getAuthorities());
 
-        User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> {
-                logger.error("User not found in database for email: {}", email);
-                return new OAuth2AuthenticationException("User not found in database: " + email);
-            });
-        
-        logger.info("User found in database: {} with role: {}", email, user.getRole());
-        return new CustomUserDetails(user, oauth2User.getAttributes());
+        try {
+            User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> {
+                    logger.error("User not found in database for email: {}", email);
+                    return new OAuth2AuthenticationException("User not found in database: " + email);
+                });
+            
+            logger.info("User found in database: {} with role: {}", email, user.getRole());
+            
+            CustomUserDetails customUserDetails = new CustomUserDetails(user, oauth2User.getAttributes());
+            logger.info("Created CustomUserDetails with authorities: {}", customUserDetails.getAuthorities());
+            logger.info("=== CustomOAuth2UserService.loadUser() completed ===");
+            
+            return customUserDetails;
+        } catch (Exception e) {
+            logger.error("Error in CustomOAuth2UserService.loadUser(): ", e);
+            throw e;
+        }
     }
 } 

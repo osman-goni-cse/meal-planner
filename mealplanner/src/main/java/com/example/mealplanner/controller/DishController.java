@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -22,6 +26,7 @@ import java.util.List;
 
 @Controller
 public class DishController {
+    private static final Logger logger = LoggerFactory.getLogger(DishController.class);
     private static final List<String> CATEGORIES = Arrays.asList("Main Course", "Side Dish", "Beverage", "Dessert");
     private static final List<String> DIETARY_TAGS = Arrays.asList(
             "Vegetarian", "Vegan", "Gluten-Free", "Dairy-Free", "Nut-Free", "Low-Carb", "High-Protein", "Spicy"
@@ -32,7 +37,8 @@ public class DishController {
     private DishRepository dishRepository;
 
     @GetMapping("/dishes/new")
-    public String showAddDishForm(Model model) {
+    public String showAddDishForm(Model model, @AuthenticationPrincipal OAuth2User oauth2User) {
+        logger.info("Add dish form accessed by user: {}", oauth2User != null ? oauth2User.getAttribute("email") : "anonymous");
         model.addAttribute("dish", new Dish());
         model.addAttribute("categories", CATEGORIES);
         model.addAttribute("dietaryTags", DIETARY_TAGS);
@@ -63,7 +69,8 @@ public class DishController {
     }
 
     @GetMapping("/dishes")
-    public String listDishes(Model model) {
+    public String listDishes(Model model, @AuthenticationPrincipal OAuth2User oauth2User) {
+        logger.info("Dish management accessed by user: {}", oauth2User != null ? oauth2User.getAttribute("email") : "anonymous");
         List<Dish> dishes = dishRepository.findAll();
         model.addAttribute("dishes", dishes);
         model.addAttribute("pageTitle", "Dish Management");

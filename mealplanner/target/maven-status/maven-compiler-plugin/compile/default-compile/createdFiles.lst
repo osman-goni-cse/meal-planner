@@ -25,3 +25,5 @@ com/example/mealplanner/MealplannerApplication.class
 com/example/mealplanner/service/MealService.class
 com/example/mealplanner/model/VoteResponse.class
 com/example/mealplanner/controller/HomeController.class
+com/example/mealplanner/service/CustomOidcUserService.class
+com/example/mealplanner/config/SecurityConfig$1.class

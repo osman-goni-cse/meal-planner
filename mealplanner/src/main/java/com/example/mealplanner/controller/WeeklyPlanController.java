@@ -28,6 +28,8 @@ import com.example.mealplanner.model.MenuTemplateEntry;
 import com.example.mealplanner.repository.DishRepository;
 import com.example.mealplanner.repository.MenuOverrideRepository;
 import com.example.mealplanner.repository.MenuTemplateEntryRepository;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 @Controller
 public class WeeklyPlanController {
@@ -103,7 +105,10 @@ public class WeeklyPlanController {
     public String weeklyPlan(
             @RequestParam(value = "date", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            Model model) {
+            Model model,
+            @AuthenticationPrincipal OAuth2User oauth2User) {
+
+        logger.info("Weekly plan accessed by user: {}", oauth2User != null ? oauth2User.getAttribute("email") : "anonymous");
 
         // Clean up duplicates before fetching data
         cleanupDuplicateTemplateEntries();

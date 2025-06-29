@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="fragments/layout :: head"></head>
 <body class="bg-gray-50 font-sans">
     <div class="flex">
@@ -20,7 +20,7 @@
 
                 <!-- Quick Actions -->
                 <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <a href="/weekly-plan" class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
+                    <a href="/weekly-plan" class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow" sec:authorize="hasAuthority('ROLE_ADMIN')">
                         <div class="flex items-center mb-4">
                             <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-4">
                                 <i class="fa-solid fa-calendar-week text-xl"></i>
@@ -33,7 +33,7 @@
                         <p class="text-gray-600 text-sm">Create and manage your weekly meal plans with ease.</p>
                     </a>
 
-                    <a href="/dishes" class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
+                    <a href="/dishes" class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow" sec:authorize="hasAuthority('ROLE_ADMIN')">
                         <div class="flex items-center mb-4">
                             <div class="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mr-4">
                                 <i class="fa-solid fa-bowl-food text-xl"></i>
@@ -46,7 +46,7 @@
                         <p class="text-gray-600 text-sm">View, edit, and organize your dish collection.</p>
                     </a>
 
-                    <a href="/dishes/new" class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
+                    <a href="/dishes/new" class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow" sec:authorize="hasAuthority('ROLE_ADMIN')">
                         <div class="flex items-center mb-4">
                             <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center mr-4">
                                 <i class="fa-solid fa-plus text-xl"></i>
