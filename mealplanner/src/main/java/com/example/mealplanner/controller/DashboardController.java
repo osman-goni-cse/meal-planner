@@ -45,38 +45,82 @@ public class DashboardController {
         LocalDate today = LocalDate.now();
         LocalTime now = LocalTime.now();
         String currentMealPeriod = mealService.getCurrentMealPeriod(now);
-        
-        List<Dish> dishes = mealService.getDishesForMeal(currentMealPeriod, today);
 
-        User user = null;
-        if (oauth2User != null) {
-            String email = oauth2User.getAttribute("email");
-            user = userRepository.findByEmail(email).orElse(null);
-            if (user != null) {
-                logger.info("User role: {}", user.getRole());
+        // Determine top and bottom meal periods
+        String topMealPeriod = currentMealPeriod;
+        String bottomMealPeriod = null;
+        if ("lunch".equalsIgnoreCase(currentMealPeriod)) {
+            bottomMealPeriod = "snacks";
+        } else if ("snacks".equalsIgnoreCase(currentMealPeriod)) {
+            bottomMealPeriod = "lunch";
+        } else {
+            // fallback: show lunch on top, snacks on bottom
+            topMealPeriod = "lunch";
+            bottomMealPeriod = "snacks";
+        }
+
+        // Helper to get main/side for a meal period
+        class MealBlock {
+            Dish mainDish;
+            List<Dish> sideDishes = new ArrayList<>();
+            String imageUrl = "/static/default-main.jpg";
+            String name = "";
+            String description = "";
+            MealBlock(List<Dish> dishes) {
+                if (dishes != null && !dishes.isEmpty()) {
+                    for (Dish d : dishes) {
+                        if (mainDish == null && d.getCategory() != null && d.getCategory().equalsIgnoreCase("Main Course")) {
+                            mainDish = d;
+                        } else if (d.getCategory() != null && d.getCategory().equalsIgnoreCase("Side Dish")) {
+                            sideDishes.add(d);
+                        }
+                    }
+                    if (mainDish == null) {
+                        mainDish = dishes.get(0);
+                    }
+                    // Remove main dish from sideDishes if present
+                    sideDishes.remove(mainDish);
+                    imageUrl = mainDish.getImageUrl() != null ? mainDish.getImageUrl() : imageUrl;
+                    name = mainDish.getName();
+                    description = mainDish.getDescription();
+                }
             }
         }
 
-        if (user != null && currentMealPeriod != null) {
-            final String finalCurrentMealPeriod = currentMealPeriod;
-            final Long userId = user.getId();
-            dishes.forEach(dish -> {
-                dish.setUpvotes(voteService.getUpvotes(dish.getId(), today, finalCurrentMealPeriod));
-                dish.setDownvotes(voteService.getDownvotes(dish.getId(), today, finalCurrentMealPeriod));
-                dish.setCurrentUserVote(voteService.getCurrentUserVote(userId, dish.getId(), today, finalCurrentMealPeriod));
-            });
-        }
+        MealBlock topMeal = new MealBlock(mealService.getDishesForMeal(topMealPeriod, today));
+        MealBlock bottomMeal = new MealBlock(mealService.getDishesForMeal(bottomMealPeriod, today));
 
         model.addAttribute("currentMealPeriod", currentMealPeriod);
-        model.addAttribute("dishes", dishes);
-        model.addAttribute("mealInfo", getMealInfo(now, currentMealPeriod));
-        
+        model.addAttribute("topMealPeriod", topMealPeriod);
+        model.addAttribute("topMealMainDish", topMeal.mainDish);
+        model.addAttribute("topMealSideDishes", topMeal.sideDishes);
+        model.addAttribute("topMealImageUrl", topMeal.imageUrl);
+        model.addAttribute("topMealName", topMeal.name);
+        model.addAttribute("topMealDescription", topMeal.description);
+        model.addAttribute("bottomMealPeriod", bottomMealPeriod);
+        model.addAttribute("bottomMealMainDish", bottomMeal.mainDish);
+        model.addAttribute("bottomMealSideDishes", bottomMeal.sideDishes);
+        model.addAttribute("bottomMealImageUrl", bottomMeal.imageUrl);
+        model.addAttribute("bottomMealName", bottomMeal.name);
+        model.addAttribute("bottomMealDescription", bottomMeal.description);
+
+        // Serving time string based on meal period
+        String servingTime = "";
+        if ("breakfast".equalsIgnoreCase(currentMealPeriod)) {
+            servingTime = "7:00 AM – 10:00 AM";
+        } else if ("lunch".equalsIgnoreCase(currentMealPeriod)) {
+            servingTime = "12:30 PM – 2:00 PM";
+        } else if ("snacks".equalsIgnoreCase(currentMealPeriod)) {
+            servingTime = "4:00 PM – 5:00 PM";
+        } else {
+            servingTime = "";
+        }
+        model.addAttribute("servingTime", servingTime);
+
         model.addAttribute("today", today);
         model.addAttribute("weekDays", mealService.getWeekDays(today));
-        
         LocalDate tomorrow = today.plusDays(1);
         addMealPreviewsToModel(model, tomorrow, "Tomorrow's Preview");
-
         return "dashboard";
     }
 

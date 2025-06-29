@@ -3,388 +3,150 @@
 <head th:replace="~{fragments/layout :: head}">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&display=swap">
+    <style>body { font-family: 'Inter', sans-serif !important; }</style>
 </head>
-<body class="bg-gray-50 font-sans">
-    <!-- Header -->
-    <header class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-6 py-4">
+<body class="font-sans bg-white">
+    <!-- Top Navigation Bar -->
+    <header class="bg-white shadow-sm fixed top-0 left-0 w-full z-50">
+        <div class="container mx-auto px-5 py-4">
             <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center mr-3">
-                        <i class="fa-solid fa-utensils text-white"></i>
-                    </div>
-                    <h1 class="text-2xl font-bold text-gray-800">DSi Eats</h1>
-                    <div class="ml-6 bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-full text-sm font-medium" th:if="${mealInfo != null}">
-                        <i class="fa-regular fa-clock mr-1"></i>
-                        <span th:text="${mealInfo}">Lunch Time - 1:30 PM</span>
-                    </div>
+                <div class="flex items-center space-x-2">
+                    <i class="text-primary text-xl fa-solid fa-utensils"></i>
+                    <span class="font-bold text-xl text-gray-800">DSi Menu</span>
                 </div>
-                
                 <div class="flex items-center space-x-6">
-                    <nav class="hidden md:flex space-x-6">
-                        <a th:href="@{/dashboard}" class="text-primary font-medium cursor-pointer border-b-2 border-primary pb-1">Today's Menu</a>
-                        <a th:href="@{/weekly-plan}" class="text-gray-600 hover:text-primary cursor-pointer" sec:authorize="hasAuthority('ROLE_ADMIN')">Weekly Menu</a>
-                        <a href="#" class="text-gray-600 hover:text-primary cursor-pointer opacity-50">Food Stats</a>
+                    <nav class="hidden md:flex items-center space-x-6">
+                        <a th:href="@{/dashboard}" class="text-primary font-semibold border-b-2 border-primary pb-1 cursor-pointer">Today's Menu</a>
+                        <a th:href="@{/weekly-plan}" class="text-gray-600 hover:text-primary cursor-pointer">Weekly Menu</a>
                     </nav>
-                    
-                    <div class="flex items-center space-x-4">
-                        <div class="relative">
-                            <button class="flex items-center text-gray-700 hover:text-primary">
-                                <i class="fa-regular fa-bell text-lg"></i>
-                                <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
-                            </button>
-                        </div>
-                        
-                        <!-- Use the layout fragment for user dropdown -->
-                        <div sec:authorize="isAuthenticated()" class="relative" id="user-dropdown">
-                            <button id="user-dropdown-button" onclick="toggleDropdown()" class="flex items-center text-gray-700 hover:text-primary transition-colors">
-                                <img th:src="${#authentication.principal.attributes['picture']}" class="w-8 h-8 rounded-full mr-2" alt="User Avatar">
-                                <span th:text="${#authentication.principal.attributes['name']}" class="font-medium mr-1 hidden md:inline-block">John Doe</span>
-                                <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
-                            </button>
-                            <!-- Enhanced dropdown for logout -->
-                            <div id="user-dropdown-menu" class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200" style="display: none;">
-                                <div class="px-4 py-2 border-b border-gray-100">
-                                    <p class="text-sm font-medium text-gray-900" th:text="${#authentication.principal.attributes['name']}">User Name</p>
-                                    <p class="text-xs text-gray-500" th:text="${#authentication.principal.attributes['email']}">user@example.com</p>
-                                </div>
-                                <form th:action="@{/logout}" method="post">
-                                    <button type="submit" class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left flex items-center">
-                                        <i class="fa-solid fa-sign-out-alt mr-2"></i>
-                                        Sign Out
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                    <div th:replace="fragments/layout :: topnav-user"></div>
                 </div>
             </div>
         </div>
     </header>
-    
-    <main class="max-w-7xl mx-auto px-6 py-8">
-        <!-- Content shown when a meal is being served -->
-        <div th:if="${currentMealPeriod != null}">
-            <!-- Hero Section -->
-            <section class="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
-                <div class="relative h-[200px]">
-                    <img class="absolute inset-0 w-full h-full object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/45c4c441d1-9309d05f107ea5096f78.png" alt="delicious food spread">
-                    <div class="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/40"></div>
-                    <div class="absolute bottom-0 left-0 p-6 text-white">
-                        <h2 class="text-2xl font-bold mb-1" th:text="'Good ' + (${#dates.hour(#dates.createNow()) < 12 ? 'Morning' : (#dates.hour(#dates.createNow()) < 18 ? 'Afternoon' : 'Evening')}) + '!'"></h2>
-                        <p class="text-lg" th:text="|Here is today's ${#strings.capitalize(currentMealPeriod)} menu|"></p>
+
+    <!-- Main Content -->
+    <main class="container mx-auto pt-20 px-5 pb-10">
+        <!-- Top Meal Section -->
+        <div class="flex flex-col md:flex-row gap-5 mt-4 h-[400px]">
+            <!-- Left Column (66.6%) -->
+            <div class="w-full md:w-2/3 bg-white flex flex-col justify-center h-full">
+                <div class="mb-6">
+                    <p class="text-lg text-gray-600">
+                        Good afternoon, <span th:text="${#authentication.principal.attributes['name']}">Team</span>
+                    </p>
+                    <h1 class="text-2xl font-bold text-gray-800 mt-1">Today's <span th:text="${topMealPeriod != null ? #strings.capitalize(topMealPeriod) : 'Meal'}">Meal</span></h1>
+                </div>
+                <!-- Main Dish Section -->
+                <div class="mb-8">
+                    <div class="bg-white">
+                        <h3 class="text-4xl font-bold text-primary mb-2" th:text="${topMealMainDish != null ? topMealMainDish.name : 'Main Dish'}">Main Dish</h3>
+                        <p class="text-lg text-gray-600" th:text="${topMealMainDish != null ? topMealMainDish.description : 'Enjoy the delicious taste of our signature dish'}">Main dish description</p>
                     </div>
                 </div>
-            </section>
-
-            <!-- Live Menu Section -->
-            <section class="mb-8">
-                <h2 class="text-xl font-semibold text-gray-800 mb-4" th:text="|Live Menu - What's Being Served for ${#strings.capitalize(currentMealPeriod)}|"></h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- Menu Card Loop -->
-                    <div th:each="dish, iterStat : ${dishes}" class="bg-white rounded-lg shadow-sm overflow-hidden flex flex-col">
-                        <div class="h-48 relative">
-                            <img class="w-full h-full object-cover" th:src="${dish.imageUrl}" th:alt="${dish.name}" src="https://via.placeholder.com/300">
-                            <div class="absolute top-2 right-2 flex space-x-1">
-                                <span th:each="tag, tagStat : ${dish.dietaryInfo}" th:if="${tagStat.index < 2}" th:text="${tag}" 
-                                      th:with="tagClass=${#strings.containsIgnoreCase(tag, 'Healthy')} ? 'bg-green-500' : (${#strings.containsIgnoreCase(tag, 'Vegetarian')} ? 'bg-green-500' : 'bg-gray-500')"
-                                      class="text-white px-2 py-1 rounded-full text-xs"
-                                      th:classappend="${tagClass}"></span>
+                <!-- Also Serving Section -->
+                <div class="mb-6" th:if="${topMealSideDishes != null and !topMealSideDishes.isEmpty()}">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Also Serving</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div th:each="side : ${topMealSideDishes}" class="bg-white flex items-center">
+                            <div class="w-16 h-16 rounded-lg overflow-hidden mr-3 flex-shrink-0">
+                                <img class="w-full h-full object-cover" th:src="${side.imageUrl}" th:alt="${side.name}">
                             </div>
-                        </div>
-                        <div class="p-4 flex flex-col flex-grow">
-                            <h3 class="font-semibold text-lg mb-1" th:text="${dish.name}">Dish Name</h3>
-                            <p class="text-gray-600 text-sm mb-3" th:text="${dish.description}">Dish description.</p>
-                            
-                            <div class="flex items-center space-x-2 mb-3">
-                                <span th:each="tag : ${dish.dietaryInfo}" class="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-xs flex items-center">
-                                    <i class="fa-solid mr-1"
-                                       th:with="iconClass=${#strings.containsIgnoreCase(tag, 'Vegetarian')} ? 'fa-seedling text-green-500' :
-                                                          (${#strings.containsIgnoreCase(tag, 'Healthy')} ? 'fa-leaf text-green-500' :
-                                                          (${#strings.containsIgnoreCase(tag, 'Spicy')} ? 'fa-pepper-hot text-red-500' :
-                                                          (${#strings.containsIgnoreCase(tag, 'Seafood')} ? 'fa-fish text-blue-500' : 
-                                                          (${#strings.containsIgnoreCase(tag, 'Whole Grain')} ? 'fa-wheat-awn text-amber-500' : 'fa-tag'))))"
-                                       th:classappend="${iconClass}"></i>
-                                    <span th:text="${tag}"></span>
-                                </span>
-                            </div>
-                            
-                            <!-- Voting and Comments Buttons -->
-                            <div class="flex justify-between mb-3 mt-auto" th:attr="data-dish-id=${dish.id}">
-                                <button th:classappend="${dish.currentUserVote?.name() == 'UPVOTE' ? 'text-success' : 'text-gray-500'}"
-                                        class="vote-btn flex items-center hover:text-success hover:bg-success hover:bg-opacity-10 px-3 py-1.5 rounded-full transition"
-                                        th:data-vote-type="'UPVOTE'" onclick="castVote(this)">
-                                    <i class="fa-solid fa-thumbs-up mr-1"></i>
-                                    <span class="upvote-count" th:text="${dish.upvotes}">0</span>
-                                </button>
-                                <button th:classappend="${dish.currentUserVote?.name() == 'DOWNVOTE' ? 'text-danger' : 'text-gray-500'}"
-                                        class="vote-btn flex items-center hover:text-danger hover:bg-danger hover:bg-opacity-10 px-3 py-1.5 rounded-full transition"
-                                        th:data-vote-type="'DOWNVOTE'" onclick="castVote(this)">
-                                    <i class="fa-solid fa-thumbs-down mr-1"></i>
-                                    <span class="downvote-count" th:text="${dish.downvotes}">0</span>
-                                </button>
-                                <button class="text-gray-500 flex items-center hover:text-primary hover:bg-primary hover:bg-opacity-10 px-3 py-1.5 rounded-full transition">
-                                    <i class="fa-solid fa-comment mr-1"></i>
-                                    <span>...</span> <!-- Comment count can be added later -->
-                                </button>
-                            </div>
-                            
-                            <div class="vote-status text-xs"
-                                 th:classappend="${dish.currentUserVote != null} ? (${dish.currentUserVote?.name() == 'UPVOTE' ? 'text-primary' : 'text-danger'}) : 'text-gray-500'">
-                                <span th:if="${dish.currentUserVote?.name() == 'UPVOTE'}">You voted 👍 for this dish</span>
-                                <span th:if="${dish.currentUserVote?.name() == 'DOWNVOTE'}">You voted 👎 for this dish</span>
-                                <span th:if="${dish.currentUserVote == null}">You haven't voted for this dish yet</span>
+                            <div>
+                                <h3 class="font-semibold text-gray-800" th:text="${side.name}">Side Dish</h3>
+                                <p class="text-sm text-gray-600" th:text="${side.description}">Side description</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
-            
-            <!-- Two Column Layout for Stats and Weekly Overview -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <!-- Quick Stats Section -->
-                <div class="bg-white rounded-lg shadow-sm p-6 flex flex-col">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Quick Stats - What Everyone's Saying</h2>
-                    
-                    <div class="mb-6 flex-1">
-                        <h3 class="text-sm font-medium text-gray-600 uppercase mb-4">Today's Top Dishes</h3>
-                        <div class="space-y-3">
-                            <div class="flex items-center bg-green-50 p-3 rounded-lg">
-                                <div class="w-3 h-3 bg-success rounded-full mr-3"></div>
-                                <div class="flex-1">
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-medium">Grilled Chicken Sandwich</span>
-                                        <span class="text-success font-bold">89%</span>
-                                    </div>
-                                    <div class="w-full bg-green-200 rounded-full h-2 mt-1">
-                                        <div class="bg-success h-2 rounded-full" style="width: 89%"></div>
-                                    </div>
-                                </div>
-                                <i class="fa-solid fa-arrow-trend-up text-success ml-3"></i>
-                            </div>
-                            
-                            <div class="flex items-center bg-red-50 p-3 rounded-lg">
-                                <div class="w-3 h-3 bg-danger rounded-full mr-3"></div>
-                                <div class="flex-1">
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-medium">Fish &amp; Chips</span>
-                                        <span class="text-danger font-bold">58%</span>
-                                    </div>
-                                    <div class="w-full bg-red-200 rounded-full h-2 mt-1">
-                                        <div class="bg-danger h-2 rounded-full" style="width: 58%"></div>
-                                    </div>
-                                </div>
-                                <i class="fa-solid fa-arrow-trend-down text-danger ml-3"></i>
-                            </div>
+                <!-- Bottom Section with Serving Time and View Full Week Button -->
+                <div class="flex flex-col md:flex-row gap-5 mt-5">
+                    <div class="w-full md:w-2/3 bg-white rounded-lg shadow-sm flex items-center h-20">
+                        <div class="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-full mr-4 flex-shrink-0">
+                            <i class="text-primary text-xl fa-solid fa-clock"></i>
+                        </div>
+                        <div>
+                            <span class="text-lg font-semibold text-gray-800">Serving Time</span>
+                            <div class="text-lg text-gray-600 mt-1" th:text="${servingTime}">12:30 PM – 2:00 PM</div>
                         </div>
                     </div>
-                    
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <h3 class="text-sm font-medium text-gray-600 uppercase mb-3">Featured Comment</h3>
-                        <div class="bg-white rounded-lg p-3">
-                            <div class="flex items-center text-sm">
-                                <i class="fa-solid fa-quote-left text-primary mr-2"></i>
-                                <span class="italic text-gray-700">"Love the new quinoa salad option!"</span>
-                                <span class="text-primary ml-auto text-xs">You, 2 days ago</span>
-                            </div>
-                        </div>
+                    <div class="w-full md:w-1/3 bg-white rounded-lg shadow-sm p-6 flex justify-end items-center h-20">
+                        <a th:href="@{/weekly-plan}" class="bg-white border border-primary text-primary px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors duration-200 flex items-center gap-2">
+                            <i class="text-primary text-sm fa-solid fa-calendar"></i>
+                            View Full Week
+                        </a>
                     </div>
                 </div>
-                
-                <!-- Weekly Overview Section -->
-                <div class="bg-white rounded-lg shadow-sm p-6 flex flex-col">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Weekly Overview - Plan Ahead</h2>
-                    
-                    <div class="flex space-x-2 mb-6 overflow-x-auto pb-2" id="day-selection-grid">
-                        <!-- Dynamic 7-day calendar -->
-                        <div th:each="day : ${weekDays}"
-                             th:data-date="${day}"
-                             th:with="isToday=${day.equals(today)}, 
-                                      cardClass=${isToday} ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-                             class="day-card flex-shrink-0 w-20 h-20 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors"
-                             th:classappend="${cardClass}">
-                             <span class="text-xs font-medium" th:text="${isToday} ? 'Today' : ${#temporals.format(day, 'E')}">Mon</span>
-                             <span class="text-xl font-bold" th:text="${day.dayOfMonth}">15</span>
-                             <span class="text-xs" th:text="${#temporals.format(day, 'MMM')}">Wed</span>
-                        </div>
-                    </div>
-                    
-                    <div id="meal-preview-container">
-                        <!-- The initial state is tomorrow's preview, this will be replaced by AJAX -->
-                        <div th:replace="~{dashboard :: meal-preview(selectedDate=${selectedDate})}"></div>
-                    </div>
+            </div>
+            <!-- Right Column (33.3%) -->
+            <div class="w-full md:w-1/3 flex flex-col">
+                <div class="relative flex-1 rounded-lg overflow-hidden">
+                    <img class="w-full h-full object-cover" th:src="${topMealImageUrl}" th:alt="${topMealName}">
+                    <div class="absolute bottom-4 right-4 flex items-center bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer hover:bg-black/50 transition-all duration-200">
+                        <span class="text-sm font-medium text-white">Add Feedback</span>
+                        <i class="text-white text-sm fa-solid fa-arrow-right ml-2"></i>
 
-                    <th:block th:if="false">
-                        <div th:fragment="meal-preview(selectedDate)">
-                            <h3 class="text-sm font-medium text-gray-600 uppercase mb-3" th:text="${previewTitle}"></h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div class="bg-gray-50 p-4 rounded-lg">
-                                    <div class="flex items-center mb-2">
-                                        <i class="fa-solid fa-mug-hot text-amber-500 mr-2"></i>
-                                        <h4 class="font-medium">Breakfast</h4>
-                                    </div>
-                                    <p class="text-sm text-gray-700" th:text="${breakfastPreview}">Pancakes &amp; Fresh Fruit</p>
-                                </div>
-                                <div class="bg-gray-50 p-4 rounded-lg">
-                                    <div class="flex items-center mb-2">
-                                        <i class="fa-solid fa-utensils text-primary mr-2"></i>
-                                        <h4 class="font-medium">Lunch</h4>
-                                    </div>
-                                    <p class="text-sm text-gray-700" th:text="${lunchPreview}">Italian Pasta Bar</p>
-                                </div>
-                                <div class="bg-gray-50 p-4 rounded-lg">
-                                    <div class="flex items-center mb-2">
-                                        <i class="fa-solid fa-cookie text-amber-700 mr-2"></i>
-                                        <h4 class="font-medium">Snacks</h4>
-                                    </div>
-                                    <p class="text-sm text-gray-700" th:text="${snacksPreview}">Homemade Cookies</p>
-                                </div>
-                            </div>
-                        </div>
-                    </th:block>
-
-                    <a th:href="@{/weekly-plan}" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center mt-auto" sec:authorize="hasAuthority('ROLE_ADMIN')">
-                        <span>View Full Weekly Menu</span>
-                        <i class="fa-solid fa-arrow-right ml-2"></i>
-                    </a>
+                    </div>
                 </div>
             </div>
         </div>
+        <!-- Bottom Meal Section -->
+        <div class="mb-4">
+            <h2 class="text-2xl font-bold text-gray-800" 
+                th:if="${currentMealPeriod == 'lunch'}">Coming Up Next</h2>
+            <h2 class="text-2xl font-bold text-gray-800" 
+                th:if="${currentMealPeriod == 'snacks'}">Earlier Today</h2>
+        </div>
+        <div class="flex flex-col md:flex-row gap-5 mt-10 h-[400px]">
+            <div class="w-full md:w-1/3 flex flex-col">
+                <div class="relative flex-1 rounded-lg overflow-hidden">
+                    <img class="w-full h-full object-cover" th:src="${bottomMealImageUrl}" th:alt="${bottomMealName}">
+                    <div class="absolute bottom-4 right-4 flex items-center bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer hover:bg-black/50 transition-all duration-200">
+                        <span class="text-sm font-medium text-white">Add Feedback</span>
+                        <i class="text-white text-sm fa-solid fa-arrow-right ml-2"></i>
 
-        <!-- Content shown when no meal is being served -->
-        <div th:if="${currentMealPeriod == null}" class="text-center py-16">
-            <div class="bg-white rounded-lg shadow-sm p-12 inline-block">
-                <i class="fa-solid fa-clock text-5xl text-gray-300 mb-4"></i>
-                <h2 class="text-2xl font-semibold text-gray-700 mb-2">No Meal Currently Being Served</h2>
-                <p class="text-gray-500">Please check back during our regular meal times.</p>
-                <div class="mt-6 text-sm text-gray-500">
-                    <p>Breakfast: 6 AM - 10 AM</p>
-                    <p>Lunch: 11 AM - 2 PM</p>
-                    <p>Snacks: 2 PM - 5 PM</p>
+                    </div>
                 </div>
-                <a th:href="@{/weekly-plan}" class="mt-8 inline-block bg-primary text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition" sec:authorize="hasAuthority('ROLE_ADMIN')">
-                    View Weekly Plan
-                </a>
+            </div>
+            <div class="w-full md:w-2/3 bg-white flex flex-col justify-center h-full">
+                <div class="mb-6">
+                    <h2 class="text-4xl font-bold text-primary mb-2" th:text="${bottomMealMainDish != null ? bottomMealMainDish.name : 'Meal'}">Meal</h2>
+                    <p class="text-lg text-gray-600" th:text="${bottomMealMainDish != null ? bottomMealMainDish.description : ''}">Meal description</p>
+                </div>
+                <div class="mb-6" th:if="${bottomMealSideDishes != null and !bottomMealSideDishes.isEmpty()}">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Also Serving</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div th:each="side : ${bottomMealSideDishes}" class="bg-white flex items-center">
+                            <div class="w-16 h-16 rounded-lg overflow-hidden mr-3 flex-shrink-0">
+                                <img class="w-full h-full object-cover" th:src="${side.imageUrl}" th:alt="${side.name}">
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-800" th:text="${side.name}">Side Dish</h4>
+                                <p class="text-sm text-gray-600" th:text="${side.description}">Side description</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
-
-    <!-- Footer or other elements -->
-    <th:block th:replace="~{fragments/layout :: footer-scripts}"></th:block>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Weekly overview script
-            const daySelectionGrid = document.getElementById('day-selection-grid');
-            const mealPreviewContainer = document.getElementById('meal-preview-container');
-
-            if (daySelectionGrid && mealPreviewContainer) {
-                daySelectionGrid.addEventListener('click', function(event) {
-                    const dayCard = event.target.closest('.day-card');
-                    if (!dayCard) return;
-
-                    const selectedDate = dayCard.getAttribute('data-date');
-
-                    document.querySelectorAll('.day-card').forEach(card => {
-                        card.classList.remove('bg-primary', 'text-white');
-                        card.classList.add('bg-gray-100', 'text-gray-600');
-                    });
-                    dayCard.classList.remove('bg-gray-100', 'text-gray-600');
-                    dayCard.classList.add('bg-primary', 'text-white');
-
-                    fetch(`/dashboard/preview?date=${selectedDate}`)
-                        .then(response => response.text())
-                        .then(html => {
-                            mealPreviewContainer.innerHTML = html;
-                        })
-                        .catch(error => {
-                            console.error('Error fetching meal preview:', error);
-                            mealPreviewContainer.innerHTML = '<p class="text-red-500">Error loading preview.</p>';
-                        });
-                });
-            }
-        });
-
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        }
-
-        function castVote(button) {
-            const dishCard = button.closest('[data-dish-id]');
-            if (!dishCard) return;
-
-            const dishId = dishCard.getAttribute('data-dish-id');
-            const voteType = button.getAttribute('data-vote-type');
-
-            const token = getCookie('XSRF-TOKEN');
-            if (!token) {
-                alert("CSRF token not found in cookie. Please refresh the page.");
-                return;
-            }
-
-            fetch('/api/votes', {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-XSRF-TOKEN': token
-                },
-                body: JSON.stringify({
-                    'dishId': dishId,
-                    'voteType': voteType
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Vote failed');
-                }
-                return response.json();
-            })
-            .then(voteResponse => {
-                updateVoteUI(voteResponse);
-            })
-            .catch(error => {
-                console.error('Error during vote:', error);
-                // Optionally show an error message
-            });
-        }
-
-        function updateVoteUI(voteResponse) {
-            const dishCard = document.querySelector(`[data-dish-id="${voteResponse.dishId}"]`);
-            if (!dishCard) return;
-
-                const upvoteButton = dishCard.querySelector('.vote-btn[data-vote-type="UPVOTE"]');
-                const downvoteButton = dishCard.querySelector('.vote-btn[data-vote-type="DOWNVOTE"]');
-                const voteStatus = dishCard.querySelector('.vote-status');
-                const upvoteCountSpan = dishCard.querySelector('.upvote-count');
-                const downvoteCountSpan = dishCard.querySelector('.downvote-count');
-
-                // Update counts
-                upvoteCountSpan.textContent = voteResponse.upvotes;
-                downvoteCountSpan.textContent = voteResponse.downvotes;
-
-                // Update button styles
-                upvoteButton.classList.remove('text-success', 'text-gray-500');
-                downvoteButton.classList.remove('text-danger', 'text-gray-500');
-                
-                upvoteButton.classList.add(voteResponse.currentUserVote === 'UPVOTE' ? 'text-success' : 'text-gray-500');
-                downvoteButton.classList.add(voteResponse.currentUserVote === 'DOWNVOTE' ? 'text-danger' : 'text-gray-500');
-
-                // Update status text
-                voteStatus.classList.remove('text-primary', 'text-danger', 'text-gray-500');
-                if (voteResponse.currentUserVote === 'UPVOTE') {
-                    voteStatus.classList.add('text-primary');
-                    voteStatus.innerHTML = `<span>You voted 👍 for this dish</span>`;
-                } else if (voteResponse.currentUserVote === 'DOWNVOTE') {
-                    voteStatus.classList.add('text-danger');
-                    voteStatus.innerHTML = `<span>You voted 👎 for this dish</span>`;
-                } else {
-                    voteStatus.classList.add('text-gray-500');
-                    voteStatus.innerHTML = `<span>You haven't voted for this dish yet</span>`;
-                }
-        }
-    </script>
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-6">
+        <div class="container mx-auto px-5 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
+                <div>© 2023 DSi Internal Food Menu System</div>
+                <div class="flex space-x-4 mt-2 md:mt-0">
+                    <span class="hover:text-primary cursor-pointer">Dietary Restrictions</span>
+                    <span class="hover:text-primary cursor-pointer">Suggest a Meal</span>
+                    <span class="hover:text-primary cursor-pointer">Contact Cafeteria</span>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
 </html> 
