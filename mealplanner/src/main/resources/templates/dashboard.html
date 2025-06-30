@@ -98,7 +98,7 @@
         <!-- Bottom Meal Section -->
         <div class="mb-4">
             <h2 class="text-2xl font-bold text-gray-800" 
-                th:if="${currentMealPeriod == 'lunch'}">Coming Up Next</h2>
+                th:if="${currentMealPeriod != 'snacks'}">Coming Up Next</h2>
             <h2 class="text-2xl font-bold text-gray-800" 
                 th:if="${currentMealPeriod == 'snacks'}">Earlier Today</h2>
         </div>
