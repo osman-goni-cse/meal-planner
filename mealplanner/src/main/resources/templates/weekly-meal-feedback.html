@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&display=swap">
+    <style>body { font-family: 'Inter', sans-serif !important; }</style>
+</head>
+<body class="font-sans bg-white">
+    <!-- Top Navigation Bar -->
+    <header class="bg-white shadow-sm fixed top-0 left-0 w-full z-50">
+        <div class="container mx-auto px-5 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="text-primary text-xl fa-solid fa-utensils"></i>
+                    <span class="font-bold text-xl text-gray-800">DSi Menu</span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <nav class="hidden md:flex items-center space-x-6">
+                        <a th:href="@{/dashboard}" class="text-gray-600 hover:text-primary cursor-pointer">Today's Menu</a>
+                        <a th:href="@{/weekly-feedback}" class="text-primary font-semibold border-b-2 border-primary pb-1 cursor-pointer">Weekly Menu</a>
+                    </nav>
+                    <div th:replace="fragments/layout :: topnav-user"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main id="main-content" class="container mx-auto pt-20 px-5 pb-10">
+        <div class="flex gap-6 items-start">
+            <!-- Calendar Column -->
+            <div id="calendar-column" class="w-1/4 bg-gray-50 rounded-lg shadow-sm border border-gray-200 p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-800" th:text="${calendarMonthYear}">December 2023</h2>
+                    <div class="flex space-x-2">
+                        <a th:href="@{/weekly-feedback(date=${prevMonthDate})}" class="p-1 hover:bg-gray-200 rounded transition-colors">
+                            <i class="text-gray-600 text-sm fas fa-chevron-left"></i>
+                        </a>
+                        <a th:href="@{/weekly-feedback(date=${nextMonthDate})}" class="p-1 hover:bg-gray-200 rounded transition-colors">
+                            <i class="text-gray-600 text-sm fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="grid grid-cols-7 gap-1 text-center text-sm">
+                    <div class="p-2 text-gray-500 font-medium">S</div>
+                    <div class="p-2 text-gray-500 font-medium">M</div>
+                    <div class="p-2 text-gray-500 font-medium">T</div>
+                    <div class="p-2 text-gray-500 font-medium">W</div>
+                    <div class="p-2 text-gray-500 font-medium">T</div>
+                    <div class="p-2 text-gray-500 font-medium">F</div>
+                    <div class="p-2 text-gray-500 font-medium">S</div>
+                    <div th:each="day,iter : ${calendarDays}"
+                         class="p-2"
+                         th:classappend="${day.selected} ? 'bg-primary text-white rounded shadow-sm font-bold ring-2 ring-primary' : (day.inMonth ? 'text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all' : 'text-gray-300')">
+                        <a th:if="${day.inMonth}" th:href="@{/weekly-feedback(date=${day.date})}" th:text="${day.dayOfMonth}"></a>
+                        <span th:if="${!day.inMonth}" th:text="${day.dayOfMonth}"></span>
+                    </div>
+                </div>
+            </div>
+            <!-- Content Column -->
+            <div id="content-column" class="w-3/4 bg-white rounded-lg shadow-md border border-gray-100 p-6">
+                <div class="flex flex-col items-center">
+                    <div class="w-full mb-12" th:each="mealBlock : ${mealBlocks}">
+                        <h1 class="text-3xl font-bold text-gray-800 text-center mb-2" th:text="${mealBlock.mealPeriodDisplay}">Lunch</h1>
+                        <h2 class="text-xl font-semibold text-primary text-center mb-6">
+                            <a th:if="${mealBlock.mainDishUrl != null}" th:href="${mealBlock.mainDishUrl}" th:text="${mealBlock.mainDishName}" class="hover:underline"></a>
+                            <span th:if="${mealBlock.mainDishUrl == null}" th:text="${mealBlock.mainDishName}"></span>
+                        </h2>
+                        <div id="main-dish-container" class="flex justify-center mb-6">
+                            <div class="relative w-[45%]">
+                                <img class="w-full h-72 object-cover rounded-lg" th:src="${mealBlock.mainDishImageUrl}" th:alt="${mealBlock.mainDishName}">
+                                <button class="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-50">
+                                    <i class="text-red-500 fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex justify-center mb-8" th:if="${mealBlock.sideDishes != null and !mealBlock.sideDishes.isEmpty()}">
+                            <div class="grid grid-cols-4 gap-4 max-w-2xl">
+                                <div th:each="side : ${mealBlock.sideDishes}" class="text-center">
+                                    <img class="w-20 h-20 object-cover rounded-lg mx-auto mb-2" th:src="${side.imageUrl}" th:alt="${side.name}">
+                                    <p class="text-sm text-gray-600" th:text="${side.name}"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Feedback Section -->
+                        <div class="max-w-2xl mx-auto">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Feedback</h3>
+                            <div class="space-y-3 mb-4">
+                                <div th:each="feedback : ${mealBlock.feedbacks}" class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="flex items-center mb-2">
+                                        <img th:src="${feedback.userAvatarUrl}" alt="User" class="w-6 h-6 rounded-full mr-2">
+                                        <span class="text-sm font-medium text-gray-700" th:text="${feedback.userName}">User Name</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600" th:text="${feedback.comment}"></p>
+                                </div>
+                            </div>
+                            <div class="text-center mb-4" th:if="${mealBlock.hasMoreFeedbacks}">
+                                <button class="text-primary hover:text-blue-600 text-sm font-medium hover:underline transition-colors">
+                                    Show More Feedbacks
+                                </button>
+                            </div>
+                            <form th:action="@{/weekly-feedback/feedback}" method="post" class="flex gap-2">
+                                <input type="hidden" name="date" th:value="${selectedDate}">
+                                <input type="hidden" name="mealPeriod" th:value="${mealBlock.mealPeriod}">
+                                <input type="text" name="comment" placeholder="Share your feedback..." class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                <button type="submit" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <!-- Footer -->
+    <footer id="footer" class="bg-white border-t border-gray-medium mt-6">
+        <div class="container mx-auto px-5 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
+                <div class="">© 2023 DSi Internal Food Menu System</div>
+                <div class="flex space-x-4 mt-2 md:mt-0">
+                    <span class="hover:text-primary cursor-pointer">Dietary Restrictions</span>
+                    <span class="hover:text-primary cursor-pointer">Suggest a Meal</span>
+                    <span class="hover:text-primary cursor-pointer">Contact Cafeteria</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html> 

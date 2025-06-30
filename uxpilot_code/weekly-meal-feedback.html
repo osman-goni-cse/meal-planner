@@ -1,0 +1,310 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>::-webkit-scrollbar { display: none;}</style>
+    
+    <script>tailwind.config = {
+  "theme": {
+    "extend": {
+      "colors": {
+        "primary": "#0984e3",
+        "accent1": "#fdcb6e",
+        "accent2": "#00b894",
+        "gray": {
+          "light": "#f5f6fa",
+          "medium": "#dfe6e9"
+        }
+      },
+      "fontFamily": {
+        "sans": [
+          "Inter",
+          "sans-serif"
+        ]
+      }
+    }
+  }
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+      body {
+        font-family: 'Inter', sans-serif !important;
+      }
+      
+      /* Preserve Font Awesome icons */
+      .fa, .fas, .far, .fal, .fab {
+        font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+      }
+    </style><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head><body class="font-sans bg-white">
+    <!-- Top Navigation Bar -->
+    <header id="header" class="bg-white shadow-sm fixed top-0 left-0 w-full z-50">
+        <div class="container mx-auto px-5 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="text-primary text-xl" data-fa-i2svg=""><svg class="svg-inline--fa fa-utensils" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="utensils" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M416 0C400 0 288 32 288 176V288c0 35.3 28.7 64 64 64h32V480c0 17.7 14.3 32 32 32s32-14.3 32-32V352 240 32c0-17.7-14.3-32-32-32zM64 16C64 7.8 57.9 1 49.7 .1S34.2 4.6 32.4 12.5L2.1 148.8C.7 155.1 0 161.5 0 167.9c0 45.9 35.1 83.6 80 87.7V480c0 17.7 14.3 32 32 32s32-14.3 32-32V255.6c44.9-4.1 80-41.8 80-87.7c0-6.4-.7-12.8-2.1-19.1L191.6 12.5c-1.8-8-9.3-13.3-17.4-12.4S160 7.8 160 16V150.2c0 5.4-4.4 9.8-9.8 9.8c-5.1 0-9.3-3.9-9.8-9.8V16zm48.3 152l-.3 0-.3 0 .3-.7 .3 .7z"></path></svg></i>
+                    <span class="font-bold text-xl text-gray-800">DSi Menu</span>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <nav class="hidden md:flex items-center space-x-6">
+                        <span class="text-gray-600 hover:text-primary cursor-pointer">Today's Menu</span>
+                        <span class="text-primary font-semibold border-b-2 border-primary pb-1 cursor-pointer">Weekly Menu</span>
+                    </nav>
+                    
+                    <div class="flex items-center space-x-2 cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg" alt="User Profile" class="w-full h-full object-cover">
+                        </div>
+                        <i class="text-gray-500 text-xs" data-fa-i2svg=""><svg class="svg-inline--fa fa-chevron-down" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="chevron-down" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"></path></svg></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="container mx-auto pt-20 px-5 pb-10">
+        <div class="flex gap-6">
+            <!-- Left Column - Calendar (25%) -->
+            <div id="calendar-column" class="w-1/4 bg-gray-50 rounded-lg shadow-sm border border-gray-200 p-4">
+                <div id="calendar-header" class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-800">December 2023</h2>
+                    <div class="flex space-x-2">
+                        <button class="p-1 hover:bg-gray-200 rounded transition-colors">
+                            <i class="text-gray-600 text-sm fas fa-chevron-left"></i>
+                        </button>
+                        <button class="p-1 hover:bg-gray-200 rounded transition-colors">
+                            <i class="text-gray-600 text-sm fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm">
+                    <!-- Days of week -->
+                    <div class="p-2 text-gray-500 font-medium">S</div>
+                    <div class="p-2 text-gray-500 font-medium">M</div>
+                    <div class="p-2 text-gray-500 font-medium">T</div>
+                    <div class="p-2 text-gray-500 font-medium">W</div>
+                    <div class="p-2 text-gray-500 font-medium">T</div>
+                    <div class="p-2 text-gray-500 font-medium">F</div>
+                    <div class="p-2 text-gray-500 font-medium">S</div>
+                    
+                    <!-- Calendar dates -->
+                    <div class="p-2 text-gray-400">26</div>
+                    <div class="p-2 text-gray-400">27</div>
+                    <div class="p-2 text-gray-400">28</div>
+                    <div class="p-2 text-gray-400">29</div>
+                    <div class="p-2 text-gray-400">30</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">1</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">2</div>
+                    
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">3</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">4</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">5</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">6</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">7</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">8</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">9</div>
+                    
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">10</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">11</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">12</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">13</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">14</div>
+                    <div class="p-2 bg-primary text-white rounded shadow-sm">15</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">16</div>
+                    
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">17</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">18</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">19</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">20</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">21</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">22</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">23</div>
+                    
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">24</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">25</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">26</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">27</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">28</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">29</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">30</div>
+                    
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">31</div>
+                    <div class="p-2 text-gray-400">1</div>
+                    <div class="p-2 text-gray-400">2</div>
+                    <div class="p-2 text-gray-400">3</div>
+                    <div class="p-2 text-gray-400">4</div>
+                    <div class="p-2 text-gray-400">5</div>
+                    <div class="p-2 text-gray-400">6</div>
+                </div>
+            </div>
+
+            <!-- Right Column - Content (75%) -->
+            <div id="content-column" class="w-3/4 bg-white rounded-lg shadow-md border border-gray-100 p-6">
+                <div class="flex flex-col items-center">
+                    <!-- Lunch Section -->
+                    <div id="lunch-section" class="w-full mb-12">
+                        <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">Lunch</h1>
+                        <h2 class="text-xl font-semibold text-primary text-center mb-6">Egg Kichuri</h2>
+                        
+                        <!-- Main Dish Image -->
+                        <div id="main-dish-container" class="flex justify-center mb-6">
+                            <div class="relative w-[45%]">
+                                <img class="w-full h-64 object-cover rounded-lg" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/6324ddb4d8-dd5fa71e54ae01c9f96e.png" alt="grilled salmon with lemon butter">
+                                <button class="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-50">
+                                    <i class="text-red-500" data-fa-i2svg=""><svg class="svg-inline--fa fa-heart" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="heart" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"></path></svg></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Side Dishes -->
+                        <div id="side-dishes" class="flex justify-center mb-8">
+                            <div class="grid grid-cols-4 gap-4 max-w-2xl">
+                                <div class="text-center">
+                                    <img class="w-20 h-20 object-cover rounded-lg mx-auto mb-2" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/6f69305a2d-da27a112ba06ef7889dc.png" alt="steamed vegetables">
+                                    <p class="text-sm text-gray-600">Steamed Vegetables</p>
+                                </div>
+                                <div class="text-center">
+                                    <img class="w-20 h-20 object-cover rounded-lg mx-auto mb-2" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/72afd4cdc8-d9c5638b998a76b3c3e7.png" alt="wild rice pilaf">
+                                    <p class="text-sm text-gray-600">Wild Rice Pilaf</p>
+                                </div>
+                                <div class="text-center">
+                                    <img class="w-20 h-20 object-cover rounded-lg mx-auto mb-2" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/920d895be2-74c071f75f279de17829.png" alt="garden salad">
+                                    <p class="text-sm text-gray-600">Garden Salad</p>
+                                </div>
+                                <div class="text-center">
+                                    <img class="w-20 h-20 object-cover rounded-lg mx-auto mb-2" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/2e405866f7-2140d030520dd175d289.png" alt="dinner rolls">
+                                    <p class="text-sm text-gray-600">Dinner Rolls</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Lunch Feedback Section -->
+                        <div id="lunch-feedback" class="max-w-2xl mx-auto">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Feedback</h3>
+                            
+                            <!-- Others' Feedback -->
+                            <div id="lunch-feedback-list" class="space-y-3 mb-4">
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="flex items-center mb-2">
+                                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" alt="User" class="w-6 h-6 rounded-full mr-2">
+                                        <span class="text-sm font-medium text-gray-700">Sarah M.</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600">Absolutely delicious! The salmon was perfectly cooked.</p>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="flex items-center mb-2">
+                                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" alt="User" class="w-6 h-6 rounded-full mr-2">
+                                        <span class="text-sm font-medium text-gray-700">John D.</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600">Great combination with the side dishes!</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Show More Feedbacks Button -->
+                            <div class="text-center mb-4">
+                                <button class="text-primary hover:text-blue-600 text-sm font-medium hover:underline transition-colors">
+                                    Show More Feedbacks
+                                </button>
+                            </div>
+                            
+                            <!-- Feedback Input -->
+                            <div id="lunch-feedback-input" class="flex gap-2">
+                                <input type="text" placeholder="Share your feedback..." class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Snack Section -->
+                    <div id="snack-section" class="w-full">
+                        <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">Snack</h1>
+                        <h2 class="text-xl font-semibold text-primary text-center mb-6">Nuggets and Samosa</h2>
+                        
+                        <!-- Snack Main Image -->
+                        <div id="snack-dish-container" class="flex justify-center mb-8">
+                            <div class="relative w-[45%]">
+                                <img class="w-full h-64 object-cover rounded-lg" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/338790fae7-36bb772cabea0d8b8902.png" alt="evening snack platter">
+                                <button class="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-50">
+                                    <i class="text-red-500" data-fa-i2svg=""><svg class="svg-inline--fa fa-heart" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="heart" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"></path></svg></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Snack Feedback Section -->
+                        <div id="snack-feedback" class="max-w-2xl mx-auto">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Feedback</h3>
+                            
+                            <!-- Others' Feedback -->
+                            <div id="snack-feedback-list" class="space-y-3 mb-4">
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="flex items-center mb-2">
+                                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg" alt="User" class="w-6 h-6 rounded-full mr-2">
+                                        <span class="text-sm font-medium text-gray-700">Emily R.</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600">Perfect for afternoon break. Love the variety!</p>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <div class="flex items-center mb-2">
+                                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-8.jpg" alt="User" class="w-6 h-6 rounded-full mr-2">
+                                        <span class="text-sm font-medium text-gray-700">Mike T.</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600">The samosas were crispy and delicious!</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Show More Feedbacks Button -->
+                            <div class="text-center mb-4">
+                                <button class="text-primary hover:text-blue-600 text-sm font-medium hover:underline transition-colors">
+                                    Show More Feedbacks
+                                </button>
+                            </div>
+                            
+                            <!-- Feedback Input -->
+                            <div id="snack-feedback-input" class="flex gap-2">
+                                <input type="text" placeholder="Share your feedback..." class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                                <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-600">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer id="footer" class="bg-white border-t border-gray-medium mt-6">
+        <div class="container mx-auto px-5 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
+                <div class="">© 2023 DSi Internal Food Menu System</div>
+                <div class="flex space-x-4 mt-2 md:mt-0">
+                    <span class="hover:text-primary cursor-pointer">Dietary Restrictions</span>
+                    <span class="hover:text-primary cursor-pointer">Suggest a Meal</span>
+                    <span class="hover:text-primary cursor-pointer">Contact Cafeteria</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body></html>
