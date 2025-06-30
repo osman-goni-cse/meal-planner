@@ -109,9 +109,9 @@ public class DashboardController {
         if ("breakfast".equalsIgnoreCase(currentMealPeriod)) {
             servingTime = "7:00 AM – 10:00 AM";
         } else if ("lunch".equalsIgnoreCase(currentMealPeriod)) {
-            servingTime = "12:30 PM – 2:00 PM";
+            servingTime = "01:00 PM – 5:00 PM";
         } else if ("snacks".equalsIgnoreCase(currentMealPeriod)) {
-            servingTime = "4:00 PM – 5:00 PM";
+            servingTime = "5:00 PM – 8:00 PM";
         } else {
             servingTime = "";
         }

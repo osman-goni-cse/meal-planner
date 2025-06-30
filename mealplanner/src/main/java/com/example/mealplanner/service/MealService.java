@@ -39,10 +39,10 @@ public class MealService {
         if (!time.isBefore(LocalTime.of(8, 0)) && time.isBefore(LocalTime.of(10, 0))) {
             return "breakfast";
         }
-        if (!time.isBefore(LocalTime.of(13, 0)) && time.isBefore(LocalTime.of(16, 0))) {
+        if (!time.isBefore(LocalTime.of(13, 0)) && time.isBefore(LocalTime.of(17, 0))) {
             return "lunch";
         }
-        if (!time.isBefore(LocalTime.of(16, 0)) && time.isBefore(LocalTime.of(21, 0))) {
+        if (!time.isBefore(LocalTime.of(17, 0)) && time.isBefore(LocalTime.of(20, 0))) {
             return "snacks";
         }
         return null;
