@@ -38,7 +38,7 @@
             <div class="w-full md:w-2/3 bg-white flex flex-col justify-center h-full">
                 <div class="mb-6">
                     <p class="text-lg text-gray-600">
-                        Good afternoon, <span th:text="${#authentication.principal.attributes['name']}">Team</span>
+                        <span th:text="${greeting}">Good Morning</span>, <span th:text="${#authentication.principal.attributes['name']}">Team</span>
                     </p>
                     <h1 class="text-2xl font-bold text-gray-800 mt-1">Today's <span th:text="${topMealPeriod != null ? #strings.capitalize(topMealPeriod) : 'Meal'}">Meal</span></h1>
                 </div>

@@ -20,10 +20,11 @@ public class Feedback {
     private LocalDateTime timestamp;
     private String userName;
     private String userAvatarUrl;
+    private Long dishId;
 
     public Feedback() {}
 
-    public Feedback(User user, LocalDate date, String mealPeriod, String comment, LocalDateTime timestamp, String userName, String userAvatarUrl) {
+    public Feedback(User user, LocalDate date, String mealPeriod, String comment, LocalDateTime timestamp, String userName, String userAvatarUrl, Long dishId) {
         this.user = user;
         this.date = date;
         this.mealPeriod = mealPeriod;
@@ -31,6 +32,7 @@ public class Feedback {
         this.timestamp = timestamp;
         this.userName = userName;
         this.userAvatarUrl = userAvatarUrl;
+        this.dishId = dishId;
     }
 
     // Getters and setters
@@ -50,4 +52,6 @@ public class Feedback {
     public void setUserName(String userName) { this.userName = userName; }
     public String getUserAvatarUrl() { return userAvatarUrl; }
     public void setUserAvatarUrl(String userAvatarUrl) { this.userAvatarUrl = userAvatarUrl; }
+    public Long getDishId() { return dishId; }
+    public void setDishId(Long dishId) { this.dishId = dishId; }
 } 

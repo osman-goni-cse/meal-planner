@@ -1,0 +1,257 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>::-webkit-scrollbar { display: none;}</style>
+    
+    <script>tailwind.config = {
+  "theme": {
+    "extend": {
+      "colors": {
+        "primary": "#0984e3",
+        "accent1": "#fdcb6e",
+        "accent2": "#00b894",
+        "gray": {
+          "light": "#f5f6fa",
+          "medium": "#dfe6e9"
+        }
+      },
+      "fontFamily": {
+        "sans": [
+          "Inter",
+          "sans-serif"
+        ]
+      }
+    }
+  }
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+      body {
+        font-family: 'Inter', sans-serif !important;
+      }
+      
+      /* Preserve Font Awesome icons */
+      .fa, .fas, .far, .fal, .fab {
+        font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+      }
+    </style><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head><body class="font-sans bg-white">
+    <!-- Top Navigation Bar -->
+    <header id="header" class="bg-white shadow-sm fixed top-0 left-0 w-full z-50">
+        <div class="container mx-auto px-5 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="text-primary text-xl" data-fa-i2svg=""><svg class="svg-inline--fa fa-utensils" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="utensils" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><path fill="currentColor" d="M416 0C400 0 288 32 288 176V288c0 35.3 28.7 64 64 64h32V480c0 17.7 14.3 32 32 32s32-14.3 32-32V352 240 32c0-17.7-14.3-32-32-32zM64 16C64 7.8 57.9 1 49.7 .1S34.2 4.6 32.4 12.5L2.1 148.8C.7 155.1 0 161.5 0 167.9c0 45.9 35.1 83.6 80 87.7V480c0 17.7 14.3 32 32 32s32-14.3 32-32V255.6c44.9-4.1 80-41.8 80-87.7c0-6.4-.7-12.8-2.1-19.1L191.6 12.5c-1.8-8-9.3-13.3-17.4-12.4S160 7.8 160 16V150.2c0 5.4-4.4 9.8-9.8 9.8c-5.1 0-9.3-3.9-9.8-9.8V16zm48.3 152l-.3 0-.3 0 .3-.7 .3 .7z"></path></svg></i>
+                    <span class="font-bold text-xl text-gray-800">DSi Menu</span>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <nav class="hidden md:flex items-center space-x-6">
+                        <span class="text-gray-600 hover:text-primary cursor-pointer">Today's Menu</span>
+                        <span class="text-primary font-semibold border-b-2 border-primary pb-1 cursor-pointer">Weekly Menu</span>
+                    </nav>
+                    
+                    <div class="flex items-center space-x-2 cursor-pointer">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                            <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg" alt="User Profile" class="w-full h-full object-cover">
+                        </div>
+                        <i class="text-gray-500 text-xs" data-fa-i2svg=""><svg class="svg-inline--fa fa-chevron-down" aria-hidden="true" focusable="false" data-prefix="fas" data-icon="chevron-down" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"></path></svg></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="container mx-auto pt-20 px-5 pb-10">
+        <div class="flex gap-6">
+            <!-- Left Column - Calendar (25%) -->
+            <div id="calendar-column" class="w-1/4 bg-gray-50 rounded-lg shadow-sm border border-gray-200 p-4">
+                <div id="calendar-header" class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-800">December 2023</h2>
+                    <div class="flex space-x-2">
+                        <button class="p-1 hover:bg-gray-200 rounded transition-colors">
+                            <i class="text-gray-600 text-sm fas fa-chevron-left"></i>
+                        </button>
+                        <button class="p-1 hover:bg-gray-200 rounded transition-colors">
+                            <i class="text-gray-600 text-sm fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-sm">
+                    <!-- Days of week -->
+                    <div class="p-2 text-gray-500 font-medium">S</div>
+                    <div class="p-2 text-gray-500 font-medium">M</div>
+                    <div class="p-2 text-gray-500 font-medium">T</div>
+                    <div class="p-2 text-gray-500 font-medium">W</div>
+                    <div class="p-2 text-gray-500 font-medium">T</div>
+                    <div class="p-2 text-gray-500 font-medium">F</div>
+                    <div class="p-2 text-gray-500 font-medium">S</div>
+                    
+                    <!-- Calendar dates -->
+                    <div class="p-2 text-gray-400">26</div>
+                    <div class="p-2 text-gray-400">27</div>
+                    <div class="p-2 text-gray-400">28</div>
+                    <div class="p-2 text-gray-400">29</div>
+                    <div class="p-2 text-gray-400">30</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">1</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">2</div>
+                    
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">3</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">4</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">5</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">6</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">7</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">8</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">9</div>
+                    
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">10</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">11</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">12</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">13</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">14</div>
+                    <div class="p-2 bg-primary text-white rounded shadow-sm">15</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">16</div>
+                    
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">17</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">18</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">19</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">20</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">21</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">22</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">23</div>
+                    
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">24</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">25</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">26</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">27</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">28</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">29</div>
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">30</div>
+                    
+                    <div class="p-2 text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all">31</div>
+                    <div class="p-2 text-gray-400">1</div>
+                    <div class="p-2 text-gray-400">2</div>
+                    <div class="p-2 text-gray-400">3</div>
+                    <div class="p-2 text-gray-400">4</div>
+                    <div class="p-2 text-gray-400">5</div>
+                    <div class="p-2 text-gray-400">6</div>
+                </div>
+            </div>
+
+            <!-- Right Column - Content (75%) -->
+            <div id="content-column" class="w-3/4 bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex flex-col font-sans">
+    <!-- Dish Tabs -->
+    <div id="dish-tabs" class="flex justify-center items-center space-x-6 sm:space-x-8 mb-6">
+        <button class="tab-button active-tab text-base font-semibold text-gray-900 bg-gray-100 px-4 py-2 rounded-lg shadow-sm">Mejbani Beef</button>
+        <button class="tab-button text-base font-medium text-gray-500 hover:text-gray-900 transition-colors">Pulao</button>
+        <button class="tab-button text-base font-medium text-gray-500 hover:text-gray-900 transition-colors">Borhani</button>
+        <button class="tab-button text-base font-medium text-gray-500 hover:text-gray-900 transition-colors">Nuggets</button>
+    </div>
+
+    <!-- Main Dish and Feedback Area -->
+    <div id="main-dish-area" class="flex-grow flex flex-col lg:flex-row border border-gray-200 rounded-xl overflow-hidden">
+        <!-- Left Column: Dish Image and Info -->
+        <div id="dish-info-column" class="w-full lg:w-[65%] p-6 bg-white">
+            <div id="dish-image-container" class="mb-6">
+                <img class="w-full h-80 object-cover rounded-xl shadow-md" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/c6944d6d0c-5b78e5cd1a7899dd5bc8.png" alt="photo of delicious mejbani beef curry in a traditional clay pot, top-down view, garnished with fresh cilantro and fried onions, rustic wooden background, food photography">
+            </div>
+            <div id="dish-details">
+                <h1 class="text-5xl font-bold text-gray-800 tracking-tight">Mejbani Beef</h1>
+                <p class="text-lg text-gray-600 mt-2">
+                    A traditional, rich and spicy beef curry, slow-cooked to perfection.
+                </p>
+            </div>
+        </div>
+
+        <!-- Right Column: Feedback -->
+        <div id="feedback-column" class="w-full lg:w-[35%] bg-gray-50/50 border-l border-gray-200 flex flex-col p-6">
+            <div id="comments-list" class="flex-grow space-y-5 pr-2 -mr-2 overflow-y-auto h-64">
+                <!-- Comment 1 -->
+                <div class="flex items-start space-x-3">
+                    <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" alt="Osman" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow">
+                    <div>
+                        <p class="font-semibold text-gray-800 text-sm">Osman</p>
+                        <p class="text-gray-600 text-sm">This dish is very awesome.</p>
+                    </div>
+                </div>
+                <!-- Comment 2 -->
+                <div class="flex items-start space-x-3">
+                    <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-9.jpg" alt="Navid" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow">
+                    <div>
+                        <p class="font-semibold text-gray-800 text-sm">Navid</p>
+                        <p class="text-gray-600 text-sm">Absolutely delicious! The best I've had.</p>
+                    </div>
+                </div>
+                <!-- Comment 3 -->
+                <div class="flex items-start space-x-3">
+                    <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-4.jpg" alt="Shuvo" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow">
+                    <div>
+                        <p class="font-semibold text-gray-800 text-sm">Shuvo</p>
+                        <p class="text-gray-600 text-sm">A must-try for everyone.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <div class="flex items-center justify-between mb-4">
+                     <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-1.5 text-gray-600">
+                            <i class="fa-regular fa-heart text-lg text-red-500"></i>
+                            <span class="font-medium text-sm">129</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5 text-gray-600">
+                            <i class="fa-regular fa-comment text-lg text-blue-500"></i>
+                            <span class="font-medium text-sm">235</span>
+                        </div>
+                    </div>
+                    <button class="text-sm font-semibold text-primary hover:underline">Load more</button>
+                </div>
+               
+                <div id="feedback-form" class="flex items-center space-x-2">
+                    <input type="text" placeholder="Share your thoughts..." class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition">
+                    <button class="bg-gray-800 text-white font-semibold px-4 py-2 rounded-lg hover:bg-gray-900 transition-colors text-sm">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer id="footer" class="bg-white border-t border-gray-medium mt-6">
+        <div class="container mx-auto px-5 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
+                <div class="">© 2023 DSi Internal Food Menu System</div>
+                <div class="flex space-x-4 mt-2 md:mt-0">
+                    <span class="hover:text-primary cursor-pointer">Dietary Restrictions</span>
+                    <span class="hover:text-primary cursor-pointer">Suggest a Meal</span>
+                    <span class="hover:text-primary cursor-pointer">Contact Cafeteria</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body></html>

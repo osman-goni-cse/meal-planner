@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,6 +31,7 @@ public class WeeklyMealFeedbackController {
     @GetMapping("/weekly-feedback")
     public String weeklyFeedback(@RequestParam(value = "date", required = false)
                                  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                 @RequestParam(value = "dish", required = false) Integer dishIndex,
                                  Model model,
                                  @AuthenticationPrincipal OAuth2User oauth2User) {
         LocalDate selectedDate = (date != null) ? date : LocalDate.now();
@@ -54,52 +56,101 @@ public class WeeklyMealFeedbackController {
         model.addAttribute("prevMonthDate", selectedDate.minusMonths(1).withDayOfMonth(1));
         model.addAttribute("nextMonthDate", selectedDate.plusMonths(1).withDayOfMonth(1));
 
-        // Meal periods to display (e.g., lunch, snacks)
+        // Gather all dishes for the selected date (across all meal periods)
         List<String> mealPeriods = Arrays.asList("lunch", "snacks");
-        List<Map<String, Object>> mealBlocks = new ArrayList<>();
+        List<Dish> allDishes = new ArrayList<>();
+        Map<Long, String> dishToMealPeriod = new HashMap<>();
         for (String mealPeriod : mealPeriods) {
-            Map<String, Object> mealBlock = new HashMap<>();
-            mealBlock.put("mealPeriod", mealPeriod);
-            mealBlock.put("mealPeriodDisplay", mealPeriod.substring(0, 1).toUpperCase() + mealPeriod.substring(1));
             List<Dish> dishes = mealService.getDishesForMeal(mealPeriod, selectedDate);
-            Dish mainDish = dishes.stream().filter(d -> "Main Course".equalsIgnoreCase(d.getCategory())).findFirst().orElse(dishes.isEmpty() ? null : dishes.get(0));
-            mealBlock.put("mainDishName", mainDish != null ? mainDish.getName() : "");
-            mealBlock.put("mainDishImageUrl", mainDish != null ? mainDish.getImageUrl() : "");
-            mealBlock.put("mainDishUrl", mainDish != null ? ("/dishes/" + mainDish.getId()) : null);
-            mealBlock.put("sideDishes", dishes.stream().filter(d -> !d.equals(mainDish)).toList());
-            // Feedbacks
+            for (Dish d : dishes) {
+                allDishes.add(d);
+                dishToMealPeriod.put(d.getId(), mealPeriod);
+            }
+        }
+
+        // Build dish DTOs for the view
+        List<Map<String, Object>> dishDTOs = new ArrayList<>();
+        for (Dish dish : allDishes) {
+            Map<String, Object> dto = new HashMap<>();
+            dto.put("id", dish.getId());
+            dto.put("name", dish.getName());
+            dto.put("imageUrl", dish.getImageUrl());
+            dto.put("description", dish.getDescription());
+            String mealPeriod = dishToMealPeriod.get(dish.getId());
+            // Feedbacks for this dish (by date and meal period, and dish id if available)
             List<Feedback> feedbacks = feedbackRepository.findByDateAndMealPeriodOrderByTimestampAsc(selectedDate, mealPeriod);
             List<Map<String, Object>> feedbackList = new ArrayList<>();
+            int commentsCount = 0;
             for (Feedback f : feedbacks) {
-                Map<String, Object> fb = new HashMap<>();
-                fb.put("userName", f.getUserName());
-                fb.put("userAvatarUrl", f.getUserAvatarUrl());
-                fb.put("comment", f.getComment());
-                feedbackList.add(fb);
+                if (f.getDishId() != null && f.getDishId().equals(dish.getId())) {
+                    Map<String, Object> fb = new HashMap<>();
+                    fb.put("userName", f.getUserName());
+                    fb.put("userAvatarUrl", f.getUserAvatarUrl());
+                    fb.put("comment", f.getComment());
+                    feedbackList.add(fb);
+                    commentsCount++;
+                }
             }
-            mealBlock.put("feedbacks", feedbackList);
-            mealBlock.put("hasMoreFeedbacks", false); // Implement pagination if needed
-            mealBlocks.add(mealBlock);
+            dto.put("feedbacks", feedbackList);
+            dto.put("commentsCount", commentsCount);
+            // Likes (if you have a like system, otherwise set to 0)
+            dto.put("likes", 0); // TODO: Replace with actual like count if available
+            dishDTOs.add(dto);
         }
-        model.addAttribute("mealBlocks", mealBlocks);
+
+        // Determine selected dish
+        int selectedDishIndex = (dishIndex != null && dishIndex >= 0 && dishIndex < dishDTOs.size()) ? dishIndex : 0;
+        Map<String, Object> selectedDish = dishDTOs.isEmpty() ? null : dishDTOs.get(selectedDishIndex);
+        model.addAttribute("dishes", dishDTOs);
+        model.addAttribute("selectedDish", selectedDish);
+        model.addAttribute("selectedDishIndex", selectedDishIndex);
         return "weekly-meal-feedback";
     }
 
     @PostMapping("/weekly-feedback/feedback")
     public String submitFeedback(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-                                 @RequestParam("mealPeriod") String mealPeriod,
+                                 @RequestParam("dishId") Long dishId,
                                  @RequestParam("comment") String comment,
-                                 @AuthenticationPrincipal OAuth2User oauth2User) {
+                                 @AuthenticationPrincipal OAuth2User oauth2User,
+                                 RedirectAttributes redirectAttributes) {
+        // Find all dishes for the date to determine the dish index
+        List<String> mealPeriods = Arrays.asList("lunch", "snacks");
+        List<Dish> allDishes = new ArrayList<>();
+        for (String mp : mealPeriods) {
+            List<Dish> dishes = mealService.getDishesForMeal(mp, date);
+            allDishes.addAll(dishes);
+        }
+        int dishIndex = 0;
+        for (int i = 0; i < allDishes.size(); i++) {
+            if (allDishes.get(i).getId().equals(dishId)) {
+                dishIndex = i;
+                break;
+            }
+        }
+        if (comment == null || comment.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Comment cannot be empty.");
+            return "redirect:/weekly-feedback?date=" + date + "&dish=" + dishIndex;
+        }
         if (oauth2User != null) {
             String email = oauth2User.getAttribute("email");
             User user = userRepository.findByEmail(email).orElse(null);
             String userName = oauth2User.getAttribute("name");
             String userAvatarUrl = oauth2User.getAttribute("picture");
-            if (user != null && comment != null && !comment.trim().isEmpty()) {
-                Feedback feedback = new Feedback(user, date, mealPeriod, comment.trim(), LocalDateTime.now(), userName, userAvatarUrl);
-                feedbackRepository.save(feedback);
+            // Find mealPeriod for this dishId and date
+            String mealPeriod = null;
+            for (String mp : mealPeriods) {
+                List<Dish> dishes = mealService.getDishesForMeal(mp, date);
+                for (Dish d : dishes) {
+                    if (d.getId().equals(dishId)) {
+                        mealPeriod = mp;
+                        break;
+                    }
+                }
+                if (mealPeriod != null) break;
             }
+            Feedback feedback = new Feedback(user, date, mealPeriod, comment.trim(), LocalDateTime.now(), userName, userAvatarUrl, dishId);
+            feedbackRepository.save(feedback);
         }
-        return "redirect:/weekly-feedback?date=" + date;
+        return "redirect:/weekly-feedback?date=" + date + "&dish=" + dishIndex;
     }
 } 

@@ -46,6 +46,9 @@ public class DashboardController {
         LocalTime now = LocalTime.now();
         String currentMealPeriod = mealService.getCurrentMealPeriod(now);
 
+        // Add time-based greeting
+        model.addAttribute("greeting", getTimeBasedGreeting(now));
+
         // Determine top and bottom meal periods
         String topMealPeriod = currentMealPeriod;
         String bottomMealPeriod = null;
@@ -105,16 +108,10 @@ public class DashboardController {
         model.addAttribute("bottomMealDescription", bottomMeal.description);
 
         // Serving time string based on meal period
-        String servingTime = "";
-        if ("breakfast".equalsIgnoreCase(currentMealPeriod)) {
-            servingTime = "7:00 AM – 10:00 AM";
-        } else if ("lunch".equalsIgnoreCase(currentMealPeriod)) {
-            servingTime = "01:00 PM – 5:00 PM";
-        } else if ("snacks".equalsIgnoreCase(currentMealPeriod)) {
+        String servingTime = "01:00 PM – 5:00 PM"; // Default to lunch time
+         if ("snacks".equalsIgnoreCase(currentMealPeriod)) {
             servingTime = "5:00 PM – 8:00 PM";
-        } else {
-            servingTime = "";
-        }
+        } 
         model.addAttribute("servingTime", servingTime);
 
         model.addAttribute("today", today);
@@ -143,5 +140,16 @@ public class DashboardController {
     private String getMealInfo(LocalTime time, String mealPeriod) {
         if (mealPeriod == null) return "No meal being served right now";
         return mealPeriod.substring(0, 1).toUpperCase() + mealPeriod.substring(1) + " Time - " + time.getHour() + ":" + String.format("%02d", time.getMinute());
+    }
+
+    private String getTimeBasedGreeting(LocalTime now) {
+        int hour = now.getHour();
+        if (hour < 12) {
+            return "Good Morning";
+        } else if (hour < 18) {
+            return "Good Afternoon";
+        } else {
+            return "Good Evening";
+        }
     }
 } 
