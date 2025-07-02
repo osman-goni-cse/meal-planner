@@ -60,12 +60,13 @@
                            "
                            th:classappend="
                                 ${day.selected} ? 'bg-primary text-white rounded-full font-bold ring-2 ring-primary' :
-                                (day.inMonth ? 'text-gray-800 hover:bg-primary/10 hover:rounded-full cursor-pointer' : 'text-gray-400 hover:bg-primary/10 hover:rounded-full cursor-pointer')
+                                (${day.inMonth?.toString() == 'true'} ? 'text-gray-800 hover:bg-primary/10 hover:rounded-full cursor-pointer' : 'text-gray-400 hover:bg-primary/10 hover:rounded-full cursor-pointer')
                            ">
                         </a>
                     </div>
                 </div>
             </div>
+            
             <!-- Content Column -->
             <div id="content-column" class="w-3/4 bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex flex-col font-sans">
                 <!-- Dish Tabs -->
