@@ -73,6 +73,9 @@ public class DishController {
         logger.info("Dish management accessed by user: {}", oauth2User != null ? oauth2User.getAttribute("email") : "anonymous");
         List<Dish> dishes = dishRepository.findAll();
         model.addAttribute("dishes", dishes);
+        model.addAttribute("dish", new Dish());
+        model.addAttribute("categories", CATEGORIES);
+        model.addAttribute("dietaryTags", DIETARY_TAGS);
         model.addAttribute("pageTitle", "Dish Management");
         model.addAttribute("dishCount", dishes.size());
         model.addAttribute("currentPath", request.getRequestURI());
