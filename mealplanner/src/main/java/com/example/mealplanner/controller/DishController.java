@@ -15,7 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -69,12 +69,13 @@ public class DishController {
     }
 
     @GetMapping("/dishes")
-    public String listDishes(Model model, @AuthenticationPrincipal OAuth2User oauth2User) {
+    public String listDishes(Model model, @AuthenticationPrincipal OAuth2User oauth2User, HttpServletRequest request) {
         logger.info("Dish management accessed by user: {}", oauth2User != null ? oauth2User.getAttribute("email") : "anonymous");
         List<Dish> dishes = dishRepository.findAll();
         model.addAttribute("dishes", dishes);
         model.addAttribute("pageTitle", "Dish Management");
         model.addAttribute("dishCount", dishes.size());
+        model.addAttribute("currentPath", request.getRequestURI());
         return "dish-management";
     }
 

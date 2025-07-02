@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}"></head>
+<body class="font-sans bg-gray-50 flex flex-col min-h-screen">
+    <div th:replace="fragments/layout :: sidebar"></div>
+    <div class="flex-1 md:ml-64">
+        <div th:replace="fragments/layout :: topnav"></div>
+        <main class="overflow-y-auto h-full">
+
+            <!-- Filters Section -->
+            <section class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div class="flex flex-col sm:flex-row gap-4 flex-1">
+                        <div class="relative flex-1 max-w-md">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" placeholder="Search comments or dishes..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        
+                        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="">Sort by</option>
+                            <option value="most-liked">Most Liked</option>
+                            <option value="most-comments">Most Comments</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
+                            <i class="fa-solid fa-filter mr-2"></i>
+                            <span>Clear Filters</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Most Commented Dishes -->
+            <div class="bg-white rounded-lg shadow-sm mb-8" id="top-dishes-section">
+                <div class="p-6 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800">Most Commented Dishes</h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div th:each="dish : ${mostCommentedDishes}" class="relative rounded-xl overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1">
+                            <img class="w-full h-80 object-cover" th:src="${dish.imageUrl}" th:alt="${dish.name}">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                            <div class="absolute bottom-0 left-0 p-4 w-full text-white">
+                                <h4 class="font-bold text-lg truncate mb-2" th:text="${dish.name}">Dish Name</h4>
+                                <div class="flex items-center justify-between text-sm">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="flex items-center space-x-1">
+                                            <i class="fa-regular fa-heart"></i>
+                                            <span th:text="${dish.likes}">0</span>
+                                        </div>
+                                        <div class="flex items-center space-x-1">
+                                            <i class="fa-regular fa-comment"></i>
+                                            <span th:text="${dish.commentsCount}">0</span>
+                                        </div>
+                                    </div>
+                                    <span class="text-white hover:underline text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">View Comments</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <footer th:replace="fragments/layout :: footer-scripts"></footer>
+</body>
+</html>

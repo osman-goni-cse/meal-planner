@@ -159,7 +159,7 @@ public class WeeklyPlanController {
             }
             weekPlan.put(d, meals);
         }
-
+        model.addAttribute("currentPath", "/weekly-plan");
         model.addAttribute("weekStart", weekStart);
         model.addAttribute("weekEnd", weekEnd);
         model.addAttribute("weekDays", weekDays);

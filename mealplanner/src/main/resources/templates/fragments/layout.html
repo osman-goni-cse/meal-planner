@@ -64,26 +64,24 @@
             <ul>
                 <!-- Admin-only navigation items -->
                 <li class="mb-2" sec:authorize="hasAuthority('ROLE_ADMIN')">
-                    <a th:href="@{/weekly-plan}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
+                    <a th:href="@{/weekly-plan}" class="flex items-center px-4 py-3 hover:bg-slate-600 cursor-pointer transition-colors"
+                    th:classappend="${currentPath.startsWith('/weekly-plan')} ? 'bg-slate-600 font-semibold' : ''">
                         <i class="fa-solid fa-calendar-week w-6 text-center"></i>
                         <span class="ml-3 hidden md:block">Manage Weekly Plan</span>
                     </a>
                 </li>
                 <li class="mb-2" sec:authorize="hasAuthority('ROLE_ADMIN')">
-                    <a th:href="@{/dishes}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
+                    <a th:href="@{/dishes}" class="flex items-center px-4 py-3 hover:bg-slate-600 cursor-pointer transition-colors"
+                    th:classappend="${currentPath.startsWith('/dishes')} ? 'bg-slate-600 font-semibold' : ''">
                         <i class="fa-solid fa-bowl-food w-6 text-center"></i>
                         <span class="ml-3 hidden md:block">Dish Management</span>
                     </a>
                 </li>
-                <li class="mb-2" sec:authorize="hasAuthority('ROLE_ADMIN')">
-                    <a th:href="@{/dishes/new}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
-                        <i class="fa-solid fa-plus w-6 text-center"></i>
-                        <span class="ml-3 hidden md:block">Add New Dish</span>
-                    </a>
-                </li>
                 
                 <li class="mb-2">
-                    <a href="#" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors opacity-50">
+                    <a th:href="@{/review-comments}"
+                       class="flex items-center px-4 py-3 hover:bg-slate-600 cursor-pointer transition-colors"
+                       th:classappend="${currentPath.startsWith('/review-comments')} ? 'bg-slate-600 font-semibold' : ''">
                         <i class="fa-solid fa-comment-dots w-6 text-center"></i>
                         <span class="ml-3 hidden md:block">Review Comments</span>
                     </a>
@@ -101,6 +99,11 @@
             <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium flex items-center" th:if="${dishCount != null}">
                 <i class="fa-solid fa-bowl-food mr-2"></i>
                 <span th:text="${dishCount} + ' Total Dishes'"></span>
+            </div>
+
+            <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium flex items-center" th:if="${commentCount != null}">
+                <i class="fa-solid fa-comment-dots mr-2"></i>
+                <span th:text="${commentCount} + ' Total Comments'"></span>
             </div>
             <div class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium flex items-center" th:if="${mealInfo != null}">
                 <i class="fa-regular fa-clock mr-2"></i>
