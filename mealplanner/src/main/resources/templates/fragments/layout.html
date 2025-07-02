@@ -53,7 +53,7 @@
     </script>
 </head>
 <body>
-    <aside th:fragment="sidebar" class="w-16 md:w-64 bg-primary text-white flex flex-col fixed h-full">
+    <aside th:fragment="sidebar" class="w-16 md:w-64 bg-slate-800 text-white flex flex-col fixed h-full">
         <div class="p-4 flex items-center justify-center md:justify-start">
             <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
                 <i class="fa-solid fa-utensils text-primary"></i>
@@ -62,18 +62,6 @@
         </div>
         <nav class="mt-8">
             <ul>
-                <li class="mb-2">
-                    <a th:href="@{/}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
-                        <i class="fa-solid fa-home w-6 text-center"></i>
-                        <span class="ml-3 hidden md:block">Home</span>
-                    </a>
-                </li>
-                <li class="mb-2">
-                    <a th:href="@{/dashboard}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
-                        <i class="fa-solid fa-clock w-6 text-center"></i>
-                        <span class="ml-3 hidden md:block">Today's Menu</span>
-                    </a>
-                </li>
                 <!-- Admin-only navigation items -->
                 <li class="mb-2" sec:authorize="hasAuthority('ROLE_ADMIN')">
                     <a th:href="@{/weekly-plan}" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors">
@@ -93,12 +81,7 @@
                         <span class="ml-3 hidden md:block">Add New Dish</span>
                     </a>
                 </li>
-                <li class="mb-2">
-                    <a href="#" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors opacity-50">
-                        <i class="fa-solid fa-chart-pie w-6 text-center"></i>
-                        <span class="ml-3 hidden md:block">Food Stats</span>
-                    </a>
-                </li>
+                
                 <li class="mb-2">
                     <a href="#" class="flex items-center px-4 py-3 hover:bg-blue-700 cursor-pointer transition-colors opacity-50">
                         <i class="fa-solid fa-comment-dots w-6 text-center"></i>
@@ -125,12 +108,7 @@
             </div>
         </div>
         <div class="flex items-center">
-            <div class="relative mr-4">
-                <button class="flex items-center text-gray-700 hover:text-primary">
-                    <i class="fa-regular fa-bell text-lg"></i>
-                    <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">3</span>
-                </button>
-            </div>
+            
             <div sec:authorize="isAuthenticated()" class="relative" id="user-dropdown">
                 <button id="user-dropdown-button" onclick="toggleDropdown()" class="flex items-center text-gray-700 hover:text-primary transition-colors">
                     <img th:src="${#authentication.principal.attributes['picture']}" class="w-8 h-8 rounded-full mr-2" alt="User Avatar">
