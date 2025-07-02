@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&display=swap">
     <style>body { font-family: 'Inter', sans-serif !important; }</style>
 </head>
-<body class="font-sans bg-white">
+<body class="font-sans bg-white flex flex-col min-h-screen">
     <!-- Top Navigation Bar -->
     <header class="bg-white shadow-sm fixed top-0 left-0 w-full z-50">
         <div class="container mx-auto px-5 py-4">
@@ -28,7 +28,7 @@
             </div>
         </div>
     </header>
-    <main id="main-content" class="container mx-auto pt-20 px-5 pb-10">
+    <main id="main-content" class="container mx-auto pt-20 px-5 pb-10 flex-grow">
         <div class="flex gap-6 items-start">
             <!-- Calendar Column -->
             <div id="calendar-column" class="w-1/4 bg-gray-50 rounded-lg shadow-sm border border-gray-200 p-5">
@@ -44,6 +44,7 @@
                     </div>
                 </div>
                 <div class="grid grid-cols-7 gap-1 text-center text-sm">
+                    <!-- Days of week -->
                     <div class="p-2 text-gray-500 font-medium">S</div>
                     <div class="p-2 text-gray-500 font-medium">M</div>
                     <div class="p-2 text-gray-500 font-medium">T</div>
@@ -51,11 +52,17 @@
                     <div class="p-2 text-gray-500 font-medium">T</div>
                     <div class="p-2 text-gray-500 font-medium">F</div>
                     <div class="p-2 text-gray-500 font-medium">S</div>
-                    <div th:each="day,iter : ${calendarDays}"
-                         class="p-2"
-                         th:classappend="${day.selected} ? 'bg-primary text-white rounded shadow-sm font-bold ring-2 ring-primary' : (day.inMonth ? 'text-gray-800 hover:bg-white hover:shadow-sm rounded cursor-pointer transition-all' : 'text-gray-300')">
-                        <a th:if="${day.inMonth}" th:href="@{/weekly-feedback(date=${day.date})}" th:text="${day.dayOfMonth}"></a>
-                        <span th:if="${!day.inMonth}" th:text="${day.dayOfMonth}"></span>
+                    <!-- Calendar dates -->
+                    <div th:each="day,iter : ${calendarDays}">
+                        <a th:href="@{/weekly-feedback(date=${day.date})}"
+                           th:text="${day.dayOfMonth}"
+                           class="block w-8 h-8 mx-auto flex items-center justify-center transition-all duration-150
+                           "
+                           th:classappend="
+                                ${day.selected} ? 'bg-primary text-white rounded-full font-bold ring-2 ring-primary' :
+                                (day.inMonth ? 'text-gray-800 hover:bg-primary/10 hover:rounded-full cursor-pointer' : 'text-gray-400 hover:bg-primary/10 hover:rounded-full cursor-pointer')
+                           ">
+                        </a>
                     </div>
                 </div>
             </div>
@@ -70,7 +77,7 @@
                     </button>
                 </div>
                 <!-- Main Dish and Feedback Area -->
-                <div id="main-dish-area" class="flex-grow flex flex-col lg:flex-row border border-gray-200 rounded-xl overflow-hidden">
+                <div th:if="${selectedDish != null}" id="main-dish-area" class="flex-grow flex flex-col lg:flex-row border border-gray-200 rounded-xl overflow-hidden">
                     <!-- Left Column: Dish Image and Info -->
                     <div id="dish-info-column" class="w-full lg:w-[65%] p-6 bg-white">
                         <div id="dish-image-container" class="mb-6">
@@ -97,7 +104,7 @@
                             <div th:if="${error}" class="mb-3 p-2 bg-red-100 border border-red-300 text-red-700 rounded text-sm">
                                 <span th:text="${error}">Comment cannot be empty.</span>
                             </div>
-                            <div class="flex items-center justify-between mb-4">
+                            <div th:if="${!selectedDish.isEmpty() && !selectedDate.isAfter(T(java.time.LocalDate).now())}" class="flex items-center justify-between mb-4">
                                 <div class="flex items-center space-x-4">
                                     <div class="flex items-center space-x-1.5 text-gray-600">
                                         <i class="fa-regular fa-heart text-lg text-red-500"></i>
@@ -110,7 +117,7 @@
                                 </div>
                                 <button class="text-sm font-semibold text-primary hover:underline">Load more</button>
                             </div>
-                            <div id="feedback-form" class="flex items-center space-x-2">
+                            <div th:if="${!selectedDate.isAfter(T(java.time.LocalDate).now())}" id="feedback-form" class="flex items-center space-x-2">
                                 <form th:action="@{/weekly-feedback/feedback}" method="post" class="flex w-full space-x-2">
                                     <input type="hidden" name="date" th:value="${selectedDate}">
                                     <input type="hidden" name="dishId" th:value="${selectedDish.id}">
@@ -120,6 +127,9 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div th:if="${selectedDish == null}" class="text-center text-gray-500 py-10">
+                    No dishes available for this date.
                 </div>
             </div>
         </div>
