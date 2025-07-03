@@ -75,7 +75,7 @@ public class DishController {
         model.addAttribute("dishes", dishes);
         model.addAttribute("dish", new Dish());
         model.addAttribute("categories", CATEGORIES);
-        model.addAttribute("dietaryTags", DIETARY_TAGS);
+        model.addAttribute("dietaryTags", DIETARY_TAGS); 
         model.addAttribute("pageTitle", "Dish Management");
         model.addAttribute("dishCount", dishes.size());
         model.addAttribute("currentPath", request.getRequestURI());

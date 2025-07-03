@@ -91,13 +91,7 @@
                     <!-- Right Column: Feedback -->
                     <div id="feedback-column" class="w-full lg:w-[35%] bg-gray-50/50 border-l border-gray-200 flex flex-col p-6">
                         <div id="comments-list" class="flex-grow space-y-5 pr-2 -mr-2 overflow-y-auto h-64">
-                            <div th:each="feedback : ${selectedDish.feedbacks}" class="flex items-start space-x-3">
-                                <img th:src="${feedback.userAvatarUrl}" th:alt="${feedback.userName}" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow">
-                                <div>
-                                    <p class="font-semibold text-gray-800 text-sm" th:text="${feedback.userName}">User</p>
-                                    <p class="text-gray-600 text-sm" th:text="${feedback.comment}">Comment</p>
-                                </div>
-                            </div>
+                            <!-- Comments will be loaded here by JS -->
                         </div>
                         <div class="mt-4 pt-4 border-t border-gray-200">
                             <!-- Error message -->
@@ -115,7 +109,7 @@
                                         <span class="font-medium text-sm" th:text="${selectedDish.commentsCount}">0</span>
                                     </div>
                                 </div>
-                                <button class="text-sm font-semibold text-primary hover:underline">Load more</button>
+                                <button id="load-more-comments-btn" class="text-sm font-semibold text-primary hover:underline hidden">Load more comments</button>
                             </div>
                             <div th:if="${!selectedDate.isAfter(T(java.time.LocalDate).now())}" id="feedback-form" class="flex items-center space-x-2">
                                 <form th:action="@{/weekly-feedback/feedback}" method="post" class="flex w-full space-x-2">
@@ -147,5 +141,74 @@
             </div>
         </div>
     </footer>
+    <script th:inline="javascript">
+    /*<![CDATA[*/
+    let currentPage = 0;
+    const pageSize = 5;
+    let currentDishId = /*[[${selectedDish != null} ? ${selectedDish.id} : 0]]*/ 0;
+    
+    let currentDate = /*[[${selectedDate}]]*/ '';
+
+    async function loadComments(reset = false) {
+        const commentsList = document.getElementById('comments-list');
+        if (reset) commentsList.innerHTML = '';
+        if (!currentDishId || !currentDate) return;
+        // Remove quotes if present
+        let dateParam = currentDate.replace(/^['"]|['"]$/g, '');
+        const res = await fetch(`/weekly-feedback/comments?dishId=${currentDishId}&date=${dateParam}&page=${currentPage}&size=${pageSize}`);
+        const data = await res.json();
+        if (!data.comments || (data.comments.length === 0 && currentPage === 0)) {
+            commentsList.innerHTML = '<div class="text-gray-500 text-sm">No comments yet.</div>';
+        } else {
+            data.comments.forEach(comment => {
+                commentsList.innerHTML += `
+                    <div class="flex items-start space-x-3">
+                        <img src="${comment.avatarUrl}" alt="${comment.userName}" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow">
+                        <div>
+                            <p class="font-semibold text-gray-800 text-sm">${comment.userName}</p>
+                            <p class="text-gray-600 text-sm">${comment.text}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        // Show/hide Load More button
+        const loadMoreBtn = document.getElementById('load-more-comments-btn');
+        if (data.hasMore) {
+            loadMoreBtn.classList.remove('hidden');
+        } else {
+            loadMoreBtn.classList.add('hidden');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('comments-list') && currentDishId && currentDate) {
+            currentPage = 0;
+            loadComments(true);
+        }
+    });
+
+    document.getElementById('load-more-comments-btn').onclick = function() {
+        currentPage++;
+        loadComments(false);
+    };
+    /*]]>*/
+    </script>
+    <style>
+        /* Custom scrollbar for comments list */
+        #comments-list {
+            scrollbar-width: thin;
+            scrollbar-color: #3B82F6 #F3F4F6;
+        }
+        #comments-list::-webkit-scrollbar {
+            width: 8px;
+            background: #F3F4F6;
+            border-radius: 8px;
+        }
+        #comments-list::-webkit-scrollbar-thumb {
+            background: #3B82F6;
+            border-radius: 8px;
+        }
+        </style>
 </body>
 </html> 

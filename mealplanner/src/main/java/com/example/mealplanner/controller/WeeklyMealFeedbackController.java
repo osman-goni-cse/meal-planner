@@ -14,6 +14,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.example.mealplanner.dto.DishCommentDTO;
+import java.util.stream.Collectors;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -152,5 +154,32 @@ public class WeeklyMealFeedbackController {
             feedbackRepository.save(feedback);
         }
         return "redirect:/weekly-feedback?date=" + date + "&dish=" + dishIndex;
+    }
+
+    @GetMapping("/weekly-feedback/comments")
+    @ResponseBody
+    public Map<String, Object> getWeeklyFeedbackComments(
+        @RequestParam("dishId") Long dishId,
+        @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "5") int size
+    ) {
+        List<Feedback> all = feedbackRepository.findAll().stream()
+            .filter(fb -> dishId.equals(fb.getDishId()) && date.equals(fb.getDate()))
+            .collect(Collectors.toList());
+        int from = page * size;
+        int to = Math.min(from + size, all.size());
+        List<DishCommentDTO> comments = all.subList(from, to).stream().map(fb -> {
+            DishCommentDTO dto = new DishCommentDTO();
+            dto.setUserName(fb.getUserName() != null ? fb.getUserName() : "Anonymous");
+            dto.setAvatarUrl(fb.getUserAvatarUrl() != null ? fb.getUserAvatarUrl() : "/static/default-avatar.png");
+            dto.setText(fb.getComment());
+            return dto;
+        }).collect(Collectors.toList());
+        boolean hasMore = to < all.size();
+        Map<String, Object> result = new HashMap<>();
+        result.put("comments", comments);
+        result.put("hasMore", hasMore);
+        return result;
     }
 } 
