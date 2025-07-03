@@ -10,6 +10,7 @@ import com.example.mealplanner.model.Feedback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import com.example.mealplanner.service.DishReactionService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,9 @@ public class CommentService {
     @Autowired
     private DishRepository dishRepository;
 
+    @Autowired
+    private DishReactionService dishReactionService;
+
     public List<DishCommentStatsDTO> getMostCommentedDishes(int limit) {
         List<Object[]> results = feedbackRepository.findDishCommentStats(PageRequest.of(0, limit));
         List<DishCommentStatsDTO> dtos = new ArrayList<>();
@@ -34,7 +38,7 @@ public class CommentService {
             dto.setName((String) row[1]);
             dto.setImageUrl((String) row[2]);
             dto.setCommentsCount(((Number) row[3]).intValue());
-            dto.setLikes(0); // If you have likes, set here
+            dto.setReactions(dishReactionService.getReactions(dto.getId()));
             dtos.add(dto);
         }
         return dtos;

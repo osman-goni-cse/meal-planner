@@ -4,7 +4,7 @@ public class DishCommentStatsDTO {
     private Long id;
     private String name;
     private String imageUrl;
-    private int likes;
+    private long reactions;
     private int commentsCount;
 
     // Getters and setters
@@ -14,8 +14,8 @@ public class DishCommentStatsDTO {
     public void setName(String name) { this.name = name; }
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-    public int getLikes() { return likes; }
-    public void setLikes(int likes) { this.likes = likes; }
+    public long getReactions() { return reactions; }
+    public void setReactions(long reactions) { this.reactions = reactions; }
     public int getCommentsCount() { return commentsCount; }
     public void setCommentsCount(int commentsCount) { this.commentsCount = commentsCount; }
 } 

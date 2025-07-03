@@ -38,7 +38,7 @@
                 </div>
                 <div class="p-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div th:each="dish : ${mostCommentedDishes}" class="relative rounded-xl overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 dish-card" th:attr="data-dish-id=${dish.id}" onclick="openDishModal(this)">
+                        <div th:each="dish : ${mostCommentedDishes}" class="relative rounded-xl overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 dish-card cursor-pointer" th:attr="data-dish-id=${dish.id}" onclick="openDishModal(this)">
                             <img class="w-full h-80 object-cover" th:src="${dish.imageUrl}" th:alt="${dish.name}">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                             <div class="absolute bottom-0 left-0 p-4 w-full text-white">
@@ -54,9 +54,10 @@
                                             <span th:text="${dish.commentsCount}">0</span>
                                         </div>
                                     </div>
-                                    <span class="text-white hover:underline text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">View Comments</span>
+                                    <span class="text-white bg-primary/80 rounded px-2 py-1 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer absolute top-4 right-4 shadow-lg">Click for Details</span>
                                 </div>
                             </div>
+                            <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                         </div>
                     </div>
                 </div>
