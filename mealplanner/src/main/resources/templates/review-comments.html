@@ -38,7 +38,7 @@
                 </div>
                 <div class="p-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div th:each="dish : ${mostCommentedDishes}" class="relative rounded-xl overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1">
+                        <div th:each="dish : ${mostCommentedDishes}" class="relative rounded-xl overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 dish-card" th:attr="data-dish-id=${dish.id}" onclick="openDishModal(this)">
                             <img class="w-full h-80 object-cover" th:src="${dish.imageUrl}" th:alt="${dish.name}">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                             <div class="absolute bottom-0 left-0 p-4 w-full text-white">
@@ -64,5 +64,112 @@
         </main>
     </div>
     <footer th:replace="fragments/layout :: footer-scripts"></footer>
+    <!-- Modal HTML (dynamic, hidden by default) -->
+    <div id="dish-modal" style="display:none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+        <div class="flex flex-col w-full max-w-4xl h-[550px] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-3 border-b border-gray-200 flex-shrink-0">
+                <h2 class="text-base font-semibold text-brand-gray-900">Dish Details</h2>
+                <button id="close-modal-btn" class="text-brand-gray-500 hover:text-brand-gray-900">
+                    <i class="fa-solid fa-xmark fa-lg"></i>
+                </button>
+            </div>
+            <div class="flex flex-grow overflow-hidden">
+                <div class="w-3/5 p-6 flex flex-col">
+                    <div id="dish-image-wrapper" class="w-full h-3/5 bg-gray-200 rounded-lg overflow-hidden mb-6">
+                        <img class="w-full h-full object-cover" src="" alt="Dish image">
+                    </div>
+                    <div>
+                        <h1 id="dish-title" class="text-4xl font-bold text-brand-gray-900 mb-2"></h1>
+                        <p id="dish-description" class="text-brand-gray-500 text-base leading-relaxed"></p>
+                    </div>
+                </div>
+                <div class="w-2/5 border-l border-gray-200 flex flex-col">
+                    <div id="comments-list" class="flex-grow p-6 space-y-6 overflow-y-auto"></div>
+                    <div class="p-6 border-t border-gray-200">
+                        <button id="load-more-comments-btn" class="text-sm font-semibold text-primary hover:underline hidden">Load more comments</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    let currentDishId = null;
+    let currentPage = 0;
+    const pageSize = 5;
+
+    async function openDishModal(element) {
+        currentDishId = element.getAttribute('data-dish-id');
+        currentPage = 0;
+        // Fetch dish details (name, desc, image)
+        const response = await fetch(`/review-comments/dish/${currentDishId}`);
+        const data = await response.json();
+        document.getElementById('dish-title').textContent = data.name;
+        document.getElementById('dish-description').textContent = data.description;
+        document.querySelector('#dish-image-wrapper img').src = data.imageUrl;
+        // Load first page of comments
+        loadComments(true);
+        document.getElementById('dish-modal').style.display = 'flex';
+    }
+
+    async function loadComments(reset = false) {
+        const commentsList = document.getElementById('comments-list');
+        if (reset) commentsList.innerHTML = '';
+        const res = await fetch(`/review-comments/dish/${currentDishId}/comments?page=${currentPage}&size=${pageSize}`);
+        const data = await res.json();
+        if (data.comments.length === 0 && currentPage === 0) {
+            commentsList.innerHTML = '<div class="text-brand-gray-500 text-sm">No comments yet.</div>';
+        } else {
+            data.comments.forEach(comment => {
+                commentsList.innerHTML += `
+                    <div class="flex items-start space-x-4">
+                        <img src="${comment.avatarUrl}" alt="${comment.userName}'s avatar" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow">
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-sm text-brand-gray-900">${comment.userName}</h4>
+                            <p class="text-sm text-brand-gray-700">${comment.text}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        // Show/hide Load More button
+        const loadMoreBtn = document.getElementById('load-more-comments-btn');
+        if (data.hasMore) {
+            loadMoreBtn.classList.remove('hidden');
+        } else {
+            loadMoreBtn.classList.add('hidden');
+        }
+    }
+
+    document.getElementById('load-more-comments-btn').onclick = function() {
+        currentPage++;
+        loadComments(false);
+    };
+
+    document.getElementById('close-modal-btn').onclick = function() {
+        document.getElementById('dish-modal').style.display = 'none';
+    };
+    window.onclick = function(event) {
+        const modal = document.getElementById('dish-modal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    };
+    </script>
+    <style>
+    /* Custom scrollbar for comments list */
+    #comments-list {
+        scrollbar-width: thin;
+        scrollbar-color: #3B82F6 #F3F4F6;
+    }
+    #comments-list::-webkit-scrollbar {
+        width: 8px;
+        background: #F3F4F6;
+        border-radius: 8px;
+    }
+    #comments-list::-webkit-scrollbar-thumb {
+        background: #3B82F6;
+        border-radius: 8px;
+    }
+    </style>
 </body>
 </html>
