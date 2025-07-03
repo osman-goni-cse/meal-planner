@@ -3,7 +3,7 @@
 <head th:replace="~{fragments/layout :: head}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&display=swap">
@@ -100,10 +100,10 @@
                             </div>
                             <div th:if="${!selectedDish.isEmpty() && !selectedDate.isAfter(T(java.time.LocalDate).now())}" class="flex items-center justify-between mb-4">
                                 <div class="flex items-center space-x-4">
-                                    <div class="flex items-center space-x-1.5 text-gray-600">
-                                        <i class="fa-regular fa-heart text-lg text-red-500"></i>
-                                        <span class="font-medium text-sm" th:text="${selectedDish.likes}">0</span>
-                                    </div>
+                                    <button id="reaction-btn" type="button" class="flex items-center space-x-1.5 text-gray-600 focus:outline-none group">
+                                        <i id="reaction-icon" class="fa-heart text-lg text-red-500" th:classappend="${selectedDish.userReacted} ? 'fa-solid' : 'fa-regular'"></i>
+                                        <span id="reaction-count" class="font-medium text-sm" th:text="${selectedDish.reactions}">0</span>
+                                    </button>
                                     <div class="flex items-center space-x-1.5 text-gray-600">
                                         <i class="fa-regular fa-comment text-lg text-blue-500"></i>
                                         <span class="font-medium text-sm" th:text="${selectedDish.commentsCount}">0</span>
@@ -185,6 +185,41 @@
         if (document.getElementById('comments-list') && currentDishId && currentDate) {
             currentPage = 0;
             loadComments(true);
+        }
+        const reactionBtn = document.getElementById('reaction-btn');
+        if (reactionBtn) {
+            reactionBtn.addEventListener('click', async function() {
+                if (!currentDishId) return;
+                const icon = document.getElementById('reaction-icon');
+                const countSpan = document.getElementById('reaction-count');
+                let currentCount = parseInt(countSpan.textContent, 10);
+                const isReacted = icon.classList.contains('fa-solid');
+                // Optimistically update UI
+                icon.classList.remove('fa-solid', 'fa-regular');
+                if (isReacted) {
+                    icon.classList.add('fa-regular');
+                    countSpan.textContent = Math.max(0, currentCount - 1);
+                } else {
+                    icon.classList.add('fa-solid');
+                    countSpan.textContent = currentCount + 1;
+                }
+                // Send request
+                const res = await fetch('/api/reactions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dishId: currentDishId })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    countSpan.textContent = data.reactions;
+                    icon.classList.remove('fa-solid', 'fa-regular');
+                    if (data.userReacted) {
+                        icon.classList.add('fa-solid');
+                    } else {
+                        icon.classList.add('fa-regular');
+                    }
+                }
+            });
         }
     });
 

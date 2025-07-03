@@ -26,13 +26,10 @@ public class Dish {
     private List<String> dietaryInfo;
 
     @Transient
-    private long upvotes;
+    private long reactions;
 
     @Transient
-    private long downvotes;
-
-    @Transient
-    private VoteType currentUserVote;
+    private boolean userReacted;
 
     // Getters and setters
     public Long getId() { return id; }
@@ -48,27 +45,19 @@ public class Dish {
     public List<String> getDietaryInfo() { return dietaryInfo; }
     public void setDietaryInfo(List<String> dietaryInfo) { this.dietaryInfo = dietaryInfo; }
 
-    public long getUpvotes() {
-        return upvotes;
+    public long getReactions() {
+        return reactions;
     }
 
-    public void setUpvotes(long upvotes) {
-        this.upvotes = upvotes;
+    public void setReactions(long reactions) {
+        this.reactions = reactions;
     }
 
-    public long getDownvotes() {
-        return downvotes;
+    public boolean isUserReacted() {
+        return userReacted;
     }
 
-    public void setDownvotes(long downvotes) {
-        this.downvotes = downvotes;
-    }
-
-    public VoteType getCurrentUserVote() {
-        return currentUserVote;
-    }
-
-    public void setCurrentUserVote(VoteType currentUserVote) {
-        this.currentUserVote = currentUserVote;
+    public void setUserReacted(boolean userReacted) {
+        this.userReacted = userReacted;
     }
 } 

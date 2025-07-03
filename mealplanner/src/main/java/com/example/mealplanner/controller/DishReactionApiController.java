@@ -1,12 +1,10 @@
 package com.example.mealplanner.controller;
 
-import com.example.mealplanner.model.CustomUserDetails;
-import com.example.mealplanner.model.VoteRequest;
-import com.example.mealplanner.model.VoteResponse;
-import com.example.mealplanner.model.VoteType;
+import com.example.mealplanner.dto.DishReactionRequest;
+import com.example.mealplanner.dto.DishReactionResponse;
 import com.example.mealplanner.model.User;
+import com.example.mealplanner.service.DishReactionService;
 import com.example.mealplanner.service.MealService;
-import com.example.mealplanner.service.VoteService;
 import com.example.mealplanner.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +19,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @RestController
-@RequestMapping("/api/votes")
-public class VoteApiController {
+@RequestMapping("/api/reactions")
+public class DishReactionApiController {
 
     @Autowired
-    private VoteService voteService;
+    private DishReactionService dishReactionService;
 
     @Autowired
     private MealService mealService;
@@ -34,7 +32,7 @@ public class VoteApiController {
     private UserRepository userRepository;
 
     @PostMapping
-    public ResponseEntity<?> handleVote(@RequestBody VoteRequest voteRequest, @AuthenticationPrincipal OAuth2User oauth2User) {
+    public ResponseEntity<?> handleReaction(@RequestBody DishReactionRequest reactionRequest, @AuthenticationPrincipal OAuth2User oauth2User) {
         if (oauth2User == null) {
             return ResponseEntity.status(401).body("User not authenticated");
         }
@@ -48,16 +46,15 @@ public class VoteApiController {
         String currentMealPeriod = mealService.getCurrentMealPeriod(LocalTime.now());
 
         if (currentMealPeriod == null) {
-            return ResponseEntity.badRequest().body("Voting is not open at this time.");
+            return ResponseEntity.badRequest().body("Reactions are not open at this time.");
         }
 
-        voteService.vote(user.getId(), voteRequest.getDishId(), voteRequest.getVoteType(), today, currentMealPeriod);
+        dishReactionService.toggleReaction(user.getId(), reactionRequest.getDishId());
 
-        long upvotes = voteService.getUpvotes(voteRequest.getDishId(), today, currentMealPeriod);
-        long downvotes = voteService.getDownvotes(voteRequest.getDishId(), today, currentMealPeriod);
-        VoteType currentUserVote = voteService.getCurrentUserVote(user.getId(), voteRequest.getDishId(), today, currentMealPeriod);
+        long reactions = dishReactionService.getReactions(reactionRequest.getDishId());
+        boolean userReacted = dishReactionService.hasUserReacted(user.getId(), reactionRequest.getDishId());
 
-        VoteResponse response = new VoteResponse(voteRequest.getDishId(), upvotes, downvotes, currentUserVote);
+        DishReactionResponse response = new DishReactionResponse(reactionRequest.getDishId(), reactions, userReacted);
         return ResponseEntity.ok(response);
     }
 } 

@@ -33,12 +33,12 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .ignoringRequestMatchers("/api/votes")
+                .ignoringRequestMatchers("/api/reactions")
             )
 
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/", "/login", "/error", "/webjars/**", "/css/**", "/js/**", "/images/**", "/api/votes", "/test-auth", "/debug-user").permitAll()
-                .requestMatchers("/dashboard", "/dashboard/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_EMPLOYEE")
+                .requestMatchers("/", "/login", "/error", "/webjars/**", "/css/**", "/js/**", "/images/**", "/api/reactions", "/test-auth", "/debug-user").permitAll()
+                .requestMatchers("/dashboard", "/dashboard/**").hasAnyAuthority("ROLE_EMPLOYEE")
                 .requestMatchers("/weekly-plan/**", "/dishes/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated()
             )

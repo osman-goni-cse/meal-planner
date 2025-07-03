@@ -6,6 +6,7 @@ import com.example.mealplanner.model.User;
 import com.example.mealplanner.repository.FeedbackRepository;
 import com.example.mealplanner.repository.UserRepository;
 import com.example.mealplanner.service.MealService;
+import com.example.mealplanner.service.DishReactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -29,6 +30,8 @@ public class WeeklyMealFeedbackController {
     private FeedbackRepository feedbackRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private DishReactionService dishReactionService;
 
     @GetMapping("/weekly-feedback")
     public String weeklyFeedback(@RequestParam(value = "date", required = false)
@@ -95,8 +98,18 @@ public class WeeklyMealFeedbackController {
             }
             dto.put("feedbacks", feedbackList);
             dto.put("commentsCount", commentsCount);
-            // Likes (if you have a like system, otherwise set to 0)
-            dto.put("likes", 0); // TODO: Replace with actual like count if available
+            // Add reactions and userReacted
+            long reactions = dishReactionService.getReactions(dish.getId());
+            dto.put("reactions", reactions);
+            boolean userReacted = false;
+            if (oauth2User != null) {
+                String email = oauth2User.getAttribute("email");
+                User user = userRepository.findByEmail(email).orElse(null);
+                if (user != null) {
+                    userReacted = dishReactionService.hasUserReacted(user.getId(), dish.getId());
+                }
+            }
+            dto.put("userReacted", userReacted);
             dishDTOs.add(dto);
         }
 

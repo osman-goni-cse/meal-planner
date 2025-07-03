@@ -5,7 +5,6 @@ import com.example.mealplanner.model.Dish;
 import com.example.mealplanner.model.User;
 import com.example.mealplanner.repository.UserRepository;
 import com.example.mealplanner.service.MealService;
-import com.example.mealplanner.service.VoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -32,8 +31,6 @@ public class DashboardController {
     @Autowired
     private MealService mealService;
 
-    @Autowired
-    private VoteService voteService;
 
     @Autowired
     private UserRepository userRepository;
