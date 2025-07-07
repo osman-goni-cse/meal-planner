@@ -44,6 +44,46 @@ public class CommentService {
         return dtos;
     }
 
+    public List<DishCommentStatsDTO> getDishesWithSearchAndSort(String searchTerm, String sortBy, int limit) {
+        List<Object[]> results;
+        
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            // Search with filtering
+            if ("most-liked".equals(sortBy)) {
+                results = feedbackRepository.findDishCommentStatsBySearchAndReactions(searchTerm.trim(), PageRequest.of(0, limit));
+            } else {
+                // Default to most comments
+                results = feedbackRepository.findDishCommentStatsBySearchAndComments(searchTerm.trim(), PageRequest.of(0, limit));
+            }
+        } else {
+            // No search term
+            if ("most-liked".equals(sortBy)) {
+                results = feedbackRepository.findDishCommentStatsByReactions(PageRequest.of(0, limit));
+            } else {
+                // Default to most comments
+                results = feedbackRepository.findDishCommentStatsByComments(PageRequest.of(0, limit));
+            }
+        }
+        
+        List<DishCommentStatsDTO> dtos = new ArrayList<>();
+        for (Object[] row : results) {
+            DishCommentStatsDTO dto = new DishCommentStatsDTO();
+            dto.setId((Long) row[0]);
+            dto.setName((String) row[1]);
+            dto.setImageUrl((String) row[2]);
+            dto.setCommentsCount(((Number) row[3]).intValue());
+            dto.setReactions(dishReactionService.getReactions(dto.getId()));
+            dtos.add(dto);
+        }
+        
+        // If sorting by most liked, we need to sort by reactions after fetching
+        if ("most-liked".equals(sortBy)) {
+            dtos.sort((a, b) -> Long.compare(b.getReactions(), a.getReactions()));
+        }
+        
+        return dtos;
+    }
+
     public int getCommentCount() {
         return feedbackRepository.findAll().size();
     }

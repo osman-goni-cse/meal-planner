@@ -13,17 +13,27 @@
                     <div class="flex flex-col sm:flex-row gap-4 flex-1">
                         <div class="relative flex-1 max-w-md">
                             <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <input type="text" placeholder="Search comments or dishes..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <input type="text" id="search-input" placeholder="Search dishes..." 
+                                   th:value="${searchTerm}" 
+                                   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
                         
-                        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                            <option value="">Sort by</option>
-                            <option value="most-liked">Most Liked</option>
-                            <option value="most-comments">Most Comments</option>
-                        </select>
+                        <div class="relative">
+                            <select id="sort-select" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none pr-10">
+                                <option value="most-comments" th:selected="${sortBy == 'most-comments'}">
+                                    <i class="fa-solid fa-comments mr-2"></i>Most Comments
+                                </option>
+                                <option value="most-liked" th:selected="${sortBy == 'most-liked'}">
+                                    <i class="fa-solid fa-heart mr-2"></i>Most Loved
+                                </option>
+                            </select>
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <i class="fa-solid fa-chevron-down text-gray-400"></i>
+                            </div>
+                        </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
+                        <button id="clear-filters-btn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
                             <i class="fa-solid fa-filter mr-2"></i>
                             <span>Clear Filters</span>
                         </button>
@@ -34,10 +44,10 @@
             <!-- Most Commented Dishes -->
             <div class="bg-white rounded-lg shadow-sm mb-8" id="top-dishes-section">
                 <div class="p-6 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-800">Most Commented Dishes</h3>
+                    <h3 class="text-lg font-semibold text-gray-800" id="section-title">Most Commented Dishes</h3>
                 </div>
                 <div class="p-6">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div id="dishes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div th:each="dish : ${mostCommentedDishes}" class="relative rounded-xl overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 dish-card cursor-pointer" th:attr="data-dish-id=${dish.id}" onclick="openDishModal(this)">
                             <img class="w-full h-80 object-cover" th:src="${dish.imageUrl}" th:alt="${dish.name}">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
@@ -59,6 +69,12 @@
                             </div>
                             <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                         </div>
+                    </div>
+                    <!-- No results message -->
+                    <div id="no-results" class="hidden text-center py-8">
+                        <i class="fa-solid fa-search text-gray-400 text-4xl mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-600 mb-2">No dishes found</h3>
+                        <p class="text-gray-500">Try adjusting your search terms or filters</p>
                     </div>
                 </div>
             </div>
@@ -97,6 +113,81 @@
     let currentDishId = null;
     let currentPage = 0;
     const pageSize = 5;
+    let searchTimeout;
+
+    // Search and sort functionality
+    document.getElementById('search-input').addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            performSearch();
+        }, 300);
+    });
+
+    document.getElementById('sort-select').addEventListener('change', function() {
+        performSearch();
+    });
+
+    document.getElementById('clear-filters-btn').addEventListener('click', function() {
+        document.getElementById('search-input').value = '';
+        document.getElementById('sort-select').value = 'most-comments';
+        performSearch();
+    });
+
+    async function performSearch() {
+        const searchTerm = document.getElementById('search-input').value;
+        const sortBy = document.getElementById('sort-select').value;
+        const dishesGrid = document.getElementById('dishes-grid');
+        const noResults = document.getElementById('no-results');
+        const sectionTitle = document.getElementById('section-title');
+
+        // Show loading state
+        dishesGrid.innerHTML = '<div class="col-span-full text-center py-8"><i class="fa-solid fa-spinner fa-spin text-gray-400 text-2xl"></i></div>';
+
+        try {
+            const response = await fetch(`/review-comments/search?search=${encodeURIComponent(searchTerm)}&sort=${encodeURIComponent(sortBy)}&limit=8`);
+            const dishes = await response.json();
+
+            // Update section title based on sort
+            if (sortBy === 'most-liked') {
+                sectionTitle.textContent = searchTerm ? `Most Loved Dishes - "${searchTerm}"` : 'Most Loved Dishes';
+            } else {
+                sectionTitle.textContent = searchTerm ? `Most Commented Dishes - "${searchTerm}"` : 'Most Commented Dishes';
+            }
+
+            if (dishes.length === 0) {
+                dishesGrid.innerHTML = '';
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                dishesGrid.innerHTML = dishes.map(dish => `
+                    <div class="relative rounded-xl overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 dish-card cursor-pointer" data-dish-id="${dish.id}" onclick="openDishModal(this)">
+                        <img class="w-full h-80 object-cover" src="${dish.imageUrl}" alt="${dish.name}">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 p-4 w-full text-white">
+                            <h4 class="font-bold text-lg truncate mb-2">${dish.name}</h4>
+                            <div class="flex items-center justify-between text-sm">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex items-center space-x-1">
+                                        <i class="fa-regular fa-heart"></i>
+                                        <span>${dish.reactions}</span>
+                                    </div>
+                                    <div class="flex items-center space-x-1">
+                                        <i class="fa-regular fa-comment"></i>
+                                        <span>${dish.commentsCount}</span>
+                                    </div>
+                                </div>
+                                <span class="text-white bg-primary/80 rounded px-2 py-1 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer absolute top-4 right-4 shadow-lg">Click for Details</span>
+                            </div>
+                        </div>
+                        <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                    </div>
+                `).join('');
+            }
+        } catch (error) {
+            console.error('Error performing search:', error);
+            dishesGrid.innerHTML = '<div class="col-span-full text-center py-8 text-red-500">Error loading dishes. Please try again.</div>';
+        }
+    }
 
     async function openDishModal(element) {
         currentDishId = element.getAttribute('data-dish-id');
