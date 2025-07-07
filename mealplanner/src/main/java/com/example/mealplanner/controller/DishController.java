@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -80,6 +81,9 @@ public class DishController {
     @GetMapping("/dishes")
     public String listDishes(Model model, @AuthenticationPrincipal OAuth2User oauth2User, HttpServletRequest request) {
         logger.info("Dish management accessed by user: {}", oauth2User != null ? oauth2User.getAttribute("email") : "anonymous");
+        logger.info("User authorities: {}", oauth2User != null ? oauth2User.getAuthorities() : "no authorities");
+        logger.info("Request URI: {}", request.getRequestURI());
+        
         List<Dish> dishes = dishRepository.findAll();
         model.addAttribute("dishes", dishes);
         model.addAttribute("dish", new Dish());
@@ -95,5 +99,74 @@ public class DishController {
     public String deleteDish(@PathVariable Long id) {
         dishRepository.deleteById(id);
         return "redirect:/dishes";
+    }
+
+    @GetMapping("/dishes/edit/{id}")
+    public String showEditDishForm(@PathVariable Long id, Model model, @AuthenticationPrincipal OAuth2User oauth2User) {
+        logger.info("Edit dish form accessed by user: {} for dish id: {}", oauth2User != null ? oauth2User.getAttribute("email") : "anonymous", id);
+        
+        Dish dish = dishRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Dish not found with id: " + id));
+        
+        model.addAttribute("dish", dish);
+        model.addAttribute("categories", CATEGORIES);
+        model.addAttribute("dietaryTags", DIETARY_TAGS);
+        model.addAttribute("mealPeriods", Arrays.asList("LUNCH", "SNACKS"));
+        model.addAttribute("pageTitle", "Edit Dish");
+        model.addAttribute("isEdit", true);
+        
+        return "dish-management";
+    }
+
+    @PostMapping("/dishes/edit/{id}")
+    public String updateDish(@PathVariable Long id,
+                           @ModelAttribute("dish") @jakarta.validation.Valid Dish dish,
+                           org.springframework.validation.BindingResult bindingResult,
+                           @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+                           @RequestParam(value = "dietaryInfo", required = false) List<String> dietaryInfo,
+                           Model model) throws IOException {
+        
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("categories", CATEGORIES);
+            model.addAttribute("dietaryTags", DIETARY_TAGS);
+            model.addAttribute("mealPeriods", Arrays.asList("LUNCH", "SNACKS"));
+            model.addAttribute("pageTitle", "Edit Dish");
+            model.addAttribute("isEdit", true);
+            return "dish-management";
+        }
+        
+        Dish existingDish = dishRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Dish not found with id: " + id));
+        
+        // Update basic fields
+        existingDish.setName(dish.getName());
+        existingDish.setMealPeriod(dish.getMealPeriod());
+        existingDish.setCategory(dish.getCategory());
+        existingDish.setDescription(dish.getDescription());
+        
+        // Handle image upload (only if new image is provided)
+        if (imageFile != null && !imageFile.isEmpty()) {
+            Path uploadPath = Paths.get(UPLOAD_DIR);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+            String fileName = System.currentTimeMillis() + "_" + imageFile.getOriginalFilename();
+            Path filePath = uploadPath.resolve(fileName);
+            imageFile.transferTo(filePath);
+            existingDish.setImageUrl("/" + UPLOAD_DIR + fileName);
+        }
+        
+        // Handle dietary info
+        existingDish.setDietaryInfo(dietaryInfo != null ? dietaryInfo : new ArrayList<>());
+        
+        dishRepository.save(existingDish);
+        return "redirect:/dishes";
+    }
+
+    @GetMapping("/dishes/json/{id}")
+    @ResponseBody
+    public Dish getDishJson(@PathVariable Long id) {
+        return dishRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Dish not found with id: " + id));
     }
 } 

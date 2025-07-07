@@ -1,6 +1,8 @@
 package com.example.mealplanner.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "menu_template_entry")
@@ -14,6 +16,7 @@ public class MenuTemplateEntry {
 
     @ManyToOne
     @JoinColumn(name = "dish_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Dish dish;
 
     private int sortOrder;

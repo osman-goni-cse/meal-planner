@@ -1,0 +1,256 @@
+<div id="edit-dish-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden" th:fragment="edit-dish-modal">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-light">
+            <div class="flex items-center">
+                <i class="fa-solid fa-edit text-primary mr-3 text-xl"></i>
+                <h2 class="text-xl font-semibold text-gray-800">Edit Dish</h2>
+            </div>
+            <button class="text-gray-400 hover:text-gray-600 text-xl" onclick="closeEditDishModal()">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        <!-- Modal Content -->
+        <div class="p-6">
+            <form id="edit-dish-form" method="post" enctype="multipart/form-data" class="space-y-6">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <!-- Basic Information -->
+                <section id="edit-basic-info" class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-800 border-b border-gray-light pb-2">Basic Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Dish Name *</label>
+                            <input type="text" name="name" id="edit-dish-name" class="w-full px-4 py-3 border border-gray-light rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white" placeholder="e.g., Grilled Chicken Sandwich" required>
+                            <div class="client-error text-red-600 text-xs mt-1"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Meal Period *</label>
+                            <select name="mealPeriod" id="edit-dish-meal-period" class="w-full px-4 py-3 border border-gray-light rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white" required>
+                                <option value="">Select Meal Period</option>
+                                <option value="LUNCH">Lunch</option>
+                                <option value="SNACKS">Snacks</option>
+                            </select>
+                            <div class="client-error text-red-600 text-xs mt-1"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
+                            <select name="category" id="edit-dish-category" class="w-full px-4 py-3 border border-gray-light rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white" required>
+                                <option value="">Select Category</option>
+                                <option value="Main Course">Main Course</option>
+                                <option value="Side Dish">Side Dish</option>
+                                <option value="Beverage">Beverage</option>
+                                <option value="Dessert">Dessert</option>
+                            </select>
+                            <div class="client-error text-red-600 text-xs mt-1"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
+                        <textarea name="description" id="edit-dish-description" class="w-full px-4 py-3 border border-gray-light rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white h-24 resize-none" placeholder="Brief description of the dish, ingredients, and preparation method" required></textarea>
+                        <div class="client-error text-red-600 text-xs mt-1"></div>
+                    </div>
+                </section>
+                <!-- Image Upload Section -->
+                <section id="edit-image-section" class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-800 border-b border-gray-light pb-2">Dish Image</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Upload Area -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Current Image</label>
+                            <div class="relative border-2 border-dashed border-gray-light rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer bg-secondary">
+                                <input type="file" id="edit-dish-image" name="imageFile" accept="image/*"
+                                    style="position:absolute;opacity:0;width:100%;height:100%;left:0;top:0;cursor:pointer;z-index:2;"
+                                    onchange="previewEditImage(event)">
+                                <label for="edit-dish-image" class="cursor-pointer z-1 relative block">
+                                    <i class="fa-solid fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                                    <p class="text-gray-600 mb-2">Click to upload new image or drag and drop</p>
+                                    <p class="text-sm text-gray-500">PNG, JPG up to 5MB</p>
+                                </label>
+                                <div id="edit-image-error" class="client-error text-red-600 text-xs mt-1"></div>
+                            </div>
+                        </div>
+                        <!-- Image Preview -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Preview</label>
+                            <div id="edit-image-preview" class="border border-gray-light rounded-lg p-4 bg-white h-40 flex items-center justify-center">
+                                <div class="text-center text-gray-400">
+                                    <i class="fa-solid fa-image text-3xl mb-2"></i>
+                                    <p class="text-sm">Image preview will appear here</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Dietary Information -->
+                <section id="edit-dietary-info" class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-800 border-b border-gray-light pb-2">Dietary Information</h3>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-3">Dietary Tags</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="edit-dietary-tags">
+                            <label class="flex items-center bg-secondary px-4 py-3 rounded-lg cursor-pointer hover:bg-gray-100 border border-gray-light transition">
+                                <input type="checkbox" name="dietaryInfo" value="Vegetarian" class="mr-3 text-primary w-4 h-4">
+                                <span class="text-sm font-medium">Vegetarian</span>
+                            </label>
+                            <label class="flex items-center bg-secondary px-4 py-3 rounded-lg cursor-pointer hover:bg-gray-100 border border-gray-light transition">
+                                <input type="checkbox" name="dietaryInfo" value="Vegan" class="mr-3 text-primary w-4 h-4">
+                                <span class="text-sm font-medium">Vegan</span>
+                            </label>
+                            <label class="flex items-center bg-secondary px-4 py-3 rounded-lg cursor-pointer hover:bg-gray-100 border border-gray-light transition">
+                                <input type="checkbox" name="dietaryInfo" value="Gluten-Free" class="mr-3 text-primary w-4 h-4">
+                                <span class="text-sm font-medium">Gluten-Free</span>
+                            </label>
+                            <label class="flex items-center bg-secondary px-4 py-3 rounded-lg cursor-pointer hover:bg-gray-100 border border-gray-light transition">
+                                <input type="checkbox" name="dietaryInfo" value="Dairy-Free" class="mr-3 text-primary w-4 h-4">
+                                <span class="text-sm font-medium">Dairy-Free</span>
+                            </label>
+                            <label class="flex items-center bg-secondary px-4 py-3 rounded-lg cursor-pointer hover:bg-gray-100 border border-gray-light transition">
+                                <input type="checkbox" name="dietaryInfo" value="Nut-Free" class="mr-3 text-primary w-4 h-4">
+                                <span class="text-sm font-medium">Nut-Free</span>
+                            </label>
+                            <label class="flex items-center bg-secondary px-4 py-3 rounded-lg cursor-pointer hover:bg-gray-100 border border-gray-light transition">
+                                <input type="checkbox" name="dietaryInfo" value="Low-Carb" class="mr-3 text-primary w-4 h-4">
+                                <span class="text-sm font-medium">Low-Carb</span>
+                            </label>
+                            <label class="flex items-center bg-secondary px-4 py-3 rounded-lg cursor-pointer hover:bg-gray-100 border border-gray-light transition">
+                                <input type="checkbox" name="dietaryInfo" value="High-Protein" class="mr-3 text-primary w-4 h-4">
+                                <span class="text-sm font-medium">High-Protein</span>
+                            </label>
+                            <label class="flex items-center bg-secondary px-4 py-3 rounded-lg cursor-pointer hover:bg-gray-100 border border-gray-light transition">
+                                <input type="checkbox" name="dietaryInfo" value="Spicy" class="mr-3 text-primary w-4 h-4">
+                                <span class="text-sm font-medium">Spicy</span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+            </form>
+        </div>
+        <!-- Modal Footer -->
+        <div class="flex items-center justify-between p-6 border-t border-gray-light bg-secondary">
+            <div class="flex items-center text-sm text-gray-600">
+                <i class="fa-solid fa-info-circle mr-2"></i>
+                <span>Fields marked with * are required</span>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button type="button" class="px-6 py-3 text-gray-700 bg-white border border-gray-light rounded-lg hover:bg-gray-50 transition font-medium" onclick="closeEditDishModal()">
+                    Cancel
+                </button>
+                <button type="submit" id="edit-dish-submit" form="edit-dish-form" class="px-8 py-3 text-white rounded-lg font-semibold transition disabled:bg-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed bg-primary hover:bg-blue-600" disabled>
+                    <i class="fa-solid fa-save mr-2"></i>
+                    Update Dish
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function setupEditDishValidation() {
+    const form = document.getElementById('edit-dish-form');
+    if (!form) return;
+    const nameInput = form.querySelector('[name="name"]');
+    const mealPeriodInput = form.querySelector('[name="mealPeriod"]');
+    const categoryInput = form.querySelector('[name="category"]');
+    const descriptionInput = form.querySelector('[name="description"]');
+    const submitBtn = document.getElementById('edit-dish-submit');
+    if (!nameInput || !mealPeriodInput || !categoryInput || !descriptionInput || !submitBtn) return;
+
+    // Remove previous listeners to avoid duplicates
+    nameInput.oninput = null; nameInput.onblur = null;
+    mealPeriodInput.onchange = null; mealPeriodInput.onblur = null;
+    categoryInput.onchange = null; categoryInput.onblur = null;
+    descriptionInput.oninput = null; descriptionInput.onblur = null;
+
+    // Error containers
+    const nameError = nameInput.parentElement.querySelector('.client-error') || createErrorDiv(nameInput);
+    const mealPeriodError = mealPeriodInput.parentElement.querySelector('.client-error') || createErrorDiv(mealPeriodInput);
+    const categoryError = categoryInput.parentElement.querySelector('.client-error') || createErrorDiv(categoryInput);
+    const descriptionError = descriptionInput.parentElement.querySelector('.client-error') || createErrorDiv(descriptionInput);
+
+    // Track touched state
+    let touched = { name: false, mealPeriod: false, category: false, description: false };
+
+    function createErrorDiv(input) {
+        const div = document.createElement('div');
+        div.className = 'client-error text-red-600 text-xs mt-1';
+        input.parentElement.appendChild(div);
+        return div;
+    }
+
+    function validate(showAll = false) {
+        let valid = true;
+        // Name
+        if ((!nameInput.value || nameInput.value.trim().length < 5)) {
+            if (touched.name || showAll) nameError.textContent = 'Dish name must be at least 5 characters.';
+            else nameError.textContent = '';
+            valid = false;
+        } else {
+            nameError.textContent = '';
+        }
+        // Meal Period
+        if (!mealPeriodInput.value) {
+            if (touched.mealPeriod || showAll) mealPeriodError.textContent = 'Meal period is required.';
+            else mealPeriodError.textContent = '';
+            valid = false;
+        } else {
+            mealPeriodError.textContent = '';
+        }
+        // Category
+        if (!categoryInput.value) {
+            if (touched.category || showAll) categoryError.textContent = 'Category is required.';
+            else categoryError.textContent = '';
+            valid = false;
+        } else {
+            categoryError.textContent = '';
+        }
+        // Description
+        if (!descriptionInput.value || descriptionInput.value.trim().length < 30) {
+            if (touched.description || showAll) descriptionError.textContent = 'Description must be at least 30 characters.';
+            else descriptionError.textContent = '';
+            valid = false;
+        } else {
+            descriptionError.textContent = '';
+        }
+        submitBtn.disabled = !valid;
+        return valid;
+    }
+
+    // Attach events
+    nameInput.addEventListener('input', function() { touched.name = true; validate(); });
+    nameInput.addEventListener('blur', function() { touched.name = true; validate(); });
+    mealPeriodInput.addEventListener('change', function() { touched.mealPeriod = true; validate(); });
+    mealPeriodInput.addEventListener('blur', function() { touched.mealPeriod = true; validate(); });
+    categoryInput.addEventListener('change', function() { touched.category = true; validate(); });
+    categoryInput.addEventListener('blur', function() { touched.category = true; validate(); });
+    descriptionInput.addEventListener('input', function() { touched.description = true; validate(); });
+    descriptionInput.addEventListener('blur', function() { touched.description = true; validate(); });
+
+    // Initial validation (do not show errors)
+    validate(false);
+
+    // Prevent submit if invalid
+    form.addEventListener('submit', function(e) {
+        if (!validate(true)) {
+            e.preventDefault();
+        }
+    });
+}
+
+function previewEditImage(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('edit-image-preview');
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" alt="Dish preview" class="w-full h-full object-cover rounded">`;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        preview.innerHTML = `
+            <div class="text-center text-gray-400">
+                <i class="fa-solid fa-image text-3xl mb-2"></i>
+                <p class="text-sm">Image preview will appear here</p>
+            </div>
+        `;
+    }
+}
+</script> 

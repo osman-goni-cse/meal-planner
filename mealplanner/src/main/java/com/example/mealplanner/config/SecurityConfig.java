@@ -66,6 +66,12 @@ public class SecurityConfig {
             @Override
             public void handle(HttpServletRequest request, HttpServletResponse response,
                              AccessDeniedException accessDeniedException) throws IOException, ServletException {
+                System.out.println("=== ACCESS DENIED DEBUG ===");
+                System.out.println("Request URI: " + request.getRequestURI());
+                System.out.println("Request Method: " + request.getMethod());
+                System.out.println("User Principal: " + (request.getUserPrincipal() != null ? request.getUserPrincipal().getName() : "null"));
+                System.out.println("Exception: " + accessDeniedException.getMessage());
+                System.out.println("==========================");
                 response.sendRedirect("/access-denied");
             }
         };

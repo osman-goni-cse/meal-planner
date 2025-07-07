@@ -2,6 +2,8 @@ package com.example.mealplanner.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "dish_reactions", uniqueConstraints = {
@@ -19,6 +21,7 @@ public class DishReaction {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dish_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Dish dish;
 
     @Column(name = "reaction_date", nullable = false)
