@@ -6,4 +6,5 @@ import java.util.List;
  
 public interface DishRepository extends JpaRepository<Dish, Long> {
     List<Dish> findByCategory(String category);
+    List<Dish> findByMealPeriod(String mealPeriod);
 } 

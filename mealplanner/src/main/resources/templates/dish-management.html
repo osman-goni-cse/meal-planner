@@ -105,8 +105,100 @@
     <!-- Add Dish Modal Fragment -->
     <div th:replace="fragments/add-dish-modal :: add-dish-modal"></div>
     <script>
+    function setupAddDishValidation() {
+        const form = document.getElementById('add-dish-form');
+        if (!form) return;
+        const nameInput = form.querySelector('[name="name"]');
+        const mealPeriodInput = form.querySelector('[name="mealPeriod"]');
+        const categoryInput = form.querySelector('[name="category"]');
+        const descriptionInput = form.querySelector('[name="description"]');
+        const submitBtn = document.getElementById('add-dish-submit');
+        if (!nameInput || !mealPeriodInput || !categoryInput || !descriptionInput || !submitBtn) return;
+
+        // Remove previous listeners to avoid duplicates
+        nameInput.oninput = null; nameInput.onblur = null;
+        mealPeriodInput.onchange = null; mealPeriodInput.onblur = null;
+        categoryInput.onchange = null; categoryInput.onblur = null;
+        descriptionInput.oninput = null; descriptionInput.onblur = null;
+
+        // Error containers
+        const nameError = nameInput.parentElement.querySelector('.client-error') || createErrorDiv(nameInput);
+        const mealPeriodError = mealPeriodInput.parentElement.querySelector('.client-error') || createErrorDiv(mealPeriodInput);
+        const categoryError = categoryInput.parentElement.querySelector('.client-error') || createErrorDiv(categoryInput);
+        const descriptionError = descriptionInput.parentElement.querySelector('.client-error') || createErrorDiv(descriptionInput);
+
+        // Track touched state
+        let touched = { name: false, mealPeriod: false, category: false, description: false };
+
+        function createErrorDiv(input) {
+            const div = document.createElement('div');
+            div.className = 'client-error text-red-600 text-xs mt-1';
+            input.parentElement.appendChild(div);
+            return div;
+        }
+
+        function validate(showAll = false) {
+            let valid = true;
+            // Name
+            if ((!nameInput.value || nameInput.value.trim().length < 5)) {
+                if (touched.name || showAll) nameError.textContent = 'Dish name must be at least 5 characters.';
+                else nameError.textContent = '';
+                valid = false;
+            } else {
+                nameError.textContent = '';
+            }
+            // Meal Period
+            if (!mealPeriodInput.value) {
+                if (touched.mealPeriod || showAll) mealPeriodError.textContent = 'Meal period is required.';
+                else mealPeriodError.textContent = '';
+                valid = false;
+            } else {
+                mealPeriodError.textContent = '';
+            }
+            // Category
+            if (!categoryInput.value) {
+                if (touched.category || showAll) categoryError.textContent = 'Category is required.';
+                else categoryError.textContent = '';
+                valid = false;
+            } else {
+                categoryError.textContent = '';
+            }
+            // Description
+            if (!descriptionInput.value || descriptionInput.value.trim().length < 30) {
+                if (touched.description || showAll) descriptionError.textContent = 'Description must be at least 30 characters.';
+                else descriptionError.textContent = '';
+                valid = false;
+            } else {
+                descriptionError.textContent = '';
+            }
+            submitBtn.disabled = !valid;
+            return valid;
+        }
+
+        // Attach events
+        nameInput.addEventListener('input', function() { touched.name = true; validate(); });
+        nameInput.addEventListener('blur', function() { touched.name = true; validate(); });
+        mealPeriodInput.addEventListener('change', function() { touched.mealPeriod = true; validate(); });
+        mealPeriodInput.addEventListener('blur', function() { touched.mealPeriod = true; validate(); });
+        categoryInput.addEventListener('change', function() { touched.category = true; validate(); });
+        categoryInput.addEventListener('blur', function() { touched.category = true; validate(); });
+        descriptionInput.addEventListener('input', function() { touched.description = true; validate(); });
+        descriptionInput.addEventListener('blur', function() { touched.description = true; validate(); });
+
+        // Initial validation (do not show errors)
+        validate(false);
+
+        // Prevent submit if invalid
+        form.addEventListener('submit', function(e) {
+            if (!validate(true)) {
+                e.preventDefault();
+            }
+        });
+    }
+
     function openAddDishModal() {
         document.getElementById('add-dish-modal').classList.remove('hidden');
+        setupAddDishValidation();
     }
     function closeAddDishModal() {
         document.getElementById('add-dish-modal').classList.add('hidden');

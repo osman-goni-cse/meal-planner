@@ -42,15 +42,24 @@ public class DishController {
         model.addAttribute("dish", new Dish());
         model.addAttribute("categories", CATEGORIES);
         model.addAttribute("dietaryTags", DIETARY_TAGS);
+        model.addAttribute("mealPeriods", Arrays.asList("LUNCH", "SNACKS"));
         model.addAttribute("pageTitle", "Add New Dish");
         return "add-dish";
     }
 
     @PostMapping("/dishes/new")
-    public String addDish(@ModelAttribute Dish dish,
+    public String addDish(@ModelAttribute("dish") @jakarta.validation.Valid Dish dish,
+                         org.springframework.validation.BindingResult bindingResult,
                          @RequestParam("imageFile") MultipartFile imageFile,
                          @RequestParam(value = "dietaryInfo", required = false) List<String> dietaryInfo,
                          Model model) throws IOException {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("categories", CATEGORIES);
+            model.addAttribute("dietaryTags", DIETARY_TAGS);
+            model.addAttribute("mealPeriods", Arrays.asList("LUNCH", "SNACKS"));
+            model.addAttribute("pageTitle", "Add New Dish");
+            return "add-dish";
+        }
         // Handle image upload
         if (!imageFile.isEmpty()) {
             Path uploadPath = Paths.get(UPLOAD_DIR);

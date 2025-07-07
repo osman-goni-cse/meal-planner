@@ -16,21 +16,34 @@
                 <!-- Basic Information -->
                 <section id="basic-info" class="space-y-4">
                     <h3 class="text-lg font-semibold text-gray-800 border-b border-gray-light pb-2">Basic Information</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Dish Name *</label>
                             <input type="text" th:field="*{name}" class="w-full px-4 py-3 border border-gray-light rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white" placeholder="e.g., Grilled Chicken Sandwich" required>
+                            <div th:if="${#fields.hasErrors('name')}" class="text-red-600 text-xs mt-1" th:errors="*{name}"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Meal Period *</label>
+                            <select th:field="*{mealPeriod}" class="w-full px-4 py-3 border border-gray-light rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white" required>
+                                <option value="">Select Meal Period</option>
+                                <option value="LUNCH">Lunch</option>
+                                <option value="SNACKS">Snacks</option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('mealPeriod')}" class="text-red-600 text-xs mt-1" th:errors="*{mealPeriod}"></div>
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
                             <select th:field="*{category}" class="w-full px-4 py-3 border border-gray-light rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white" required>
+                                <option value="">Select Category</option>
                                 <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"></option>
                             </select>
+                            <div th:if="${#fields.hasErrors('category')}" class="text-red-600 text-xs mt-1" th:errors="*{category}"></div>
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
                         <textarea th:field="*{description}" class="w-full px-4 py-3 border border-gray-light rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white h-24 resize-none" placeholder="Brief description of the dish, ingredients, and preparation method" required></textarea>
+                        <div th:if="${#fields.hasErrors('description')}" class="text-red-600 text-xs mt-1" th:errors="*{description}"></div>
                     </div>
                 </section>
                 <!-- Image Upload Section -->
@@ -40,13 +53,16 @@
                         <!-- Upload Area -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Image *</label>
-                            <div class="border-2 border-dashed border-gray-light rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer bg-secondary">
-                                <input type="file" id="dish-image" name="imageFile" accept="image/*" class="hidden" required onchange="previewImage(event)">
-                                <label for="dish-image" class="cursor-pointer">
+                            <div class="relative border-2 border-dashed border-gray-light rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer bg-secondary">
+                                <input type="file" id="dish-image" name="imageFile" accept="image/*"
+                                    style="position:absolute;opacity:0;width:100%;height:100%;left:0;top:0;cursor:pointer;z-index:2;"
+                                    required onchange="previewImage(event)">
+                                <label for="dish-image" class="cursor-pointer z-1 relative block">
                                     <i class="fa-solid fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
                                     <p class="text-gray-600 mb-2">Click to upload or drag and drop</p>
                                     <p class="text-sm text-gray-500">PNG, JPG up to 5MB</p>
                                 </label>
+                                <div id="image-error" class="client-error text-red-600 text-xs mt-1"></div>
                             </div>
                         </div>
                         <!-- Image Preview -->
@@ -87,11 +103,119 @@
                 <button type="button" class="px-6 py-3 text-gray-700 bg-white border border-gray-light rounded-lg hover:bg-gray-50 transition font-medium" onclick="closeAddDishModal()">
                     Cancel
                 </button>
-                <button type="submit" form="add-dish-form" class="px-8 py-3 text-white bg-primary rounded-lg hover:bg-blue-600 transition font-semibold">
+                <button type="submit" id="add-dish-submit" form="add-dish-form" class="px-8 py-3 text-white rounded-lg font-semibold transition disabled:bg-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed bg-primary hover:bg-blue-600" disabled>
                     <i class="fa-solid fa-plus mr-2"></i>
                     Add Dish
                 </button>
             </div>
         </div>
     </div>
-</div> 
+</div>
+
+<script>
+function setupAddDishValidation() {
+    const form = document.getElementById('add-dish-form');
+    if (!form) return;
+    const nameInput = form.querySelector('[name="name"]');
+    const mealPeriodInput = form.querySelector('[name="mealPeriod"]');
+    const categoryInput = form.querySelector('[name="category"]');
+    const descriptionInput = form.querySelector('[name="description"]');
+    const imageInput = form.querySelector('[name="imageFile"]');
+    const submitBtn = document.getElementById('add-dish-submit');
+    if (!nameInput || !mealPeriodInput || !categoryInput || !descriptionInput || !imageInput || !submitBtn) return;
+
+    // Remove previous listeners to avoid duplicates
+    nameInput.oninput = null; nameInput.onblur = null;
+    mealPeriodInput.onchange = null; mealPeriodInput.onblur = null;
+    categoryInput.onchange = null; categoryInput.onblur = null;
+    descriptionInput.oninput = null; descriptionInput.onblur = null;
+    imageInput.onchange = null; imageInput.onblur = null;
+
+    // Error containers
+    const nameError = nameInput.parentElement.querySelector('.client-error') || createErrorDiv(nameInput);
+    const mealPeriodError = mealPeriodInput.parentElement.querySelector('.client-error') || createErrorDiv(mealPeriodInput);
+    const categoryError = categoryInput.parentElement.querySelector('.client-error') || createErrorDiv(categoryInput);
+    const descriptionError = descriptionInput.parentElement.querySelector('.client-error') || createErrorDiv(descriptionInput);
+    const imageError = document.getElementById('image-error');
+
+    // Track touched state
+    let touched = { name: false, mealPeriod: false, category: false, description: false, image: false };
+
+    function createErrorDiv(input) {
+        const div = document.createElement('div');
+        div.className = 'client-error text-red-600 text-xs mt-1';
+        input.parentElement.appendChild(div);
+        return div;
+    }
+
+    function validate(showAll = false) {
+        let valid = true;
+        // Name
+        if ((!nameInput.value || nameInput.value.trim().length < 5)) {
+            if (touched.name || showAll) nameError.textContent = 'Dish name must be at least 5 characters.';
+            else nameError.textContent = '';
+            valid = false;
+        } else {
+            nameError.textContent = '';
+        }
+        // Meal Period
+        if (!mealPeriodInput.value) {
+            if (touched.mealPeriod || showAll) mealPeriodError.textContent = 'Meal period is required.';
+            else mealPeriodError.textContent = '';
+            valid = false;
+        } else {
+            mealPeriodError.textContent = '';
+        }
+        // Category
+        if (!categoryInput.value) {
+            if (touched.category || showAll) categoryError.textContent = 'Category is required.';
+            else categoryError.textContent = '';
+            valid = false;
+        } else {
+            categoryError.textContent = '';
+        }
+        // Description
+        if (!descriptionInput.value || descriptionInput.value.trim().length < 30) {
+            if (touched.description || showAll) descriptionError.textContent = 'Description must be at least 30 characters.';
+            else descriptionError.textContent = '';
+            valid = false;
+        } else {
+            descriptionError.textContent = '';
+        }
+        // Image
+        if (!imageInput.files || imageInput.files.length === 0) {
+            if (touched.image || showAll) imageError.textContent = 'Image is required.';
+            else imageError.textContent = '';
+            valid = false;
+        } else {
+            imageError.textContent = '';
+        }
+        submitBtn.disabled = !valid;
+        return valid;
+    }
+
+    // Attach events
+    nameInput.addEventListener('input', function() { touched.name = true; validate(); });
+    nameInput.addEventListener('blur', function() { touched.name = true; validate(); });
+    mealPeriodInput.addEventListener('change', function() { touched.mealPeriod = true; validate(); });
+    mealPeriodInput.addEventListener('blur', function() { touched.mealPeriod = true; validate(); });
+    categoryInput.addEventListener('change', function() { touched.category = true; validate(); });
+    categoryInput.addEventListener('blur', function() { touched.category = true; validate(); });
+    descriptionInput.addEventListener('input', function() { touched.description = true; validate(); });
+    descriptionInput.addEventListener('blur', function() { touched.description = true; validate(); });
+    imageInput.addEventListener('change', function() { touched.image = true; validate(); });
+    imageInput.addEventListener('blur', function() { touched.image = true; validate(); });
+
+    // Initial validation (do not show errors)
+    validate(false);
+
+    // Prevent submit if invalid
+    form.addEventListener('submit', function(e) {
+        if (!imageInput.files || imageInput.files.length === 0) touched.image = true;
+        if (!validate(true)) {
+            if (!imageInput.files || imageInput.files.length === 0) imageInput.focus();
+            e.preventDefault();
+        }
+    });
+}
+</script>
