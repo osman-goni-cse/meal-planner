@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.example.mealplanner.model.User;
 import com.example.mealplanner.repository.UserRepository;
+import com.example.mealplanner.service.UserOnboardingService;
 
 @Controller
 public class HomeController {
@@ -19,6 +20,9 @@ public class HomeController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserOnboardingService userOnboardingService;
 
     @GetMapping("/")
     public String home() {
@@ -55,22 +59,10 @@ public class HomeController {
         
         String email = oauth2User.getAttribute("email");
         
-        // Check if user exists in database
-        var userOpt = userRepository.findByEmail(email);
+        // Use the onboarding service to handle user creation/retrieval
+        User user = userOnboardingService.onboardUser(email);
         
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            return String.format("User found in database:<br>Email: %s<br>Role: %s<br>ID: %s", 
-                               user.getEmail(), user.getRole(), user.getId());
-        } else {
-            // Create user with Admin role if not exists
-            User newUser = new User();
-            newUser.setEmail(email);
-            newUser.setRole("Admin");
-            userRepository.save(newUser);
-            
-            return String.format("User not found in database. Created new user:<br>Email: %s<br>Role: %s<br>ID: %s", 
-                               newUser.getEmail(), newUser.getRole(), newUser.getId());
-        }
+        return String.format("User processed through onboarding:<br>Email: %s<br>Role: %s<br>ID: %s", 
+                           user.getEmail(), user.getRole(), user.getId());
     }
 } 

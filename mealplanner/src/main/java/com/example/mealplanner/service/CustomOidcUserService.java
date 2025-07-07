@@ -19,6 +19,9 @@ public class CustomOidcUserService extends OidcUserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserOnboardingService userOnboardingService;
+
     public CustomOidcUserService() {
         logger.info("=== CustomOidcUserService constructor called ===");
     }
@@ -40,13 +43,10 @@ public class CustomOidcUserService extends OidcUserService {
         logger.info("Original OidcUser authorities: {}", oidcUser.getAuthorities());
 
         try {
-            User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> {
-                    logger.error("User not found in database for email: {}", email);
-                    return new OAuth2AuthenticationException("User not found in database: " + email);
-                });
+            // Use the onboarding service to handle user creation/retrieval
+            User user = userOnboardingService.onboardUser(email);
             
-            logger.info("User found in database: {} with role: {}", email, user.getRole());
+            logger.info("User processed through onboarding: {} with role: {}", email, user.getRole());
             
             CustomUserDetails customUserDetails = new CustomUserDetails(user, oidcUser.getAttributes());
             logger.info("Created CustomUserDetails with authorities: {}", customUserDetails.getAuthorities());

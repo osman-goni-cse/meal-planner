@@ -20,6 +20,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private UserOnboardingService userOnboardingService;
+
     public CustomOAuth2UserService() {
         logger.info("=== CustomOAuth2UserService constructor called ===");
     }
@@ -36,13 +39,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         logger.info("Original OAuth2User authorities: {}", oauth2User.getAuthorities());
 
         try {
-            User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> {
-                    logger.error("User not found in database for email: {}", email);
-                    return new OAuth2AuthenticationException("User not found in database: " + email);
-                });
+            // Use the onboarding service to handle user creation/retrieval
+            User user = userOnboardingService.onboardUser(email);
             
-            logger.info("User found in database: {} with role: {}", email, user.getRole());
+            logger.info("User processed through onboarding: {} with role: {}", email, user.getRole());
             
             CustomUserDetails customUserDetails = new CustomUserDetails(user, oauth2User.getAttributes());
             logger.info("Created CustomUserDetails with authorities: {}", customUserDetails.getAuthorities());
