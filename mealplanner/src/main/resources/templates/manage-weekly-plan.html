@@ -59,8 +59,7 @@
                             </a>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div th:insert="~{manage-weekly-plan :: mealCard(selectedDate=${selectedDate}, meal='breakfast', weekPlan=${weekPlan}, allDishes=${allDishes})}"></div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div th:insert="~{manage-weekly-plan :: mealCard(selectedDate=${selectedDate}, meal='lunch', weekPlan=${weekPlan}, allDishes=${allDishes})}"></div>
                         <div th:insert="~{manage-weekly-plan :: mealCard(selectedDate=${selectedDate}, meal='snacks', weekPlan=${weekPlan}, allDishes=${allDishes})}"></div>
                     </div>
