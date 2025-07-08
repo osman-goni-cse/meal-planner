@@ -173,12 +173,11 @@ public class WeeklyMealFeedbackController {
     @ResponseBody
     public Map<String, Object> getWeeklyFeedbackComments(
         @RequestParam("dishId") Long dishId,
-        @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size
     ) {
         List<Feedback> all = feedbackRepository.findAll().stream()
-            .filter(fb -> dishId.equals(fb.getDishId()) && date.equals(fb.getDate()))
+            .filter(fb -> dishId.equals(fb.getDishId()))
             .collect(Collectors.toList());
         int from = page * size;
         int to = Math.min(from + size, all.size());
