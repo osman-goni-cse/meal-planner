@@ -24,6 +24,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @Controller
 public class DishController {
@@ -79,19 +82,35 @@ public class DishController {
     }
 
     @GetMapping("/dishes")
-    public String listDishes(Model model, @AuthenticationPrincipal OAuth2User oauth2User, HttpServletRequest request) {
+    public String listDishes(
+        @RequestParam(value = "search", required = false) String search,
+        @RequestParam(value = "mealPeriod", required = false) String mealPeriod,
+        @RequestParam(value = "category", required = false) String category,
+        @RequestParam(value = "page", defaultValue = "0") int page,
+        @RequestParam(value = "size", defaultValue = "8") int size,
+        Model model, @AuthenticationPrincipal OAuth2User oauth2User, HttpServletRequest request) {
         logger.info("Dish management accessed by user: {}", oauth2User != null ? oauth2User.getAttribute("email") : "anonymous");
         logger.info("User authorities: {}", oauth2User != null ? oauth2User.getAuthorities() : "no authorities");
         logger.info("Request URI: {}", request.getRequestURI());
-        
-        List<Dish> dishes = dishRepository.findAll();
-        model.addAttribute("dishes", dishes);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Dish> dishesPage = dishRepository.findByFilters(
+            (search != null && !search.isBlank()) ? search : null,
+            (mealPeriod != null && !mealPeriod.isBlank()) ? mealPeriod : null,
+            (category != null && !category.isBlank()) ? category : null,
+            pageable);
+        model.addAttribute("dishesPage", dishesPage);
+        model.addAttribute("dishes", dishesPage.getContent());
         model.addAttribute("dish", new Dish());
         model.addAttribute("categories", CATEGORIES);
         model.addAttribute("dietaryTags", DIETARY_TAGS); 
         model.addAttribute("pageTitle", "Dish Management");
-        model.addAttribute("dishCount", dishes.size());
+        model.addAttribute("dishCount", dishesPage.getTotalElements());
         model.addAttribute("currentPath", request.getRequestURI());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
+        model.addAttribute("search", search);
+        model.addAttribute("mealPeriod", mealPeriod);
+        model.addAttribute("category", category);
         return "dish-management";
     }
 

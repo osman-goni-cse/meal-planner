@@ -10,33 +10,34 @@
                 <!-- Page-specific content starts here -->
                 
                 <section id="dish-filters-section" class="bg-white rounded-lg shadow-sm p-6 mb-8">
-                    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <form id="dish-filters-form" method="get" action="/dishes" class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                         <div class="flex flex-col sm:flex-row gap-4 flex-1">
                             <div class="relative flex-1 max-w-md">
                                 <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                <input type="text" id="search-input" placeholder="Search dishes by name..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <input type="text" id="search-input" name="search" placeholder="Search dishes by name..." th:value="${search}" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                             </div>
-                            
-                            <select id="meal-period-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <select id="meal-period-filter" name="mealPeriod" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                                 <option value="">All Meal Periods</option>
-                                <option value="LUNCH">Lunch</option>
-                                <option value="SNACKS">Snacks</option>
+                                <option value="LUNCH" th:selected="${mealPeriod == 'LUNCH'}">Lunch</option>
+                                <option value="SNACKS" th:selected="${mealPeriod == 'SNACKS'}">Snacks</option>
                             </select>
-                            
-                            <select id="category-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <select id="category-filter" name="category" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                                 <option value="">All Categories</option>
-                                <option value="Main Course">Main Course</option>
-                                <option value="Side Dish">Side Dish</option>
-                                <option value="Beverage">Beverage</option>
-                                <option value="Dessert">Dessert</option>
+                                <option value="Main Course" th:selected="${category == 'Main Course'}">Main Course</option>
+                                <option value="Side Dish" th:selected="${category == 'Side Dish'}">Side Dish</option>
+                                <option value="Beverage" th:selected="${category == 'Beverage'}">Beverage</option>
+                                <option value="Dessert" th:selected="${category == 'Dessert'}">Dessert</option>
                             </select>
                         </div>
-                        
                         <div class="flex items-center gap-2">
-                            <button id="clear-filters-btn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
+                            <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition flex items-center">
+                                <i class="fa-solid fa-filter mr-2"></i>
+                                <span>Apply Filters</span>
+                            </button>
+                            <a href="/dishes" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
                                 <i class="fa-solid fa-filter mr-2"></i>
                                 <span>Clear Filters</span>
-                            </button>
+                            </a>
                             <div class="" sec:authorize="hasAuthority('ROLE_ADMIN')">
                                 <button class="bg-white text-primary px-6 py-2 rounded-full shadow-md hover:bg-gray-100 transition flex items-center font-medium"
                                         type="button" onclick="openAddDishModal()">
@@ -45,7 +46,7 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </form>
                 </section>
                 
                 <section id="dishes-grid-section" class="mb-8">
@@ -54,7 +55,31 @@
                             <div class="flex items-center justify-between">
                                 <h3 class="text-lg font-semibold text-gray-800">All Dishes</h3>
                                 <div class="flex items-center text-sm text-gray-600">
-                                    <span id="dish-count-display" th:text="'Showing 1-' + ${dishes.size()} + ' of ' + ${dishes.size()} + ' dishes'"></span>
+                                    <span id="dish-count-display" th:text="'Showing ' + (${currentPage * pageSize + 1}) + '-' + (${currentPage * pageSize + dishes.size()}) + ' of ' + ${dishCount} + ' dishes'"></span>
+                                    <!-- Pagination Controls (Top Right) -->
+                                    <nav class="flex items-center gap-1 ml-6 overflow-x-auto" aria-label="Pagination" th:if="${dishesPage.totalPages > 1}">
+                                        <a th:href="@{/dishes(page=${currentPage-1},size=${pageSize},search=${search},mealPeriod=${mealPeriod},category=${category})}"
+                                           class="px-2 py-1 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-100 rounded-l-md"
+                                           th:classappend="${dishesPage.first} ? 'pointer-events-none opacity-50' : ''"
+                                           th:if="${!dishesPage.first}">
+                                            <i class="fa-solid fa-chevron-left"></i>
+                                        </a>
+                                        <span th:if="${dishesPage.first}" class="px-2 py-1 border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 rounded-l-md"><i class="fa-solid fa-chevron-left"></i></span>
+                                        <span th:each="i : ${#numbers.sequence(0, dishesPage.totalPages-1)}">
+                                            <a th:href="@{/dishes(page=${i},size=${pageSize},search=${search},mealPeriod=${mealPeriod},category=${category})}"
+                                               th:text="${i+1}"
+                                               class="px-2 py-1 border border-gray-300 text-sm font-medium hover:bg-primary hover:text-white"
+                                               th:classappend="${i} == ${currentPage} ? 'bg-primary text-white' : 'bg-white text-gray-700'">
+                                            </a>
+                                        </span>
+                                        <a th:href="@{/dishes(page=${currentPage+1},size=${pageSize},search=${search},mealPeriod=${mealPeriod},category=${category})}"
+                                           class="px-2 py-1 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-100 rounded-r-md"
+                                           th:classappend="${dishesPage.last} ? 'pointer-events-none opacity-50' : ''"
+                                           th:if="${!dishesPage.last}">
+                                            <i class="fa-solid fa-chevron-right"></i>
+                                        </a>
+                                        <span th:if="${dishesPage.last}" class="px-2 py-1 border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 rounded-r-md"><i class="fa-solid fa-chevron-right"></i></span>
+                                    </nav>
                                 </div>
                             </div>
                         </div>
@@ -648,111 +673,8 @@
 
     // Search and Filter Functionality
     document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('search-input');
-        const mealPeriodFilter = document.getElementById('meal-period-filter');
-        const categoryFilter = document.getElementById('category-filter');
-        const clearFiltersBtn = document.getElementById('clear-filters-btn');
-        const dishCards = document.querySelectorAll('.dish-card');
-        const dishCountDisplay = document.getElementById('dish-count-display');
-        
-        let totalDishes = dishCards.length;
-        
-        // Initialize filters
-        function initializeFilters() {
-            // Add event listeners
-            searchInput.addEventListener('input', filterDishes);
-            mealPeriodFilter.addEventListener('change', filterDishes);
-            categoryFilter.addEventListener('change', filterDishes);
-            clearFiltersBtn.addEventListener('click', clearAllFilters);
-            
-            // Initial count update
-            updateDishCount();
-        }
-        
-        function filterDishes() {
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            const selectedMealPeriod = mealPeriodFilter.value;
-            const selectedCategory = categoryFilter.value;
-            
-            let visibleCount = 0;
-            
-            dishCards.forEach(card => {
-                const dishName = card.getAttribute('data-dish-name').toLowerCase();
-                const mealPeriod = card.getAttribute('data-meal-period');
-                const category = card.getAttribute('data-category');
-                
-                // Check if dish matches all filters
-                const matchesSearch = searchTerm === '' || dishName.includes(searchTerm);
-                const matchesMealPeriod = selectedMealPeriod === '' || mealPeriod === selectedMealPeriod;
-                const matchesCategory = selectedCategory === '' || category === selectedCategory;
-                
-                if (matchesSearch && matchesMealPeriod && matchesCategory) {
-                    card.style.display = 'block';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-            
-            updateDishCount(visibleCount);
-            
-            // Show/hide no results message
-            const noResultsMsg = document.getElementById('no-results-message');
-            if (visibleCount === 0) {
-                showNoResultsMessage();
-            } else {
-                hideNoResultsMessage();
-            }
-        }
-        
-        function clearAllFilters() {
-            searchInput.value = '';
-            mealPeriodFilter.value = '';
-            categoryFilter.value = '';
-            filterDishes();
-        }
-        
-        function updateDishCount(visibleCount = null) {
-            if (visibleCount === null) {
-                visibleCount = totalDishes;
-            }
-            
-            if (visibleCount === totalDishes) {
-                dishCountDisplay.textContent = `Showing 1-${visibleCount} of ${totalDishes} dishes`;
-            } else {
-                dishCountDisplay.textContent = `Showing ${visibleCount} of ${totalDishes} dishes`;
-            }
-        }
-        
-        function showNoResultsMessage() {
-            let noResultsMsg = document.getElementById('no-results-message');
-            if (!noResultsMsg) {
-                noResultsMsg = document.createElement('div');
-                noResultsMsg.id = 'no-results-message';
-                noResultsMsg.className = 'col-span-full text-center py-12';
-                noResultsMsg.innerHTML = `
-                    <div class="text-gray-500">
-                        <i class="fa-solid fa-search text-4xl mb-4"></i>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">No dishes found</h3>
-                        <p class="text-gray-600">Try adjusting your search or filter criteria.</p>
-                    </div>
-                `;
-                
-                const gridContainer = document.querySelector('.grid');
-                gridContainer.appendChild(noResultsMsg);
-            }
-            noResultsMsg.style.display = 'block';
-        }
-        
-        function hideNoResultsMessage() {
-            const noResultsMsg = document.getElementById('no-results-message');
-            if (noResultsMsg) {
-                noResultsMsg.style.display = 'none';
-            }
-        }
-        
-        // Initialize the filters
-        initializeFilters();
+        // The client-side filtering logic is now handled by the server-side Thymeleaf template
+        // and the form submission.
     });
     </script>
 </body>
