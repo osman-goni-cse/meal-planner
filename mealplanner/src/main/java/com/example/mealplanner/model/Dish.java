@@ -3,6 +3,7 @@ package com.example.mealplanner.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -34,11 +35,19 @@ public class Dish {
     @Column(name = "dietary_info")
     private List<String> dietaryInfo;
 
+    @Column(name = "created_date", nullable = false)
+    private LocalDateTime createdDate;
+
     @Transient
     private long reactions;
 
     @Transient
     private boolean userReacted;
+
+    // Constructor
+    public Dish() {
+        this.createdDate = LocalDateTime.now();
+    }
 
     // Getters and setters
     public Long getId() { return id; }
@@ -55,6 +64,8 @@ public class Dish {
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     public List<String> getDietaryInfo() { return dietaryInfo; }
     public void setDietaryInfo(List<String> dietaryInfo) { this.dietaryInfo = dietaryInfo; }
+    public LocalDateTime getCreatedDate() { return createdDate; }
+    public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
     public long getReactions() { return reactions; }
     public void setReactions(long reactions) { this.reactions = reactions; }
     public boolean isUserReacted() { return userReacted; }

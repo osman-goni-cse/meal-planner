@@ -76,7 +76,7 @@
                                             <!-- Dropdown menu -->
                                             <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all duration-200 z-10 dish-menu">
                                                 <div class="py-1">
-                                                    <a th:href="@{'/dishes/view/' + ${dish.id}}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition">
+                                                    <a href="#" th:onclick="'openViewDishModal(' + ${dish.id} + '); return false;'" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition">
                                                         <i class="fa-solid fa-eye mr-3 text-gray-500"></i>
                                                         View Details
                                                     </a>
@@ -121,6 +121,8 @@
     <div th:replace="fragments/add-dish-modal :: add-dish-modal"></div>
     <!-- Edit Dish Modal Fragment -->
     <div th:replace="fragments/edit-dish-modal :: edit-dish-modal"></div>
+    <!-- View Dish Modal Fragment -->
+    <div th:replace="fragments/view-dish-modal :: view-dish-modal"></div>
     
     <!-- Delete Confirmation Modal -->
     <div id="delete-confirmation-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
@@ -531,6 +533,120 @@
         const dishName = button.getAttribute('data-dish-name');
         openDeleteModal(dishId, dishName);
     }
+
+    // View Dish Modal Functions
+    function openViewDishModal(dishId) {
+        fetch(`/dishes/json/${dishId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch dish data');
+                }
+                return response.json();
+            })
+            .then(dishData => {
+                // Populate modal with dish data
+                document.getElementById('view-dish-name').textContent = dishData.name;
+                document.getElementById('view-dish-description').textContent = dishData.description;
+                
+                // Handle image display
+                const imageElement = document.getElementById('view-dish-image');
+                if (dishData.imageUrl && dishData.imageUrl.trim() !== '') {
+                    imageElement.src = dishData.imageUrl;
+                    imageElement.alt = dishData.name;
+                } else {
+                    // Show a placeholder for missing images
+                    imageElement.src = '/images/default-dish.svg';
+                    imageElement.alt = 'No image available';
+                    imageElement.onerror = function() {
+                        // If default image also fails, show a text placeholder
+                        this.style.display = 'none';
+                        this.parentElement.innerHTML = `
+                            <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                                <div class="text-center text-gray-500">
+                                    <i class="fa-solid fa-utensils text-4xl mb-2"></i>
+                                    <p class="text-sm">No image available</p>
+                                </div>
+                            </div>
+                        `;
+                    };
+                }
+                
+                // Set category and meal period
+                const categorySpan = document.getElementById('view-dish-category');
+                categorySpan.innerHTML = `<i class="fa-solid fa-utensils mr-2"></i>${dishData.category}`;
+                
+                const mealPeriodSpan = document.getElementById('view-dish-meal-period');
+                mealPeriodSpan.innerHTML = `<i class="fa-solid fa-sun mr-2"></i>${dishData.mealPeriod}`;
+                
+                // Set date
+                const dateSpan = document.getElementById('view-dish-date');
+                if (dishData.createdDate) {
+                    const createdDate = new Date(dishData.createdDate);
+                    dateSpan.textContent = createdDate.toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+                } else {
+                    dateSpan.textContent = 'Date not available';
+                }
+                
+                // Populate dietary tags
+                populateDietaryTags(dishData.dietaryInfo || []);
+                
+                // Store current dish ID for edit functionality
+                document.getElementById('view-dish-modal').setAttribute('data-current-dish-id', dishId);
+                
+                // Show the modal
+                document.getElementById('view-dish-modal').classList.remove('hidden');
+            })
+            .catch(error => {
+                console.error('Error loading dish data:', error);
+                alert('Error loading dish data. Please try again.');
+            });
+    }
+
+    function populateDietaryTags(dietaryInfo) {
+        const container = document.getElementById('view-dietary-tags');
+        const allTags = ['Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Nut-Free', 'Low-Carb', 'High-Protein', 'Spicy'];
+        
+        container.innerHTML = '';
+        
+        allTags.forEach(tag => {
+            const isIncluded = dietaryInfo.includes(tag);
+            const div = document.createElement('div');
+            div.className = `flex items-center px-4 py-3 rounded-lg border transition-all duration-200 ${
+                isIncluded 
+                    ? 'bg-success bg-opacity-10 border-success border-opacity-20 shadow-sm' 
+                    : 'bg-gray-100 border-gray-light opacity-60'
+            }`;
+            
+            div.innerHTML = `
+                <i class="fa-solid ${isIncluded ? 'fa-check-circle text-success' : 'fa-times-circle text-gray-400'} mr-3 text-lg"></i>
+                <span class="font-medium text-sm ${isIncluded ? 'text-success' : 'text-gray-500'}">${tag}</span>
+            `;
+            
+            container.appendChild(div);
+        });
+    }
+
+    function closeViewDishModal() {
+        document.getElementById('view-dish-modal').classList.add('hidden');
+    }
+
+    function openEditFromView() {
+        const dishId = document.getElementById('view-dish-modal').getAttribute('data-current-dish-id');
+        closeViewDishModal();
+        openEditDishModal(dishId);
+    }
+
+    // Close view modal when clicking outside
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('view-dish-modal');
+        if (e.target === modal) {
+            closeViewDishModal();
+        }
+    });
     </script>
 </body>
 </html> 

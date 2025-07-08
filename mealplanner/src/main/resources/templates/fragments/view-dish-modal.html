@@ -1,0 +1,78 @@
+<div id="view-dish-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden" th:fragment="view-dish-modal">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-6 border-b border-gray-light">
+            <div class="flex items-center">
+                <i class="fa-solid fa-utensils text-primary mr-3 text-xl"></i>
+                <h2 class="text-xl font-semibold text-gray-800">Dish Details</h2>
+            </div>
+            <button class="text-gray-400 hover:text-gray-600 text-xl transition" onclick="closeViewDishModal()">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Modal Content -->
+        <div class="p-6">
+            <!-- Dish Image Section -->
+            <section id="dish-image-section" class="mb-6">
+                <div class="relative w-full h-64 rounded-lg overflow-hidden bg-gray-100">
+                    <img id="view-dish-image" src="" alt="Dish Image" class="w-full h-full object-cover">
+                    <div class="absolute top-4 right-4">
+                        <span id="view-dish-fresh-badge" class="bg-success text-white px-3 py-1 rounded-full text-sm font-medium hidden">
+                            <i class="fa-solid fa-leaf mr-1"></i>Fresh
+                        </span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Basic Information -->
+            <section id="basic-details" class="mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h1 id="view-dish-name" class="text-2xl font-bold text-gray-800 mb-2"></h1>
+                        <div class="flex items-center space-x-4 mb-4">
+                            <span id="view-dish-category" class="inline-flex items-center px-3 py-1 bg-primary bg-opacity-10 text-primary rounded-full text-sm font-medium">
+                                <i class="fa-solid fa-utensils mr-2"></i>
+                            </span>
+                            <span id="view-dish-meal-period" class="inline-flex items-center px-3 py-1 bg-warning bg-opacity-10 text-warning rounded-full text-sm font-medium">
+                                <i class="fa-solid fa-sun mr-2"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-end">
+                        <div class="text-right">
+                            <div class="text-sm text-gray-500 mb-1">Added on</div>
+                            <div id="view-dish-date" class="text-gray-800 font-medium"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Description Section -->
+            <section id="description-section" class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Description</h3>
+                <div class="bg-secondary p-4 rounded-lg border border-gray-light">
+                    <p id="view-dish-description" class="text-gray-700 leading-relaxed"></p>
+                </div>
+            </section>
+
+            <!-- Dietary Information -->
+            <section id="dietary-details" class="mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-3">Dietary Information</h3>
+                <div id="view-dietary-tags" class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <!-- Dietary tags will be populated dynamically -->
+                </div>
+            </section>
+
+            <div class="flex items-center justify-end space-x-3">
+                <button type="button" id="view-edit-button" class="px-6 py-2 text-gray-700 bg-white border border-gray-light rounded-lg hover:bg-gray-50 transition font-medium" sec:authorize="hasAuthority('ROLE_ADMIN')" onclick="openEditFromView()">
+                    <i class="fa-solid fa-edit mr-2"></i>
+                    Edit Dish
+                </button>
+                <button type="button" class="px-6 py-2 text-white bg-primary rounded-lg hover:bg-blue-600 transition font-medium" onclick="closeViewDishModal()">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div> 
