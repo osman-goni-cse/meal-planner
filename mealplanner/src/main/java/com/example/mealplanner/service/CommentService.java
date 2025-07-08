@@ -107,6 +107,9 @@ public class CommentService {
         dto.setDescription(dish.getDescription());
         dto.setImageUrl(dish.getImageUrl());
         dto.setComments(comments);
+        // Add reactions and commentsCount for modal
+        dto.setReactions(dishReactionService.getReactions(dishId));
+        dto.setCommentsCount(comments.size());
         return dto;
     }
 
