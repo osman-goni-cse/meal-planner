@@ -79,7 +79,7 @@
                 <!-- Main Dish and Feedback Area -->
                 <div th:if="${selectedDish != null}" id="main-dish-area" class="flex-grow flex flex-col lg:flex-row border border-gray-200 rounded-xl overflow-hidden">
                     <!-- Left Column: Dish Image and Info -->
-                    <div id="dish-info-column" class="w-full lg:w-[65%] p-6 bg-white">
+                    <div id="dish-info-column" class="w-full lg:w-[60%] p-6 bg-white">
                         <div id="dish-image-container" class="mb-6">
                             <img class="w-full h-80 object-cover rounded-xl shadow-md" th:src="${selectedDish.imageUrl}" th:alt="${selectedDish.name}">
                         </div>
@@ -89,7 +89,7 @@
                         </div>
                     </div>
                     <!-- Right Column: Feedback -->
-                    <div id="feedback-column" class="w-full lg:w-[35%] bg-gray-50/50 border-l border-gray-200 flex flex-col p-6">
+                    <div id="feedback-column" class="w-full lg:w-[40%] bg-gray-50/50 border-l border-gray-200 flex flex-col p-6">
                         <div th:if="${!selectedDate.isAfter(T(java.time.LocalDate).now())}" id="comments-list" class="flex-grow space-y-5 pr-2 -mr-2 overflow-y-auto h-64">
                             <!-- Comments will be loaded here by JS -->
                         </div>
@@ -103,13 +103,15 @@
                                     <button id="reaction-btn" type="button" class="flex items-center space-x-1.5 text-gray-600 focus:outline-none group">
                                         <i id="reaction-icon" class="fa-heart text-lg text-red-500" th:classappend="${selectedDish.userReacted} ? 'fa-solid' : 'fa-regular'"></i>
                                         <span id="reaction-count" class="font-medium text-sm" th:text="${selectedDish.reactions}">0</span>
+                                        <span class="text-xs ml-1">Likes</span>
                                     </button>
                                     <div class="flex items-center space-x-1.5 text-gray-600">
                                         <i class="fa-regular fa-comment text-lg text-blue-500"></i>
                                         <span class="font-medium text-sm" th:text="${selectedDish.commentsCount}">0</span>
+                                        <span class="text-xs ml-1">Comments</span>
                                     </div>
                                 </div>
-                                <button id="load-more-comments-btn" class="text-sm font-semibold text-primary hover:underline hidden">Load more comments</button>
+                                <button id="load-more-comments-btn" class="text-sm font-semibold text-primary hover:underline hidden">View more comments</button>
                             </div>
                             <div th:if="${!selectedDate.isAfter(T(java.time.LocalDate).now())}" id="feedback-form" class="flex items-center space-x-2">
                                 <form th:action="@{/weekly-feedback/feedback}" method="post" class="flex w-full space-x-2">
@@ -154,7 +156,7 @@
         if (reset) commentsList.innerHTML = '';
         if (!currentDishId || !currentDate) return;
         // Remove quotes if present
-        let dateParam = currentDate.replace(/^['"]|['"]$/g, '');
+        //let dateParam = currentDate.replace(/^['"]|['"]$/g, '');
         const res = await fetch(`/weekly-feedback/comments?dishId=${currentDishId}&page=${currentPage}&size=${pageSize}`);
         const data = await res.json();
         if (!data.comments || (data.comments.length === 0 && currentPage === 0)) {

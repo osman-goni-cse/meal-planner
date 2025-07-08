@@ -85,7 +85,7 @@ public class WeeklyMealFeedbackController {
             // Feedbacks for this dish (by date and meal period, and dish id if available)
             List<Feedback> feedbacks = feedbackRepository.findByDateAndMealPeriodOrderByTimestampAsc(selectedDate, mealPeriod);
             List<Map<String, Object>> feedbackList = new ArrayList<>();
-            int commentsCount = 0;
+            
             for (Feedback f : feedbacks) {
                 if (f.getDishId() != null && f.getDishId().equals(dish.getId())) {
                     Map<String, Object> fb = new HashMap<>();
@@ -93,11 +93,13 @@ public class WeeklyMealFeedbackController {
                     fb.put("userAvatarUrl", f.getUserAvatarUrl());
                     fb.put("comment", f.getComment());
                     feedbackList.add(fb);
-                    commentsCount++;
+                    
                 }
             }
             dto.put("feedbacks", feedbackList);
-            dto.put("commentsCount", commentsCount);
+            // Use repository method to count all comments for this dish
+            int commentsCountTotal = (int) feedbackRepository.countByDishId(dish.getId());
+            dto.put("commentsCount", commentsCountTotal);
             // Add reactions and userReacted
             long reactions = dishReactionService.getReactions(dish.getId());
             dto.put("reactions", reactions);

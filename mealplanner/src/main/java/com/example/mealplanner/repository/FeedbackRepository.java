@@ -15,6 +15,9 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     List<Feedback> findByDateAndMealPeriodOrderByTimestampAsc(LocalDate date, String mealPeriod);
     List<Feedback> findByUserAndDateAndMealPeriod(User user, LocalDate date, String mealPeriod);
 
+    // Efficiently count feedbacks (comments) for a given dish
+    long countByDishId(Long dishId);
+
     @Query("SELECT f.dishId, d.name, d.imageUrl, COUNT(f.id) as commentsCount " +
            "FROM Feedback f JOIN Dish d ON f.dishId = d.id " +
            "GROUP BY f.dishId, d.name, d.imageUrl " +
