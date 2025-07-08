@@ -14,29 +14,26 @@
                         <div class="flex flex-col sm:flex-row gap-4 flex-1">
                             <div class="relative flex-1 max-w-md">
                                 <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                                <input type="text" placeholder="Search dishes by name..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <input type="text" id="search-input" placeholder="Search dishes by name..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                             </div>
                             
-                            <select class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <option value="">All Categories</option>
-                                <option value="breakfast">Breakfast</option>
-                                <option value="lunch">Lunch</option>
-                                <option value="snacks">Snacks</option>
-                                <option value="beverages">Beverages</option>
+                            <select id="meal-period-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="">All Meal Periods</option>
+                                <option value="LUNCH">Lunch</option>
+                                <option value="SNACKS">Snacks</option>
                             </select>
                             
-                            <select class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <option value="">All Tags</option>
-                                <option value="vegetarian">Vegetarian</option>
-                                <option value="vegan">Vegan</option>
-                                <option value="gluten-free">Gluten-Free</option>
-                                <option value="dairy-free">Dairy-Free</option>
-                                <option value="spicy">Spicy</option>
+                            <select id="category-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="">All Categories</option>
+                                <option value="Main Course">Main Course</option>
+                                <option value="Side Dish">Side Dish</option>
+                                <option value="Beverage">Beverage</option>
+                                <option value="Dessert">Dessert</option>
                             </select>
                         </div>
                         
                         <div class="flex items-center gap-2">
-                            <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
+                            <button id="clear-filters-btn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
                                 <i class="fa-solid fa-filter mr-2"></i>
                                 <span>Clear Filters</span>
                             </button>
@@ -57,13 +54,14 @@
                             <div class="flex items-center justify-between">
                                 <h3 class="text-lg font-semibold text-gray-800">All Dishes</h3>
                                 <div class="flex items-center text-sm text-gray-600">
-                                    <span th:text="'Showing 1-' + ${dishes.size()} + ' of ' + ${dishes.size()} + ' dishes'"></span>
+                                    <span id="dish-count-display" th:text="'Showing 1-' + ${dishes.size()} + ' of ' + ${dishes.size()} + ' dishes'"></span>
                                 </div>
                             </div>
                         </div>
                         <div class="p-6">
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                <div th:each="dish : ${dishes}" class="relative rounded-xl overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 dish-card" th:attr="data-dish-id=${dish.id}">
+                                <div th:each="dish : ${dishes}" class="relative rounded-xl overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 dish-card" 
+                                     th:attr="data-dish-id=${dish.id},data-dish-name=${dish.name},data-meal-period=${dish.mealPeriod},data-category=${dish.category}">
                                     <img class="w-full h-80 object-cover" th:src="${dish.imageUrl}" th:alt="${dish.name}">
                                     <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                                     
@@ -646,6 +644,115 @@
         if (e.target === modal) {
             closeViewDishModal();
         }
+    });
+
+    // Search and Filter Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('search-input');
+        const mealPeriodFilter = document.getElementById('meal-period-filter');
+        const categoryFilter = document.getElementById('category-filter');
+        const clearFiltersBtn = document.getElementById('clear-filters-btn');
+        const dishCards = document.querySelectorAll('.dish-card');
+        const dishCountDisplay = document.getElementById('dish-count-display');
+        
+        let totalDishes = dishCards.length;
+        
+        // Initialize filters
+        function initializeFilters() {
+            // Add event listeners
+            searchInput.addEventListener('input', filterDishes);
+            mealPeriodFilter.addEventListener('change', filterDishes);
+            categoryFilter.addEventListener('change', filterDishes);
+            clearFiltersBtn.addEventListener('click', clearAllFilters);
+            
+            // Initial count update
+            updateDishCount();
+        }
+        
+        function filterDishes() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const selectedMealPeriod = mealPeriodFilter.value;
+            const selectedCategory = categoryFilter.value;
+            
+            let visibleCount = 0;
+            
+            dishCards.forEach(card => {
+                const dishName = card.getAttribute('data-dish-name').toLowerCase();
+                const mealPeriod = card.getAttribute('data-meal-period');
+                const category = card.getAttribute('data-category');
+                
+                // Check if dish matches all filters
+                const matchesSearch = searchTerm === '' || dishName.includes(searchTerm);
+                const matchesMealPeriod = selectedMealPeriod === '' || mealPeriod === selectedMealPeriod;
+                const matchesCategory = selectedCategory === '' || category === selectedCategory;
+                
+                if (matchesSearch && matchesMealPeriod && matchesCategory) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            updateDishCount(visibleCount);
+            
+            // Show/hide no results message
+            const noResultsMsg = document.getElementById('no-results-message');
+            if (visibleCount === 0) {
+                showNoResultsMessage();
+            } else {
+                hideNoResultsMessage();
+            }
+        }
+        
+        function clearAllFilters() {
+            searchInput.value = '';
+            mealPeriodFilter.value = '';
+            categoryFilter.value = '';
+            filterDishes();
+        }
+        
+        function updateDishCount(visibleCount = null) {
+            if (visibleCount === null) {
+                visibleCount = totalDishes;
+            }
+            
+            if (visibleCount === totalDishes) {
+                dishCountDisplay.textContent = `Showing 1-${visibleCount} of ${totalDishes} dishes`;
+            } else {
+                dishCountDisplay.textContent = `Showing ${visibleCount} of ${totalDishes} dishes`;
+            }
+        }
+        
+        function showNoResultsMessage() {
+            let noResultsMsg = document.getElementById('no-results-message');
+            if (!noResultsMsg) {
+                noResultsMsg = document.createElement('div');
+                noResultsMsg.id = 'no-results-message';
+                noResultsMsg.className = 'col-span-full text-center py-12';
+                noResultsMsg.innerHTML = `
+                    <div class="text-gray-500">
+                        <i class="fa-solid fa-search text-4xl mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No dishes found</h3>
+                        <p class="text-gray-600">Try adjusting your search or filter criteria.</p>
+                    </div>
+                `;
+                
+                const gridContainer = document.querySelector('.grid');
+                gridContainer.appendChild(noResultsMsg);
+            }
+            noResultsMsg.style.display = 'block';
+        }
+        
+        function hideNoResultsMessage() {
+            const noResultsMsg = document.getElementById('no-results-message');
+            if (noResultsMsg) {
+                noResultsMsg.style.display = 'none';
+            }
+        }
+        
+        // Initialize the filters
+        initializeFilters();
     });
     </script>
 </body>
