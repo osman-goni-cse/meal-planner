@@ -24,27 +24,25 @@ public class ReviewCommentsController {
     public String reviewComments(
             @RequestParam(value = "search", required = false) String searchTerm,
             @RequestParam(value = "sort", required = false) String sortBy,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "8") int size,
             Model model, 
             HttpServletRequest request) {
-        
         // Default to most commented if no sort specified
         if (sortBy == null || sortBy.isEmpty()) {
             sortBy = "most-comments";
         }
-        
-        List<DishCommentStatsDTO> dishes;
-        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-            dishes = commentService.getDishesWithSearchAndSort(searchTerm, sortBy, 8);
-        } else {
-            dishes = commentService.getDishesWithSearchAndSort(null, sortBy, 8);
-        }
-        
-        model.addAttribute("mostCommentedDishes", dishes);
+        // Fetch paginated, filtered dishes
+        var pagedDishes = commentService.getDishesWithSearchAndSortPaged(searchTerm, sortBy, page, size);
+        model.addAttribute("mostCommentedDishes", pagedDishes.getContent());
+        model.addAttribute("dishesPage", pagedDishes);
         model.addAttribute("currentPath", request.getRequestURI());
         model.addAttribute("pageTitle", "Review Comments");
         model.addAttribute("commentCount", commentService.getCommentCount());
         model.addAttribute("searchTerm", searchTerm);
         model.addAttribute("sortBy", sortBy);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
         return "review-comments";
     }
 

@@ -8,7 +8,10 @@ import com.example.mealplanner.repository.DishRepository;
 import com.example.mealplanner.model.Dish;
 import com.example.mealplanner.model.Feedback;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.example.mealplanner.service.DishReactionService;
 
@@ -82,6 +85,40 @@ public class CommentService {
         }
         
         return dtos;
+    }
+
+    public Page<DishCommentStatsDTO> getDishesWithSearchAndSortPaged(String searchTerm, String sortBy, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<Object[]> results;
+        List<DishCommentStatsDTO> dtos = new ArrayList<>();
+
+        if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+            results = feedbackRepository.findDishCommentStatsBySearchAndComments(searchTerm.trim(), Pageable.unpaged());
+        } else {
+            results = feedbackRepository.findDishCommentStatsByComments(Pageable.unpaged());
+        }
+
+        for (Object[] row : results) {
+            DishCommentStatsDTO dto = new DishCommentStatsDTO();
+            dto.setId((Long) row[0]);
+            dto.setName((String) row[1]);
+            dto.setImageUrl((String) row[2]);
+            dto.setCommentsCount(((Number) row[3]).intValue());
+            dto.setReactions(dishReactionService.getReactions(dto.getId()));
+            dtos.add(dto);
+        }
+
+        if ("most-liked".equals(sortBy)) {
+            dtos.sort((a, b) -> Long.compare(b.getReactions(), a.getReactions()));
+        } else {
+            dtos.sort((a, b) -> Integer.compare(b.getCommentsCount(), a.getCommentsCount()));
+        }
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), dtos.size());
+        List<DishCommentStatsDTO> pageContent = (start < end) ? dtos.subList(start, end) : new ArrayList<>();
+
+        return new PageImpl<>(pageContent, pageable, dtos.size());
     }
 
     public int getCommentCount() {

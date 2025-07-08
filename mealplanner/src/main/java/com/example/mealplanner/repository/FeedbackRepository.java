@@ -5,6 +5,7 @@ import com.example.mealplanner.model.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -56,4 +57,10 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
            "GROUP BY f.dishId, d.name, d.imageUrl " +
            "ORDER BY commentsCount DESC")
     List<Object[]> findDishCommentStatsBySearchAndReactions(String searchTerm, Pageable pageable);
+
+    @Query("SELECT COUNT(DISTINCT f.dishId) FROM Feedback f JOIN Dish d ON f.dishId = d.id")
+    long countDishStats();
+
+    @Query("SELECT COUNT(DISTINCT f.dishId) FROM Feedback f JOIN Dish d ON f.dishId = d.id WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
+    long countDishStatsBySearch(@Param("searchTerm") String searchTerm);
 } 
