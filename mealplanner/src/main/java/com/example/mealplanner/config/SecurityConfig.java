@@ -37,8 +37,9 @@ public class SecurityConfig {
             )
 
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/", "/login", "/error", "/webjars/**", "/css/**", "/js/**", "/images/**", "/api/reactions", "/test-auth", "/debug-user").permitAll()
+                .requestMatchers("/login", "/error", "/webjars/**", "/css/**", "/js/**", "/images/**", "/api/reactions", "/test-auth", "/debug-user").permitAll()
                 .requestMatchers("/weekly-plan/**", "/dishes/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/", "/weekly-feedback").hasAuthority("ROLE_EMPLOYEE")
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
