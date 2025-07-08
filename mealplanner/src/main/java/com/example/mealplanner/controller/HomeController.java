@@ -18,6 +18,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
 
 @Controller
 public class HomeController {
@@ -114,6 +117,20 @@ public class HomeController {
         model.addAttribute("currentPath", "/");
         model.addAttribute("pageTitle", "Today's Menu");
         
+        // Build all dishes for the day (across all meal periods, as in WeeklyMealFeedbackController)
+        List<String> mealPeriods = Arrays.asList("lunch", "snacks");
+        List<Dish> allDishes = new ArrayList<>();
+        for (String mp : mealPeriods) {
+            List<Dish> dishes = mealService.getDishesForMeal(mp, today);
+            allDishes.addAll(dishes);
+        }
+        // Build a map from dishId to index
+        Map<Long, Integer> dishIdToIndex = new HashMap<>();
+        for (int i = 0; i < allDishes.size(); i++) {
+            dishIdToIndex.put(allDishes.get(i).getId(), i);
+        }
+        model.addAttribute("dishIdToIndex", dishIdToIndex);
+
         return "dashboard";
     }
 
