@@ -158,16 +158,16 @@
     
     <!-- Meal Card Fragment (hidden) -->
     <div th:fragment="mealCard(selectedDate, meal, weekPlan, allDishes)" th:id="|meal-card-${meal != null ? meal : 'unknown'}|">
-        <div th:if="${meal != null}" th:classappend="${meal == 'breakfast'} ? 'bg-yellow-50 border-yellow-200' : (meal == 'lunch' ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200')"
+        <div th:if="${meal != null}" th:classappend="${meal == 'lunch'} ? 'bg-orange-50 border-orange-200' : 'bg-blue-50 border-blue-200'"
              class="rounded-lg p-6 border">
             <div class="flex items-center mb-4">
-                <div th:classappend="${meal == 'breakfast'} ? 'bg-yellow-100 text-yellow-600' : (meal == 'lunch' ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-600')"
+                <div th:classappend="${meal == 'lunch'} ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'"
                      class="w-10 h-10 rounded-full flex items-center justify-center mr-3">
-                    <i th:class="${meal == 'breakfast'} ? 'fa-solid fa-sun' : 'fa-solid fa-utensils'"></i>
+                    <i class="fa-solid fa-utensils"></i>
                 </div>
                 <div>
                     <h4 class="font-semibold text-gray-800" th:text="${#strings.capitalize(meal)}"></h4>
-                    <p class="text-sm text-gray-600" th:text="${meal == 'breakfast' ? '7:00 - 10:00 AM' : (meal == 'lunch' ? '12:00 - 2:00 PM' : '1:00 - 2:00 PM')}"></p>
+                    <p class="text-sm text-gray-600" th:text="${meal == 'lunch' ? '1:00 - 5:00 PM' : '5:00 - 7:00 PM'}"></p>
                 </div>
             </div>
             
@@ -220,7 +220,10 @@
                     <div class="flex items-center gap-2">
                         <select name="dishId" class="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-3 text-gray-500 focus:border-primary dish-select">
                             <option value="">+ Add Dish</option>
-                            <option th:each="d : ${allDishes}" th:value="${d.id}" th:text="${d.name}"></option>
+                            <option th:each="d : ${allDishes}"
+                                    th:if="${#strings.toUpperCase(d.mealPeriod) == #strings.toUpperCase(meal)}"
+                                    th:value="${d.id}"
+                                    th:text="${d.name}"></option>
                         </select>
                     </div>
                 </form>
