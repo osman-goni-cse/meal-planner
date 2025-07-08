@@ -38,7 +38,6 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/", "/login", "/error", "/webjars/**", "/css/**", "/js/**", "/images/**", "/api/reactions", "/test-auth", "/debug-user").permitAll()
-                .requestMatchers("/dashboard", "/dashboard/**").hasAnyAuthority("ROLE_EMPLOYEE")
                 .requestMatchers("/weekly-plan/**", "/dishes/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated()
             )
