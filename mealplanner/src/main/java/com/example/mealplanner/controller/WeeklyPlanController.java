@@ -23,10 +23,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.mealplanner.model.Dish;
-import com.example.mealplanner.model.MenuOverride;
 import com.example.mealplanner.model.MenuTemplateEntry;
 import com.example.mealplanner.repository.DishRepository;
-import com.example.mealplanner.repository.MenuOverrideRepository;
 import com.example.mealplanner.repository.MenuTemplateEntryRepository;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -39,8 +37,6 @@ public class WeeklyPlanController {
     @Autowired
     private MenuTemplateEntryRepository templateRepo;
     @Autowired
-    private MenuOverrideRepository overrideRepo;
-    @Autowired
     private DishRepository dishRepo;
 
     private static final List<String> MEAL_PERIODS = Arrays.asList("breakfast", "lunch", "snacks");
@@ -51,20 +47,26 @@ public class WeeklyPlanController {
     private void cleanupDuplicateTemplateEntries() {
         logger.info("Starting cleanup of duplicate MenuTemplateEntry records");
         
-        for (int dayOfWeek = 1; dayOfWeek <= 7; dayOfWeek++) {
-            for (String mealPeriod : MEAL_PERIODS) {
-                List<MenuTemplateEntry> entries = templateRepo.findByDayOfWeekAndMealPeriodOrderBySortOrder(dayOfWeek, mealPeriod);
-                
+        // Get all entries and group by date and meal period
+        List<MenuTemplateEntry> allEntries = templateRepo.findAll();
+        Map<String, List<MenuTemplateEntry>> entriesByDateAndMeal = allEntries.stream()
+            .collect(Collectors.groupingBy(entry -> entry.getDate() + "_" + entry.getMealPeriod()));
+        
+        // Remove duplicates for each date/meal combination
+        for (Map.Entry<String, List<MenuTemplateEntry>> group : entriesByDateAndMeal.entrySet()) {
+            List<MenuTemplateEntry> entries = group.getValue();
+            if (entries.size() > 1) {
                 // Group by dish ID to find duplicates
                 Map<Long, List<MenuTemplateEntry>> dishGroups = entries.stream()
                     .collect(Collectors.groupingBy(entry -> entry.getDish().getId()));
                 
                 // Remove duplicates for each dish (keep only the first one)
-                for (Map.Entry<Long, List<MenuTemplateEntry>> group : dishGroups.entrySet()) {
-                    List<MenuTemplateEntry> duplicates = group.getValue();
+                for (Map.Entry<Long, List<MenuTemplateEntry>> dishGroup : dishGroups.entrySet()) {
+                    List<MenuTemplateEntry> duplicates = dishGroup.getValue();
                     if (duplicates.size() > 1) {
-                        logger.warn("Found {} duplicate entries for dish {} on dayOfWeek={}, mealPeriod={}, removing extras", 
-                                   duplicates.size(), duplicates.get(0).getDish().getName(), dayOfWeek, mealPeriod);
+                        logger.warn("Found {} duplicate entries for dish {} on date={}, mealPeriod={}, removing extras", 
+                                   duplicates.size(), duplicates.get(0).getDish().getName(), 
+                                   duplicates.get(0).getDate(), duplicates.get(0).getMealPeriod());
                         
                         // Keep the first one, remove the rest
                         for (int i = 1; i < duplicates.size(); i++) {
@@ -79,10 +81,10 @@ public class WeeklyPlanController {
     }
 
     /**
-     * Get unique dishes for a specific day and meal period
+     * Get unique dishes for a specific date and meal period
      */
-    private List<Map<String, Object>> getUniqueDishesForMeal(int dayOfWeek, String mealPeriod) {
-        List<MenuTemplateEntry> entries = templateRepo.findByDayOfWeekAndMealPeriodOrderBySortOrder(dayOfWeek, mealPeriod);
+    private List<Map<String, Object>> getUniqueDishesForMeal(LocalDate date, String mealPeriod) {
+        List<MenuTemplateEntry> entries = templateRepo.findByDateAndMealPeriodOrderBySortOrder(date, mealPeriod);
         Map<Long, MenuTemplateEntry> uniqueDishes = new LinkedHashMap<>();
         
         for (MenuTemplateEntry entry : entries) {
@@ -93,7 +95,6 @@ public class WeeklyPlanController {
         for (MenuTemplateEntry entry : uniqueDishes.values()) {
             Map<String, Object> map = new HashMap<>();
             map.put("dish", entry.getDish());
-            map.put("overrideId", null);
             map.put("templateEntryId", entry.getId());
             result.add(map);
         }
@@ -123,37 +124,13 @@ public class WeeklyPlanController {
         List<LocalDate> weekDays = new ArrayList<>();
         for (int i = 0; i < 7; i++) weekDays.add(weekStart.plusDays(i));
 
-        // Fetch overrides for the week
-        List<MenuOverride> overrides = overrideRepo.findByDateBetween(weekStart, weekEnd);
-        Map<String, List<MenuOverride>> overrideMap = new HashMap<>();
-        for (MenuOverride o : overrides) {
-            String key = o.getDate() + "_" + o.getMealPeriod();
-            overrideMap.computeIfAbsent(key, k -> new ArrayList<>()).add(o);
-        }
-
         // Build week plan with deduplication
         Map<LocalDate, Map<String, List<Map<String, Object>>>> weekPlan = new LinkedHashMap<>();
         for (LocalDate d : weekDays) {
             Map<String, List<Map<String, Object>>> meals = new LinkedHashMap<>();
-            int dow = d.getDayOfWeek().getValue(); // 1=Monday
             
             for (String meal : MEAL_PERIODS) {
-                String key = d + "_" + meal;
-                List<Map<String, Object>> dishList = new ArrayList<>();
-                
-                if (overrideMap.containsKey(key)) {
-                    // Use overrides
-                    for (MenuOverride o : overrideMap.get(key)) {
-                        Map<String, Object> map = new HashMap<>();
-                        map.put("dish", o.getDish());
-                        map.put("overrideId", o.getId());
-                        dishList.add(map);
-                    }
-                } else {
-                    // Use template entries with deduplication
-                    dishList = getUniqueDishesForMeal(dow, meal);
-                }
-                
+                List<Map<String, Object>> dishList = getUniqueDishesForMeal(d, meal);
                 meals.put(meal, dishList);
                 logger.debug("Dishes for {} {}: {} items", d, meal, dishList.size());
             }
@@ -187,11 +164,10 @@ public class WeeklyPlanController {
                 }
                 return "redirect:/weekly-plan?date=" + date + "&error=nodish";
             }
-            int dow = date.getDayOfWeek().getValue();
             Dish dish = dishRepo.findById(dishId).orElseThrow();
             
             // Check if this dish already exists for this day/meal combination
-            List<MenuTemplateEntry> existing = templateRepo.findByDayOfWeekAndMealPeriodOrderBySortOrder(dow, mealPeriod);
+            List<MenuTemplateEntry> existing = templateRepo.findByDateAndMealPeriodOrderBySortOrder(date, mealPeriod);
             
             // Clean up any existing duplicates for this day/meal/dish combination
             List<MenuTemplateEntry> duplicatesToRemove = new ArrayList<>();
@@ -203,8 +179,8 @@ public class WeeklyPlanController {
             
             // Remove duplicates (keep only the first one)
             if (duplicatesToRemove.size() > 1) {
-                logger.warn("Found {} duplicate entries for dish {} on dayOfWeek={}, mealPeriod={}, removing extras", 
-                           duplicatesToRemove.size(), dish.getName(), dow, mealPeriod);
+                logger.warn("Found {} duplicate entries for dish {} on date={}, mealPeriod={}, removing extras", 
+                           duplicatesToRemove.size(), dish.getName(), date, mealPeriod);
                 for (int i = 1; i < duplicatesToRemove.size(); i++) {
                     templateRepo.delete(duplicatesToRemove.get(i));
                 }
@@ -215,7 +191,7 @@ public class WeeklyPlanController {
             
             if (!alreadyExists) {
                 MenuTemplateEntry newEntry = new MenuTemplateEntry();
-                newEntry.setDayOfWeek(dow);
+                newEntry.setDate(date);
                 newEntry.setMealPeriod(mealPeriod);
                 newEntry.setDish(dish);
                 newEntry.setSortOrder(existing.size());
@@ -223,7 +199,7 @@ public class WeeklyPlanController {
                 templateRepo.flush();
                 logger.info("Saved MenuTemplateEntry: {} for dish: {}", newEntry.getId(), dish.getName());
             } else {
-                logger.info("Dish {} already exists for dayOfWeek={}, mealPeriod={}, skipping", dish.getName(), dow, mealPeriod);
+                logger.info("Dish {} already exists for date={}, mealPeriod={}, skipping", dish.getName(), date, mealPeriod);
             }
 
             if ("XMLHttpRequest".equals(requestedWith)) {
@@ -242,7 +218,7 @@ public class WeeklyPlanController {
                 Map<String, List<Map<String, Object>>> meals = new LinkedHashMap<>();
                 
                 for (String meal : MEAL_PERIODS) {
-                    List<Map<String, Object>> dishList = getUniqueDishesForMeal(dow, meal);
+                    List<Map<String, Object>> dishList = getUniqueDishesForMeal(date, meal);
                     meals.put(meal, dishList);
                 }
                 
@@ -271,13 +247,6 @@ public class WeeklyPlanController {
         }
     }
 
-    @PostMapping("/weekly-plan/remove")
-    public String removeDishFromPlan(@RequestParam("overrideId") Long overrideId,
-                                     @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        overrideRepo.deleteById(overrideId);
-        return "redirect:/weekly-plan?date=" + date;
-    }
-
     @PostMapping("/weekly-plan/remove-template")
     public String removeDishFromTemplate(
             @RequestParam("dishId") Long dishId,
@@ -288,10 +257,9 @@ public class WeeklyPlanController {
         
         try {
             logger.info("Remove dish from template: date={}, mealPeriod={}, dishId={}", date, mealPeriod, dishId);
-            int dow = date.getDayOfWeek().getValue();
             
             // Find and delete the template entry
-            List<MenuTemplateEntry> entries = templateRepo.findByDayOfWeekAndMealPeriodOrderBySortOrder(dow, mealPeriod);
+            List<MenuTemplateEntry> entries = templateRepo.findByDateAndMealPeriodOrderBySortOrder(date, mealPeriod);
             for (MenuTemplateEntry entry : entries) {
                 if (entry.getDish().getId().equals(dishId)) {
                     templateRepo.delete(entry);
@@ -307,7 +275,7 @@ public class WeeklyPlanController {
                 Map<String, List<Map<String, Object>>> meals = new LinkedHashMap<>();
                 
                 for (String meal : MEAL_PERIODS) {
-                    List<Map<String, Object>> dishList = getUniqueDishesForMeal(dow, meal);
+                    List<Map<String, Object>> dishList = getUniqueDishesForMeal(date, meal);
                     meals.put(meal, dishList);
                 }
                 

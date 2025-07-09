@@ -42,12 +42,6 @@ public class DishReactionApiController {
             return ResponseEntity.status(401).body("User not found in database");
         }
 
-        LocalDate today = LocalDate.now();
-        String currentMealPeriod = mealService.getCurrentMealPeriod(LocalTime.now());
-
-        if (currentMealPeriod == null) {
-            return ResponseEntity.badRequest().body("Reactions are not open at this time.");
-        }
 
         dishReactionService.toggleReaction(user.getId(), reactionRequest.getDishId());
 

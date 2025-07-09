@@ -184,16 +184,8 @@
                                     <span th:each="tag : ${dishMap.dish?.dietaryInfo}" th:text="${tag}" class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs mr-1"></span>
                                 </div>
                             </div>
-                            <!-- Remove button for overrides -->
-                            <form th:if="${dishMap.overrideId != null}" th:action="@{/weekly-plan/remove}" method="post" class="remove-dish-form">
-                                <input type="hidden" name="overrideId" th:value="${dishMap.overrideId}" />
-                                <input type="hidden" name="date" th:value="${selectedDate}" />
-                                <button type="submit" class="text-gray-400 hover:text-danger transition-colors">
-                                    <i class="fa-solid fa-times text-xs"></i>
-                                </button>
-                            </form>
                             <!-- Remove button for template entries -->
-                            <form th:if="${dishMap.overrideId == null}" th:action="@{/weekly-plan/remove-template}" method="post" class="remove-template-form">
+                            <form th:action="@{/weekly-plan/remove-template}" method="post" class="remove-template-form">
                                 <input type="hidden" name="dishId" th:value="${dishMap.dish?.id}" />
                                 <input type="hidden" name="date" th:value="${selectedDate}" />
                                 <input type="hidden" name="mealPeriod" th:value="${meal}" />

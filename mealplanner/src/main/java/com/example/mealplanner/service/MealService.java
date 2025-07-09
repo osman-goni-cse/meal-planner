@@ -1,9 +1,7 @@
 package com.example.mealplanner.service;
 
 import com.example.mealplanner.model.Dish;
-import com.example.mealplanner.model.MenuOverride;
 import com.example.mealplanner.model.MenuTemplateEntry;
-import com.example.mealplanner.repository.MenuOverrideRepository;
 import com.example.mealplanner.repository.MenuTemplateEntryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,9 +15,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class MealService {
-
-    @Autowired
-    private MenuOverrideRepository overrideRepo;
 
     @Autowired
     private MenuTemplateEntryRepository templateRepo;
@@ -50,7 +45,6 @@ public class MealService {
 
     /**
      * Fetches the list of dishes for a given meal period and date.
-     * It first checks for overrides and then falls back to the template.
      * @param mealPeriod The meal period ("breakfast", "lunch", "snacks").
      * @param date The date for which to fetch the dishes.
      * @return A list of unique Dish objects.
@@ -60,22 +54,8 @@ public class MealService {
             return Collections.emptyList();
         }
 
-        int dow = date.getDayOfWeek().getValue();
-
-        // Check for overrides first
-        List<MenuOverride> overrides = overrideRepo.findByDateBetween(date, date);
-        List<Dish> dishes = overrides.stream()
-            .filter(o -> o.getMealPeriod().equalsIgnoreCase(mealPeriod))
-            .map(MenuOverride::getDish)
-            .distinct()
-            .collect(Collectors.toList());
-
-        if (!dishes.isEmpty()) {
-            return dishes;
-        }
-
-        // Fallback to template, ensuring no duplicates
-        return templateRepo.findByDayOfWeekAndMealPeriodOrderBySortOrder(dow, mealPeriod)
+        // Get dishes from template entries
+        return templateRepo.findByDateAndMealPeriodOrderBySortOrder(date, mealPeriod)
             .stream()
             .map(MenuTemplateEntry::getDish)
             .distinct()
@@ -83,9 +63,8 @@ public class MealService {
     }
 
     public Map<String, List<Dish>> getMealsForDay(LocalDate date) {
-        int dow = date.getDayOfWeek().getValue();
-        // This is a simplified version. A more complete version might also consider overrides.
-        List<MenuTemplateEntry> entries = templateRepo.findByDayOfWeek(dow);
+        // Get all template entries for the date
+        List<MenuTemplateEntry> entries = templateRepo.findByDate(date);
         return entries.stream()
                 .collect(Collectors.groupingBy(
                         MenuTemplateEntry::getMealPeriod,
