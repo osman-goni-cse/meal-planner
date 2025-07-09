@@ -72,7 +72,7 @@ public class HomeController {
                     for (Dish d : dishes) {
                         if (mainDish == null && d.getCategory() != null && d.getCategory().equalsIgnoreCase("Main Course")) {
                             mainDish = d;
-                        } else if (d.getCategory() != null && d.getCategory().equalsIgnoreCase("Side Dish")) {
+                        } else if (d.getCategory() != null ) {
                             sideDishes.add(d);
                         }
                     }
