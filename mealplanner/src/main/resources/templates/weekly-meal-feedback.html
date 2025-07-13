@@ -19,17 +19,103 @@
                     <span class="font-bold text-xl text-gray-800">DSi Menu</span>
                 </div>
                 <div class="flex items-center space-x-6">
+                    <!-- Desktop Navigation -->
                     <nav class="hidden md:flex items-center space-x-6">
                         <a th:href="@{/}" class="text-gray-600 hover:text-primary cursor-pointer">Today's Menu</a>
                         <a th:href="@{/weekly-feedback}" class="text-primary font-semibold border-b-2 border-primary pb-1 cursor-pointer">Weekly Menu</a>
                     </nav>
+                    <!-- Desktop User Profile -->
                     <div th:replace="fragments/layout :: topnav-user"></div>
+                    
+                    <!-- Mobile Hamburger Menu Button -->
+                    <button id="mobile-menu-button" class="block md:hidden flex items-center p-2 rounded-md text-gray-600 hover:text-primary hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Date Selector -->
+            <div class="md:hidden mt-4 pb-4 border-t border-gray-200">
+                <div class="flex items-center justify-between pt-4">
+                    <div class="flex items-center space-x-3">
+                        <i class="text-primary text-lg fa-solid fa-calendar"></i>
+                        <span class="text-lg font-semibold text-gray-800" th:text="${#temporals.format(selectedDate, 'dd MMMM, yyyy')}">18 July, 2025</span>
+                    </div>
+                    <button id="mobile-calendar-toggle" class="flex items-center space-x-2 text-primary hover:text-primary/80">
+                        <span class="text-sm font-medium">Change Date</span>
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </header>
-    <main id="main-content" class="container mx-auto pt-20 px-5 pb-10 flex-grow">
-        <div class="flex gap-6 items-start">
+
+    <!-- Mobile Navigation Menu - Positioned outside header -->
+    <div id="mobile-menu" class="hidden md:hidden fixed top-20 right-4 z-50">
+        <div class="bg-white rounded-lg shadow-lg min-w-[200px]">
+            <div class="flex flex-col space-y-3 pt-4 px-4 pb-4">
+                <a th:href="@{/}" class="text-gray-600 hover:text-primary cursor-pointer py-2 w-fit">Today's Menu</a>
+                <a th:href="@{/weekly-feedback}" class="text-primary font-semibold border-b-2 border-primary pb-1 cursor-pointer py-2 w-fit">Weekly Menu</a>
+                <div class="border-t border-gray-200 pt-3">
+                    <form th:action="@{/logout}" method="post" class="inline">
+                        <button type="submit" class="text-gray-600 hover:text-primary cursor-pointer w-fit text-left py-2 flex items-center">
+                            <i class="fa-solid fa-sign-out-alt mr-2"></i>
+                            Sign Out
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Calendar Modal -->
+    <div id="mobile-calendar-modal" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-sm">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">Select Date</h3>
+                <button id="close-calendar-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-base font-semibold text-gray-800" th:text="${calendarMonthYear}">December 2023</h4>
+                    <div class="flex space-x-2">
+                        <a th:href="@{/weekly-feedback(date=${prevMonthDate})}" class="p-1 hover:bg-gray-200 rounded transition-colors">
+                            <i class="text-gray-600 text-sm fas fa-chevron-left"></i>
+                        </a>
+                        <a th:href="@{/weekly-feedback(date=${nextMonthDate})}" class="p-1 hover:bg-gray-200 rounded transition-colors">
+                            <i class="text-gray-600 text-sm fas fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="grid grid-cols-7 gap-1 text-center text-sm">
+                    <!-- Days of week -->
+                    <div class="p-2 text-gray-500 font-medium text-xs">S</div>
+                    <div class="p-2 text-gray-500 font-medium text-xs">M</div>
+                    <div class="p-2 text-gray-500 font-medium text-xs">T</div>
+                    <div class="p-2 text-gray-500 font-medium text-xs">W</div>
+                    <div class="p-2 text-gray-500 font-medium text-xs">T</div>
+                    <div class="p-2 text-gray-500 font-medium text-xs">F</div>
+                    <div class="p-2 text-gray-500 font-medium text-xs">S</div>
+                    <!-- Calendar dates -->
+                    <div th:each="day,iter : ${calendarDays}">
+                        <a th:href="@{/weekly-feedback(date=${day.date})}"
+                           th:text="${day.dayOfMonth}"
+                           class="block w-8 h-8 mx-auto flex items-center justify-center transition-all duration-150 text-sm"
+                           th:classappend="
+                                ${day.selected} ? 'bg-primary text-white rounded-full font-bold ring-2 ring-primary' :
+                                (${day.inMonth?.toString() == 'true'} ? 'text-gray-800 hover:bg-primary/10 hover:rounded-full cursor-pointer' : 'text-gray-400 hover:bg-primary/10 hover:rounded-full cursor-pointer')
+                           ">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <main id="main-content" class="container mx-auto pt-20 md:pt-20 px-5 pb-10 flex-grow">
+        <!-- Desktop Layout -->
+        <div class="hidden md:flex gap-6 items-start">
             <!-- Calendar Column -->
             <div id="calendar-column" class="w-1/4 bg-gray-50 rounded-lg shadow-sm border border-gray-200 p-5">
                 <div class="flex items-center justify-between mb-4">
@@ -56,8 +142,7 @@
                     <div th:each="day,iter : ${calendarDays}">
                         <a th:href="@{/weekly-feedback(date=${day.date})}"
                            th:text="${day.dayOfMonth}"
-                           class="block w-8 h-8 mx-auto flex items-center justify-center transition-all duration-150
-                           "
+                           class="block w-8 h-8 mx-auto flex items-center justify-center transition-all duration-150"
                            th:classappend="
                                 ${day.selected} ? 'bg-primary text-white rounded-full font-bold ring-2 ring-primary' :
                                 (${day.inMonth?.toString() == 'true'} ? 'text-gray-800 hover:bg-primary/10 hover:rounded-full cursor-pointer' : 'text-gray-400 hover:bg-primary/10 hover:rounded-full cursor-pointer')
@@ -71,7 +156,7 @@
                 <!-- Dish Tabs -->
                 <div id="dish-tabs" class="flex items-center space-x-6 sm:space-x-8 mb-6">
                     <button th:each="dish,iter : ${dishes}" th:text="${dish.name}"
-                        th:classappend="${iter.index} == ${selectedDishIndex} ? 'tab-button active-tab text-base font-semibold text-gray-900 bg-gray-100 px-4 py-2 rounded-lg shadow-sm' : 'tab-button text-base font-medium text-gray-500 hover:text-gray-900 transition-colors'"
+                        th:classappend="${iter.index} == ${selectedDishIndex} ? 'tab-button active-tab text-base font-semibold text-white bg-primary px-6 py-3 rounded-full shadow-sm transition-all duration-200' : 'tab-button text-base font-medium text-gray-600 bg-gray-100 hover:text-gray-800 hover:bg-gray-200 px-6 py-3 rounded-full transition-all duration-200'"
                         th:onclick="|window.location='@{/weekly-feedback(date=${selectedDate},dish=${iter.index})}'|">
                         Dish Name
                     </button>
@@ -129,7 +214,88 @@
                 </div>
             </div>
         </div>
+
+        <!-- Mobile Layout -->
+        <div class="md:hidden pt-32">
+            <!-- Dish Tabs - Horizontally Scrollable -->
+            <div id="mobile-dish-tabs" class="flex items-center space-x-6 my-8 overflow-x-auto pb-2 scrollbar-hide">
+                <button th:each="dish,iter : ${dishes}" th:text="${dish.name}"
+                    th:classappend="${iter.index} == ${selectedDishIndex} ? 'tab-button active-tab text-base font-semibold text-white bg-primary px-6 py-3 rounded-full shadow-sm transition-all duration-200 whitespace-nowrap flex-shrink-0' : 'tab-button text-base font-medium text-gray-600 bg-gray-100 hover:text-gray-800 hover:bg-gray-200 px-6 py-3 rounded-full transition-all duration-200 whitespace-nowrap flex-shrink-0'"
+                    th:onclick="|window.location='@{/weekly-feedback(date=${selectedDate},dish=${iter.index})}'|">
+                    Dish Name
+                </button>
+            </div>
+
+            <!-- Mobile Dish Content -->
+            <div th:if="${selectedDish != null}" class="bg-white rounded-lg shadow-sm border border-gray-200 grid grid-rows-[1fr_auto] h-[calc(100vh-200px)]">
+                <!-- Dish Image - Takes available space -->
+                <div class="relative min-h-0">
+                    <img class="w-full h-full object-cover rounded-t-lg" th:src="${selectedDish.imageUrl}" th:alt="${selectedDish.name}">
+                </div>
+                
+                <!-- Dish Details - Auto-sized based on content -->
+                <div class="p-6">
+                    <h1 class="text-3xl font-bold text-gray-800 tracking-tight mb-3" th:text="${selectedDish.name}">Dish Name</h1>
+                    <p class="text-base text-gray-600 mb-6" th:text="${selectedDish.description}">Dish description</p>
+                    
+                    <!-- Likes and Comments -->
+                    <div th:if="${!selectedDish.isEmpty() && !selectedDate.isAfter(T(java.time.LocalDate).now())}" class="flex items-center space-x-6">
+                        <button id="mobile-reaction-btn" type="button" class="flex items-center space-x-2 text-gray-600 focus:outline-none group">
+                            <i id="mobile-reaction-icon" class="fa-heart text-xl text-red-500" th:classappend="${selectedDish.userReacted} ? 'fa-solid' : 'fa-regular'"></i>
+                            <span id="mobile-reaction-count" class="font-medium text-base" th:text="${selectedDish.reactions}">0</span>
+                            <span class="text-sm">Likes</span>
+                        </button>
+                        <button id="mobile-comments-btn" type="button" class="flex items-center space-x-2 text-gray-600 focus:outline-none group">
+                            <i class="fa-regular fa-comment text-xl text-blue-500"></i>
+                            <span class="font-medium text-base" th:text="${selectedDish.commentsCount}">0</span>
+                            <span class="text-sm">Comments</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div th:if="${selectedDish == null}" class="text-center text-gray-500 py-10">
+                No dishes available for this date.
+            </div>
+        </div>
     </main>
+
+    <!-- Mobile Comments Modal -->
+    <div id="mobile-comments-modal" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex flex-col">
+        <div class="flex-1 flex flex-col bg-white">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+                <h3 class="text-lg font-semibold text-gray-800">Comments</h3>
+                <button id="close-comments-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa-solid fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Comments List -->
+            <div id="mobile-comments-list" class="flex-1 overflow-y-auto p-4 space-y-4">
+                <!-- Comments will be loaded here by JS -->
+            </div>
+            
+            <!-- Comment Input -->
+            <div th:if="${!selectedDate.isAfter(T(java.time.LocalDate).now())}" class="border-t border-gray-200 p-4 bg-white">
+                <!-- Error message -->
+                <div th:if="${error}" class="mb-3 p-2 bg-red-100 border border-red-300 text-red-700 rounded text-sm">
+                    <span th:text="${error}">Comment cannot be empty.</span>
+                </div>
+                
+                <form id="mobile-comment-form" th:action="@{/weekly-feedback/feedback}" method="post" class="flex items-center space-x-3">
+                    <input type="hidden" name="date" th:value="${selectedDate}">
+                    <input type="hidden" name="dishId" th:value="${selectedDish != null ? selectedDish.id : ''}">
+                    <div class="flex-1 relative">
+                        <input type="text" name="comment" placeholder="Write a comment..." class="w-full px-4 py-3 pr-12 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition">
+                    </div>
+                    <button type="submit" class="text-primary">
+                        <i class="fa-regular fa-paper-plane text-lg"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
     <!-- Footer -->
     <footer id="footer" class="bg-white border-t border-gray-medium mt-6">
         <div class="container mx-auto px-5 py-4">
@@ -183,11 +349,161 @@
         }
     }
 
+    async function loadMobileComments(reset = false) {
+        const mobileCommentsList = document.getElementById('mobile-comments-list');
+        if (!mobileCommentsList) return;
+        
+        if (reset) {
+            mobileCommentsList.innerHTML = '';
+            currentPage = 0;
+        }
+        
+        if (!currentDishId || !currentDate) {
+            mobileCommentsList.innerHTML = '<div class="text-gray-500 text-sm text-center py-8">No dish selected.</div>';
+            return;
+        }
+        
+        try {
+            // Show loading state
+            if (reset) {
+                mobileCommentsList.innerHTML = '<div class="text-gray-500 text-sm text-center py-8">Loading comments...</div>';
+            }
+            
+            // Get the comment count from the dish data
+            const commentCountElement = document.querySelector('#mobile-comments-btn span');
+            const commentCount = commentCountElement ? parseInt(commentCountElement.textContent, 10) : 0;
+            
+            // Load all comments for mobile view using the actual comment count
+            const res = await fetch(`/weekly-feedback/comments?dishId=${currentDishId}&page=0&size=${commentCount}`);
+            
+            if (!res.ok) {
+                throw new Error('Failed to load comments');
+            }
+            
+            const data = await res.json();
+            
+            if (reset) {
+                mobileCommentsList.innerHTML = '';
+            }
+            
+            if (!data.comments || (data.comments.length === 0 && currentPage === 0)) {
+                mobileCommentsList.innerHTML = '<div class="text-gray-500 text-sm text-center py-8">No comments yet. Be the first to comment!</div>';
+            } else {
+                data.comments.forEach(comment => {
+                    mobileCommentsList.innerHTML += `
+                        <div class="flex items-start space-x-3">
+                            <img src="${comment.avatarUrl}" alt="${comment.userName}" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow flex-shrink-0">
+                            <div class="flex-1">
+                                <p class="font-semibold text-gray-800 text-sm">${comment.userName}</p>
+                                <p class="text-gray-600 text-sm">${comment.text}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                // Scroll to bottom to show the latest comment
+                if (reset) {
+                    setTimeout(() => {
+                        mobileCommentsList.scrollTop = mobileCommentsList.scrollHeight;
+                    }, 100);
+                }
+            }
+        } catch (error) {
+            console.error('Error loading mobile comments:', error);
+            mobileCommentsList.innerHTML = '<div class="text-red-500 text-sm text-center py-8">Failed to load comments. Please try again.</div>';
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+        // Scroll active dish tab into view on page load
+        function scrollActiveTabIntoView() {
+            const mobileDishTabs = document.getElementById('mobile-dish-tabs');
+            const activeTab = mobileDishTabs?.querySelector('.active-tab');
+            
+            if (mobileDishTabs && activeTab) {
+                // Calculate the scroll position to center the active tab
+                const containerWidth = mobileDishTabs.offsetWidth;
+                const tabLeft = activeTab.offsetLeft;
+                const tabWidth = activeTab.offsetWidth;
+                const scrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2);
+                
+                // Smooth scroll to the active tab
+                mobileDishTabs.scrollTo({
+                    left: Math.max(0, scrollLeft),
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        // Mobile menu functionality
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const isHidden = mobileMenu.classList.contains('hidden');
+                
+                if (isHidden) {
+                    mobileMenu.classList.remove('hidden');
+                    mobileMenu.classList.add('block');
+                    mobileMenuButton.innerHTML = '<i class="fa-solid fa-times text-xl"></i>';
+                } else {
+                    mobileMenu.classList.add('hidden');
+                    mobileMenu.classList.remove('block');
+                    mobileMenuButton.innerHTML = '<i class="fa-solid fa-bars text-xl"></i>';
+                }
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                const isClickInsideMenu = mobileMenu.contains(event.target);
+                const isClickOnButton = mobileMenuButton.contains(event.target);
+                
+                if (!isClickInsideMenu && !isClickOnButton && !mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                    mobileMenu.classList.remove('block');
+                    mobileMenuButton.innerHTML = '<i class="fa-solid fa-bars text-xl"></i>';
+                }
+            });
+            
+            // Prevent menu from closing when clicking inside menu
+            mobileMenu.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+
+        // Mobile calendar modal functionality
+        const mobileCalendarToggle = document.getElementById('mobile-calendar-toggle');
+        const mobileCalendarModal = document.getElementById('mobile-calendar-modal');
+        const closeCalendarModal = document.getElementById('close-calendar-modal');
+        
+        if (mobileCalendarToggle && mobileCalendarModal) {
+            mobileCalendarToggle.addEventListener('click', function() {
+                mobileCalendarModal.classList.remove('hidden');
+            });
+            
+            closeCalendarModal.addEventListener('click', function() {
+                mobileCalendarModal.classList.add('hidden');
+            });
+            
+            // Close modal when clicking outside
+            mobileCalendarModal.addEventListener('click', function(e) {
+                if (e.target === mobileCalendarModal) {
+                    mobileCalendarModal.classList.add('hidden');
+                }
+            });
+        }
+
+        // Desktop comments functionality
         if (document.getElementById('comments-list') && currentDishId && currentDate) {
             currentPage = 0;
             loadComments(true);
         }
+        
+        // Desktop reaction functionality
         const reactionBtn = document.getElementById('reaction-btn');
         if (reactionBtn) {
             reactionBtn.addEventListener('click', async function() {
@@ -223,6 +539,121 @@
                 }
             });
         }
+
+        // Mobile reaction functionality
+        const mobileReactionBtn = document.getElementById('mobile-reaction-btn');
+        if (mobileReactionBtn) {
+            mobileReactionBtn.addEventListener('click', async function() {
+                if (!currentDishId) return;
+                const icon = document.getElementById('mobile-reaction-icon');
+                const countSpan = document.getElementById('mobile-reaction-count');
+                let currentCount = parseInt(countSpan.textContent, 10);
+                const isReacted = icon.classList.contains('fa-solid');
+                // Optimistically update UI
+                icon.classList.remove('fa-solid', 'fa-regular');
+                if (isReacted) {
+                    icon.classList.add('fa-regular');
+                    countSpan.textContent = Math.max(0, currentCount - 1);
+                } else {
+                    icon.classList.add('fa-solid');
+                    countSpan.textContent = currentCount + 1;
+                }
+                // Send request
+                const res = await fetch('/api/reactions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dishId: currentDishId })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    countSpan.textContent = data.reactions;
+                    icon.classList.remove('fa-solid', 'fa-regular');
+                    if (data.userReacted) {
+                        icon.classList.add('fa-solid');
+                    } else {
+                        icon.classList.add('fa-regular');
+                    }
+                }
+            });
+        }
+
+        // Mobile comments modal functionality
+        const mobileCommentsBtn = document.getElementById('mobile-comments-btn');
+        const mobileCommentsModal = document.getElementById('mobile-comments-modal');
+        const closeCommentsModal = document.getElementById('close-comments-modal');
+        const mobileCommentsList = document.getElementById('mobile-comments-list');
+        const mobileCommentForm = document.getElementById('mobile-comment-form');
+
+        if (mobileCommentsBtn && mobileCommentsModal && mobileCommentsList && mobileCommentForm) {
+            mobileCommentsBtn.addEventListener('click', function() {
+                mobileCommentsModal.classList.remove('hidden');
+                // Reset page and load comments for the modal
+                currentPage = 0;
+                loadMobileComments(true);
+            });
+
+            closeCommentsModal.addEventListener('click', function() {
+                mobileCommentsModal.classList.add('hidden');
+            });
+
+            // Close modal when clicking outside
+            mobileCommentsModal.addEventListener('click', function(e) {
+                if (e.target === mobileCommentsModal) {
+                    mobileCommentsModal.classList.add('hidden');
+                }
+            });
+
+            // Handle form submission
+            mobileCommentForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const commentInput = this.querySelector('input[name="comment"]');
+                const commentText = commentInput.value;
+                
+                if (!commentText.trim()) {
+                    alert('Comment cannot be empty.');
+                    return;
+                }
+                
+                const formData = new FormData(this);
+                try {
+                    const res = await fetch('/weekly-feedback/feedback', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (res.ok) {
+                        // Clear the input
+                        commentInput.value = '';
+                        
+                        // Update comment count instantly
+                        const commentCountElement = document.querySelector('#mobile-comments-btn span');
+                        if (commentCountElement) {
+                            const currentCount = parseInt(commentCountElement.textContent, 10);
+                            commentCountElement.textContent = currentCount + 1;
+                        }
+                        
+                        // Reload comments to show the new comment
+                        currentPage = 0;
+                        loadMobileComments(true);
+                        
+                    } else {
+                        const errorData = await res.json();
+                        alert(errorData.message || 'Failed to submit comment.');
+                    }
+                } catch (error) {
+                    console.error('Error submitting comment:', error);
+                    alert('Failed to submit comment. Please try again.');
+                }
+            });
+        }
+
+        // Scroll active tab into view after page load and after navigation
+        scrollActiveTabIntoView();
+        
+        // Also scroll active tab into view when window is resized (orientation change)
+        window.addEventListener('resize', function() {
+            setTimeout(scrollActiveTabIntoView, 100); // Small delay to ensure DOM is updated
+        });
     });
 
     document.getElementById('load-more-comments-btn').onclick = function() {
@@ -246,6 +677,41 @@
             background: #3B82F6;
             border-radius: 8px;
         }
-        </style>
+        
+        /* Hide scrollbar for mobile dish tabs */
+        .scrollbar-hide {
+            -ms-overflow-style: none;  /* Internet Explorer 10+ */
+            scrollbar-width: none;  /* Firefox */
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;  /* Safari and Chrome */
+        }
+        
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+            #main-content {
+                padding-top: 0; /* Remove extra padding since we have mt-32 */
+            }
+            
+            /* Ensure modal takes full height */
+            #mobile-comments-modal {
+                height: 100vh;
+            }
+            
+            /* Mobile comments list styling */
+            #mobile-comments-list {
+                scrollbar-width: thin;
+                scrollbar-color: #3B82F6 #F3F4F6;
+            }
+            #mobile-comments-list::-webkit-scrollbar {
+                width: 4px;
+                background: #F3F4F6;
+            }
+            #mobile-comments-list::-webkit-scrollbar-thumb {
+                background: #3B82F6;
+                border-radius: 4px;
+            }
+        }
+    </style>
 </body>
 </html> 
