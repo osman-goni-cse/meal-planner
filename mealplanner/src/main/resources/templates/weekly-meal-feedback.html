@@ -456,11 +456,8 @@
                 const tabWidth = activeTab.offsetWidth;
                 const scrollLeft = tabLeft - (containerWidth / 2) + (tabWidth / 2);
                 
-                // Smooth scroll to the active tab
-                mobileDishTabs.scrollTo({
-                    left: Math.max(0, scrollLeft),
-                    behavior: 'smooth'
-                });
+                // Instant scroll to the active tab (no animation)
+                mobileDishTabs.scrollLeft = Math.max(0, scrollLeft);
             }
         }
 
@@ -714,6 +711,11 @@
         }
         .scrollbar-hide::-webkit-scrollbar {
             display: none;  /* Safari and Chrome */
+        }
+        
+        /* Ensure smooth scrolling is disabled for mobile dish tabs */
+        #mobile-dish-tabs {
+            scroll-behavior: auto;
         }
         
         /* Mobile responsive adjustments */
