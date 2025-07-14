@@ -13,7 +13,10 @@
                     <div class="flex flex-col sm:flex-row gap-4 flex-1">
                         <div class="relative flex-1 max-w-md">
                             <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                            <input type="text" id="search-input" name="search" placeholder="Search dishes..." th:value="${searchTerm}" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <input type="text" id="search-input" name="search" placeholder="Search dishes..." th:value="${searchTerm}" class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <button type="button" id="clear-search-btn" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none" style="display:none;">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
                         </div>
                         <div class="relative">
                             <select id="sort-select" name="sort" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none pr-10">
@@ -24,16 +27,6 @@
                                 <i class="fa-solid fa-chevron-down text-gray-400"></i>
                             </div>
                         </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition flex items-center">
-                            <i class="fa-solid fa-filter mr-2"></i>
-                            <span>Apply Filters</span>
-                        </button>
-                        <a href="/review-comments" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
-                            <i class="fa-solid fa-filter mr-2"></i>
-                            <span>Clear Filters</span>
-                        </a>
                     </div>
                 </form>
             </section>
@@ -213,6 +206,39 @@
             modal.style.display = 'none';
         }
     };
+    // --- Instant search/sort and clear button logic ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('review-comments-filters-form');
+        const searchInput = document.getElementById('search-input');
+        const sortSelect = document.getElementById('sort-select');
+        const clearBtn = document.getElementById('clear-search-btn');
+        let debounceTimeout;
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(debounceTimeout);
+                if (searchInput.value.length > 0) {
+                    clearBtn.style.display = '';
+                } else {
+                    clearBtn.style.display = 'none';
+                }
+                debounceTimeout = setTimeout(() => {
+                    form.submit();
+                }, 2500);
+            });
+            clearBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                clearBtn.style.display = 'none';
+                form.submit();
+            });
+            // Show clear button if input has value on load
+            if (searchInput.value.length > 0) clearBtn.style.display = '';
+        }
+        if (sortSelect) {
+            sortSelect.addEventListener('change', function() {
+                form.submit();
+            });
+        }
+    });
     </script>
     <style>
     /* Custom scrollbar for comments list */
