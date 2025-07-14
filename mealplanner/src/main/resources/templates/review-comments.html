@@ -2,24 +2,27 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head}"></head>
 <body class="font-sans bg-gray-50 flex flex-col min-h-screen">
-    <div th:replace="fragments/layout :: sidebar"></div>
+    <!-- Desktop Sidebar (Desktop Only) -->
+    <div th:replace="fragments/layout :: sidebar" class="hidden md:block"></div>
     <div class="flex-1 md:ml-64">
-        <div th:replace="fragments/layout :: topnav"></div>
+        <!-- Desktop Topnav (Desktop Only) -->
+        <div th:replace="fragments/layout :: topnav" class="hidden md:block"></div>
+        <!-- Mobile Navbar (reuse fragment) -->
+        <div th:replace="fragments/layout :: mobile-navbar" class="md:hidden"></div>
         <main class="overflow-y-auto h-full">
-
             <!-- Filters Section -->
-            <section class="bg-white rounded-lg shadow-sm p-6 mb-8">
-                <form id="review-comments-filters-form" method="get" action="/review-comments" class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div class="flex flex-col sm:flex-row gap-4 flex-1">
-                        <div class="relative flex-1 max-w-md">
+            <section class="bg-white rounded-lg shadow-sm p-4 md:p-6 mb-4 md:mb-8">
+                <form id="review-comments-filters-form" method="get" action="/review-comments" class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
+                    <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 flex-1">
+                        <div class="relative w-full md:flex-1 md:max-w-md mb-2 md:mb-0">
                             <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                             <input type="text" id="search-input" name="search" placeholder="Search dishes..." th:value="${searchTerm}" class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                             <button type="button" id="clear-search-btn" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none" style="display:none;">
                                 <i class="fa-solid fa-times"></i>
                             </button>
                         </div>
-                        <div class="relative">
-                            <select id="sort-select" name="sort" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none pr-10">
+                        <div class="relative w-full md:w-auto">
+                            <select id="sort-select" name="sort" class="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none pr-10">
                                 <option value="most-comments" th:selected="${sortBy == 'most-comments'}">Most Comments</option>
                                 <option value="most-liked" th:selected="${sortBy == 'most-liked'}">Most Loved</option>
                             </select>
@@ -30,14 +33,14 @@
                     </div>
                 </form>
             </section>
-
             <!-- Most Commented Dishes -->
             <div class="bg-white rounded-lg shadow-sm mb-8" id="top-dishes-section">
-                <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-800" id="section-title">Most Commented Dishes</h3>
-                    <div class="flex items-center text-sm text-gray-600">
-                        <span id="dish-count-display" th:text="'Showing ' + (${currentPage * pageSize + 1}) + '-' + (${currentPage * pageSize + mostCommentedDishes.size()}) + ' of ' + ${dishesPage.totalElements} + ' dishes'"></span>
-                        <nav class="flex items-center gap-1 ml-6 overflow-x-auto" aria-label="Pagination" th:if="${dishesPage.totalPages > 1}">
+                <div class="p-4 md:p-6 border-b border-gray-200 flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
+                    <h3 class="text-lg font-semibold text-gray-800 hidden md:block" id="section-title">Most Commented Dishes</h3>
+                    <div class="flex flex-row items-center gap-2 text-sm text-gray-600 w-full md:w-auto flex-wrap justify-between">
+                        <span id="dish-count-display" class="text-xs md:text-sm text-gray-500" th:text="'Showing ' + (${currentPage * pageSize + 1}) + '-' + (${currentPage * pageSize + mostCommentedDishes.size()}) + ' of ' + ${dishesPage.totalElements} + ' dishes'"></span>
+                        <!-- Pagination: Show on all screens, compact and scrollable on mobile -->
+                        <nav class="flex items-center gap-1 overflow-x-auto" aria-label="Pagination" th:if="${dishesPage.totalPages > 1}">
                             <a th:href="@{/review-comments(page=${currentPage-1},size=${pageSize},search=${searchTerm},sort=${sortBy})}"
                                class="px-2 py-1 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-100 rounded-l-md"
                                th:classappend="${dishesPage.first} ? 'pointer-events-none opacity-50' : ''"
@@ -62,10 +65,10 @@
                         </nav>
                     </div>
                 </div>
-                <div class="p-6">
-                    <div id="dishes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="p-4 md:p-6">
+                    <div id="dishes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                         <div th:each="dish : ${mostCommentedDishes}" class="relative rounded-xl overflow-hidden group shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 dish-card cursor-pointer" th:attr="data-dish-id=${dish.id}" onclick="openDishModal(this)">
-                            <img class="w-full h-80 object-cover" th:src="${dish.imageUrl}" th:alt="${dish.name}">
+                            <img class="w-full h-56 md:h-80 object-cover" th:src="${dish.imageUrl}" th:alt="${dish.name}">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                             <div class="absolute bottom-0 left-0 p-4 w-full text-white">
                                 <h4 class="font-bold text-lg truncate mb-2" th:text="${dish.name}">Dish Name</h4>
@@ -98,26 +101,26 @@
     </div>
     <footer th:replace="fragments/layout :: footer-scripts"></footer>
     <!-- Modal HTML (dynamic, hidden by default) -->
-    <div id="dish-modal" style="display:none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
-        <div class="flex flex-col w-full max-w-4xl h-[550px] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
+    <div id="dish-modal" style="display:none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 overflow-y-auto">
+        <div class="flex flex-col w-full max-w-4xl md:h-[550px] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden max-h-[90vh] md:max-h-none my-6">
             <div class="flex items-center justify-between px-6 py-3 border-b border-gray-200 flex-shrink-0">
                 <h2 class="text-base font-semibold text-brand-gray-900">Dish Details</h2>
                 <button id="close-modal-btn" class="text-brand-gray-500 hover:text-brand-gray-900">
                     <i class="fa-solid fa-xmark fa-lg"></i>
                 </button>
             </div>
-            <div class="flex flex-grow overflow-hidden">
-                <div class="w-3/5 p-6 flex flex-col">
-                    <div id="dish-image-wrapper" class="w-full h-3/5 bg-gray-200 rounded-lg overflow-hidden mb-6">
+            <div class="flex flex-grow overflow-hidden flex-col md:flex-row">
+                <div class="w-full md:w-3/5 p-6 flex flex-col">
+                    <div id="dish-image-wrapper" class="w-full h-40 md:h-3/5 bg-gray-200 rounded-lg overflow-hidden mb-6">
                         <img class="w-full h-full object-cover" src="" alt="Dish image">
                     </div>
                     <div>
-                        <h1 id="dish-title" class="text-4xl font-bold text-brand-gray-900 mb-2"></h1>
+                        <h1 id="dish-title" class="text-2xl md:text-4xl font-bold text-brand-gray-900 mb-2"></h1>
                         <p id="dish-description" class="text-brand-gray-500 text-base leading-relaxed"></p>
                     </div>
                 </div>
-                <div class="w-2/5 border-l border-gray-200 flex flex-col">
-                    <div id="comments-list" class="flex-grow p-6 space-y-6 overflow-y-auto"></div>
+                <div class="w-full md:w-2/5 border-t md:border-t-0 md:border-l border-gray-200 flex flex-col">
+                    <div id="comments-list" class="flex-grow p-6 space-y-6 overflow-y-auto max-h-48 md:max-h-96"></div>
                     <div class="p-4 border-t border-gray-200">
                         <div class="flex items-center justify-between space-x-1">
                             <div class="flex items-center space-x-4">

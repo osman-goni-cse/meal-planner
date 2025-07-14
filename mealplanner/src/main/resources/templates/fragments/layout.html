@@ -232,6 +232,25 @@
     </div>
     <th:block th:fragment="footer-scripts">
         <!-- Place for page-specific scripts -->
+        <script>
+        // Hamburger menu logic for mobile (shared for all pages)
+        document.addEventListener('DOMContentLoaded', function() {
+            var menuBtn = document.getElementById('mobile-menu-button');
+            var menu = document.getElementById('mobile-menu');
+            var closeBtn = document.getElementById('close-mobile-menu');
+            if (menuBtn && menu) {
+                menuBtn.onclick = function() { menu.classList.remove('hidden'); };
+            }
+            if (closeBtn && menu) {
+                closeBtn.onclick = function() { menu.classList.add('hidden'); };
+            }
+            if (menu) {
+                menu.addEventListener('click', function(e) {
+                    if (e.target === menu) menu.classList.add('hidden');
+                });
+            }
+        });
+        </script>
     </th:block>
 </body>
 </html> 
