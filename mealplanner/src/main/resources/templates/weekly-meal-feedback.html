@@ -185,7 +185,7 @@
                 <!-- Dish Tabs -->
                 <div id="dish-tabs" class="flex items-center space-x-6 sm:space-x-8 mb-6">
                     <button th:each="dish,iter : ${dishes}" th:text="${dish.name}"
-                        th:classappend="${iter.index} == ${selectedDishIndex} ? 'tab-button active-tab text-base font-semibold text-white bg-primary px-6 py-3 rounded-full shadow-sm transition-all duration-200' : 'tab-button text-base font-medium text-gray-600 bg-gray-100 hover:text-gray-800 hover:bg-gray-200 px-6 py-3 rounded-full transition-all duration-200'"
+                        th:classappend="${iter.index} == ${selectedDishIndex} ? 'tab-button active-tab text-base font-semibold text-blue-800 bg-blue-100 px-6 py-3 rounded-full shadow-sm transition-all duration-200' : 'tab-button text-base font-medium text-gray-600 bg-gray-100 hover:text-gray-800 hover:bg-gray-200 px-6 py-3 rounded-full transition-all duration-200'"
                         th:onclick="|window.location='@{/weekly-feedback(date=${selectedDate},dish=${iter.index})}'|">
                         Dish Name
                     </button>
@@ -198,7 +198,13 @@
                             <img class="w-full h-80 object-cover rounded-xl shadow-md" th:src="${selectedDish.imageUrl}" th:alt="${selectedDish.name}">
                         </div>
                         <div id="dish-details">
-                            <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 tracking-tight break-words break-all leading-tight" th:text="${selectedDish.name}">Dish Name</h1>
+                            <div class="flex items-center justify-between mb-2">
+                                <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 tracking-tight break-words break-all leading-tight" th:text="${selectedDish.name}">Dish Name</h1>
+                                <span th:if="${selectedDish.mealPeriod != null}" 
+                                      class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-sm font-medium whitespace-nowrap">
+                                    <span th:text="${#strings.capitalize(selectedDish.mealPeriod)}">Lunch</span>
+                                </span>
+                            </div>
                             <p class="text-sm sm:text-base md:text-lg text-gray-600 mt-2 leading-relaxed break-words break-all" th:text="${selectedDish.description}">Dish description</p>
                         </div>
                     </div>
@@ -249,7 +255,7 @@
             <!-- Dish Tabs - Horizontally Scrollable -->
             <div id="mobile-dish-tabs" class="flex items-center space-x-6 my-8 overflow-x-auto pb-2 scrollbar-hide">
                 <button th:each="dish,iter : ${dishes}" th:text="${dish.name}"
-                    th:classappend="${iter.index} == ${selectedDishIndex} ? 'tab-button active-tab text-base font-semibold text-white bg-primary px-6 py-3 rounded-full shadow-sm transition-all duration-200 whitespace-nowrap flex-shrink-0' : 'tab-button text-base font-medium text-gray-600 bg-gray-100 hover:text-gray-800 hover:bg-gray-200 px-6 py-3 rounded-full transition-all duration-200 whitespace-nowrap flex-shrink-0'"
+                    th:classappend="${iter.index} == ${selectedDishIndex} ? 'tab-button active-tab text-base font-semibold text-blue-800 bg-blue-100 px-6 py-3 rounded-full shadow-sm transition-all duration-200 whitespace-nowrap flex-shrink-0' : 'tab-button text-base font-medium text-gray-600 bg-gray-100 hover:text-gray-800 hover:bg-gray-200 px-6 py-3 rounded-full transition-all duration-200 whitespace-nowrap flex-shrink-0'"
                     th:onclick="|window.location='@{/weekly-feedback(date=${selectedDate},dish=${iter.index})}'|">
                     Dish Name
                 </button>
@@ -264,7 +270,13 @@
                 
                 <!-- Dish Details - Auto-sized based on content -->
                 <div class="p-6">
-                    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 tracking-tight mb-3 break-words break-all leading-tight" th:text="${selectedDish.name}">Dish Name</h1>
+                    <div class="flex items-center justify-between mb-3">
+                        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 tracking-tight break-words break-all leading-tight" th:text="${selectedDish.name}">Dish Name</h1>
+                        <span th:if="${selectedDish.mealPeriod != null}" 
+                              class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-sm font-medium whitespace-nowrap">
+                            <span th:text="${#strings.capitalize(selectedDish.mealPeriod)}">Lunch</span>
+                        </span>
+                    </div>
                     <p class="text-sm sm:text-base text-gray-600 mb-6 leading-relaxed break-words break-all" th:text="${selectedDish.description}">Dish description</p>
                     
                     <!-- Likes and Comments -->

@@ -82,6 +82,7 @@ public class WeeklyMealFeedbackController {
             dto.put("imageUrl", dish.getImageUrl());
             dto.put("description", dish.getDescription());
             String mealPeriod = dishToMealPeriod.get(dish.getId());
+            dto.put("mealPeriod", mealPeriod);
             // Feedbacks for this dish (by date and meal period, and dish id if available)
             List<Feedback> feedbacks = feedbackRepository.findByDateAndMealPeriodOrderByTimestampAsc(selectedDate, mealPeriod);
             List<Map<String, Object>> feedbackList = new ArrayList<>();
