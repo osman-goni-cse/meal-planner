@@ -4,43 +4,132 @@
 <body class="bg-gray-50 font-sans">
     <div class="flex">
         <aside th:replace="fragments/layout :: sidebar"></aside>
-        <div class="flex-1 ml-16 md:ml-64">
+        <div class="w-full md:ml-64">
             <header th:replace="fragments/layout :: topnav"></header>
+            <!-- Mobile Topbar (overrides only on mobile) -->
+            <div class="md:hidden fixed top-0 left-0 w-full z-50 bg-white shadow-sm h-16 flex items-center justify-between px-4">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-utensils text-primary"></i>
+                    </div>
+                    <span class="ml-3 text-xl font-bold text-gray-800">DSi Eats</span>
+                </div>
+                <button id="mobile-menu-button" class="p-2 rounded-md text-gray-600 hover:text-primary hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+            <!-- Hamburger Modal (mobile sidebar) -->
+            <div id="mobile-menu" class="hidden fixed inset-0 z-50 bg-black bg-opacity-40 md:hidden">
+                <div class="absolute top-0 right-0 w-64 h-full bg-white shadow-lg flex flex-col">
+                    <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                        <span class="text-xl font-bold text-gray-800">Menu</span>
+                        <button id="close-mobile-menu" class="text-gray-500 hover:text-gray-700">
+                            <i class="fa-solid fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    <nav class="flex-1 overflow-y-auto">
+                        <ul class="py-4">
+                            <li class="mb-2"><a th:href="@{/weekly-plan}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 rounded transition">Manage Weekly Plan</a></li>
+                            <li class="mb-2"><a th:href="@{/dishes}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 rounded transition">Dish Management</a></li>
+                            <li class="mb-2"><a th:href="@{/review-comments}" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 rounded transition">Review Comments</a></li>
+                        </ul>
+                    </nav>
+                    <form th:action="@{/logout}" method="post" class="p-4 border-t border-gray-200">
+                        <button type="submit" class="w-full flex items-center justify-center px-4 py-2 text-gray-700 hover:text-primary hover:bg-gray-100 rounded transition">
+                            <i class="fa-solid fa-sign-out-alt mr-2"></i> Sign Out
+                        </button>
+                    </form>
+                </div>
+            </div>
             <main class="px-6 py-6 overflow-y-auto">
-                
-                <section id="weekly-calendar-section" class="bg-white rounded-lg shadow-sm p-6 mb-8">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-lg font-semibold text-gray-800">Weekly Overview</h3>
-                        <div class="flex items-center space-x-2">
-                            <a th:href="@{'/weekly-plan?date=' + ${weekStart.minusWeeks(1)}}" class="p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-lg transition">
-                                <i class="fa-solid fa-chevron-left"></i>
-                            </a>
-                            <span class="text-sm text-gray-600 mx-3" th:text="${weekStart} + ' - ' + ${weekEnd}"></span>
-                            <a th:href="@{'/weekly-plan?date=' + ${weekStart.plusWeeks(1)}}" class="p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-lg transition">
-                                <i class="fa-solid fa-chevron-right"></i>
-                            </a>
+                <!-- Mobile Date Selection -->
+                <div class="md:hidden flex items-center justify-between md:mb-6 md:pt-16">
+                    <span class="text-lg font-semibold text-gray-800" th:text="'Planning for ' + ${#temporals.format(selectedDate, 'EEEE, MMMM d, yyyy')}"></span>
+                    <button id="mobile-calendar-toggle" class="text-primary hover:text-primary/80">
+                        <i class="fa-solid fa-chevron-down text-base"></i>
+                    </button>
+                </div>
+                <!-- Calendar Modal (mobile) -->
+                <div id="mobile-calendar-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 md:hidden">
+                    <div class="bg-white rounded-lg shadow-xl w-full max-w-sm">
+                        <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800">Select Date</h3>
+                            <button id="close-calendar-modal" class="text-gray-500 hover:text-gray-700">
+                                <i class="fa-solid fa-times text-xl"></i>
+                            </button>
                         </div>
-                    </div>
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-3">
-                        <div th:each="day,iter : ${weekDays}"
-                             th:classappend="${day.equals(selectedDate)} ? 'bg-primary text-white border-primary' : 'bg-gray-100 text-gray-600 border-transparent hover:border-primary hover:bg-primary hover:text-white transition'"
-                             class="day-card rounded-lg p-4 cursor-pointer border-2"
-                             >
-                            <a th:href="@{'/weekly-plan?date=' + ${day}}">
-                                <div class="text-center">
-                                    <p class="text-xs font-medium mb-1" th:text="${#strings.toUpperCase(#temporals.format(day, 'EEE'))}"></p>
-                                    <p class="text-lg font-bold mb-2" th:text="${day.dayOfMonth}"></p>
-                                    <div class="w-5 h-5 bg-success rounded-full mx-auto flex items-center justify-center" th:if="${day.equals(selectedDate)}">
-                                        <i class="fa-solid fa-check text-white text-xs"></i>
-                                    </div>
-                                    <div class="w-5 h-5 bg-gray-300 rounded-full mx-auto" th:if="${!day.equals(selectedDate)}"></div>
+                        <div class="p-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-base font-semibold text-gray-800" th:text="${calendarMonthYear}">December 2023</h4>
+                                <div class="flex space-x-2">
+                                    <a th:href="@{'/weekly-plan?date=' + ${prevMonthDate}}" class="p-1 hover:bg-gray-200 rounded transition-colors">
+                                        <i class="text-gray-600 text-sm fas fa-chevron-left"></i>
+                                    </a>
+                                    <a th:href="@{'/weekly-plan?date=' + ${nextMonthDate}}" class="p-1 hover:bg-gray-200 rounded transition-colors">
+                                        <i class="text-gray-600 text-sm fas fa-chevron-right"></i>
+                                    </a>
                                 </div>
-                            </a>
+                            </div>
+                            <div class="grid grid-cols-7 gap-1 text-center text-sm">
+                                <!-- Days of week -->
+                                <div class="p-2 text-gray-500 font-medium text-xs">S</div>
+                                <div class="p-2 text-gray-500 font-medium text-xs">M</div>
+                                <div class="p-2 text-gray-500 font-medium text-xs">T</div>
+                                <div class="p-2 text-gray-500 font-medium text-xs">W</div>
+                                <div class="p-2 text-gray-500 font-medium text-xs">T</div>
+                                <div class="p-2 text-gray-500 font-medium text-xs">F</div>
+                                <div class="p-2 text-gray-500 font-medium text-xs">S</div>
+                                <!-- Calendar dates -->
+                                <div th:each="day,iter : ${calendarDays}">
+                                    <a th:href="@{'/weekly-plan?date=' + ${day.date}}"
+                                       th:text="${day.dayOfMonth}"
+                                       class="block w-8 h-8 mx-auto flex items-center justify-center transition-all duration-150 text-sm"
+                                       th:classappend="
+                                            ${day.selected} ? 'bg-primary text-white rounded-full font-bold ring-2 ring-primary' :
+                                            (${day.inMonth?.toString() == 'true'} ? 'text-gray-800 hover:bg-primary/10 hover:rounded-full cursor-pointer' : 'text-gray-400 hover:bg-primary/10 hover:rounded-full cursor-pointer')
+                                       ">
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </section>
-                <section id="day-planning-section" class="bg-white rounded-lg shadow-sm p-6">
-                    <div class="flex items-center justify-between mb-6">
+                </div>
+                <!-- Desktop content remains unchanged below -->
+                <div class="hidden md:block">
+                    <section id="weekly-calendar-section" class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-gray-800">Weekly Overview</h3>
+                            <div class="flex items-center space-x-2">
+                                <a th:href="@{'/weekly-plan?date=' + ${weekStart.minusWeeks(1)}}" class="p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-lg transition">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </a>
+                                <span class="text-sm text-gray-600 mx-3" th:text="${weekStart} + ' - ' + ${weekEnd}"></span>
+                                <a th:href="@{'/weekly-plan?date=' + ${weekStart.plusWeeks(1)}}" class="p-2 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-lg transition">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div id="calendar-grid" class="grid grid-cols-7 gap-3">
+                            <div th:each="day,iter : ${weekDays}"
+                                 th:classappend="${day.equals(selectedDate)} ? 'bg-primary text-white border-primary' : 'bg-gray-100 text-gray-600 border-transparent hover:border-primary hover:bg-primary hover:text-white transition'"
+                                 class="day-card rounded-lg p-4 cursor-pointer border-2"
+                                 >
+                                <a th:href="@{'/weekly-plan?date=' + ${day}}">
+                                    <div class="text-center">
+                                        <p class="text-xs font-medium mb-1" th:text="${#strings.toUpperCase(#temporals.format(day, 'EEE'))}"></p>
+                                        <p class="text-lg font-bold mb-2" th:text="${day.dayOfMonth}"></p>
+                                        <div class="w-5 h-5 bg-success rounded-full mx-auto flex items-center justify-center" th:if="${day.equals(selectedDate)}">
+                                            <i class="fa-solid fa-check text-white text-xs"></i>
+                                        </div>
+                                        <div class="w-5 h-5 bg-gray-300 rounded-full mx-auto" th:if="${!day.equals(selectedDate)}"></div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <section id="day-planning-section" class="bg-white rounded-lg shadow-sm mt-4 md:mt-0 md:p-6">
+                    <div class="flex items-center justify-between mb-6 hidden md:flex">
                         <div class="flex items-center space-x-4">
                             <h3 class="text-xl font-semibold text-gray-800" th:text="'Planning for ' + ${#temporals.format(selectedDate, 'EEEE, MMMM d')}"></h3>
                             <div class="bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-full text-sm font-medium">
@@ -59,7 +148,7 @@
                             </a>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-2">
                         <div th:insert="~{manage-weekly-plan :: mealCard(selectedDate=${selectedDate}, meal='lunch', weekPlan=${weekPlan}, allDishes=${allDishes})}"></div>
                         <div th:insert="~{manage-weekly-plan :: mealCard(selectedDate=${selectedDate}, meal='snacks', weekPlan=${weekPlan}, allDishes=${allDishes})}"></div>
                     </div>
@@ -97,6 +186,7 @@
                                 mealCard.outerHTML = html;
                                 attachAddDishHandlers(); // re-attach
                                 attachRemoveHandlers(); // re-attach remove handlers
+                                setupMobileDishSelect(); // re-attach modal handlers
                             } else {
                                 console.error('Could not find meal card with id: meal-card-' + meal);
                             }
@@ -139,6 +229,7 @@
                         mealCard.outerHTML = html;
                         attachAddDishHandlers(); // re-attach
                         attachRemoveHandlers(); // re-attach remove handlers
+                        setupMobileDishSelect(); // re-attach modal handlers
                     } else {
                         console.error('Could not find meal card with id: meal-card-' + meal);
                     }
@@ -154,20 +245,41 @@
         attachAddDishHandlers();
         attachRemoveHandlers();
     });
+    // Hamburger menu
+    document.getElementById('mobile-menu-button').onclick = function() {
+        document.getElementById('mobile-menu').classList.remove('hidden');
+    };
+    document.getElementById('close-mobile-menu').onclick = function() {
+        document.getElementById('mobile-menu').classList.add('hidden');
+    };
+    // Mobile calendar modal
+    document.getElementById('mobile-calendar-toggle').onclick = function() {
+        document.getElementById('mobile-calendar-modal').classList.remove('hidden');
+    };
+    document.getElementById('close-calendar-modal').onclick = function() {
+        document.getElementById('mobile-calendar-modal').classList.add('hidden');
+    };
+    // Close modals on outside click
+    document.getElementById('mobile-menu').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.add('hidden');
+    });
+    document.getElementById('mobile-calendar-modal').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.add('hidden');
+    });
     </script>
     
     <!-- Meal Card Fragment (hidden) -->
-    <div th:fragment="mealCard(selectedDate, meal, weekPlan, allDishes)" th:id="|meal-card-${meal != null ? meal : 'unknown'}|">
+    <div th:fragment="mealCard(selectedDate, meal, weekPlan, allDishes)" th:id="|meal-card-${meal != null ? meal : 'unknown'}|" class="meal-card">
         <div th:if="${meal != null}" th:classappend="${meal == 'lunch'} ? 'bg-orange-50 border-orange-200' : 'bg-blue-50 border-blue-200'"
-             class="rounded-lg p-6 border">
+             class="w-full max-w-full border p-2 md:p-6 rounded-none md:rounded-lg">
             <div class="flex items-center mb-4">
                 <div th:classappend="${meal == 'lunch'} ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'"
-                     class="w-10 h-10 rounded-full flex items-center justify-center mr-3">
+                     class="w-14 h-14 md:w-10 md:h-10 rounded-full flex items-center justify-center mr-3">
                     <i class="fa-solid fa-utensils"></i>
                 </div>
                 <div>
-                    <h4 class="font-semibold text-gray-800" th:text="${#strings.capitalize(meal)}"></h4>
-                    <p class="text-sm text-gray-600" th:text="${meal == 'lunch' ? '1:00 - 5:00 PM' : '5:00 - 7:00 PM'}"></p>
+                    <h4 class="font-semibold text-gray-800 text-base md:text-lg" th:text="${#strings.capitalize(meal)}"></h4>
+                    <p class="text-sm md:text-base text-gray-600" th:text="${meal == 'lunch' ? '1:00 - 5:00 PM' : '5:00 - 7:00 PM'}"></p>
                 </div>
             </div>
             
@@ -178,9 +290,9 @@
                     <th:block th:if="${weekPlan.get(selectedDate) != null and weekPlan.get(selectedDate).containsKey(meal)}">
                         <div th:each="dishMap : ${weekPlan.get(selectedDate).get(meal)}" class="selected-dish bg-white rounded-lg p-3 border border-gray-200 flex items-center justify-between">
                             <div class="flex items-center">
-                                <img class="w-12 h-12 rounded-lg object-cover mr-3" th:src="${dishMap.dish?.imageUrl}" th:alt="${dishMap.dish?.name}">
+                                <img class="w-16 h-16 md:w-12 md:h-12 rounded-lg object-cover mr-3" th:src="${dishMap.dish?.imageUrl}" th:alt="${dishMap.dish?.name}">
                                 <div>
-                                    <p class="font-medium text-gray-800" th:text="${dishMap.dish?.name}"></p>
+                                    <p class="font-medium text-gray-800 text-base md:text-lg" th:text="${dishMap.dish?.name}"></p>
                                     <span th:each="tag : ${dishMap.dish?.dietaryInfo}" th:text="${tag}" class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs mr-1"></span>
                                 </div>
                             </div>
@@ -209,18 +321,207 @@
                 <form th:action="@{/weekly-plan/add}" method="post" class="w-full add-dish-form">
                     <input type="hidden" name="date" th:value="${selectedDate}" />
                     <input type="hidden" name="mealPeriod" th:value="${meal}" />
+                    <input type="hidden" name="dishId" class="mobile-dish-id-input" />
                     <div class="flex items-center gap-2">
-                        <select name="dishId" class="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-3 text-gray-500 focus:border-primary dish-select">
-                            <option value="">+ Add Dish</option>
-                            <option th:each="d : ${allDishes}"
-                                    th:if="${#strings.toUpperCase(d.mealPeriod) == #strings.toUpperCase(meal)}"
-                                    th:value="${d.id}"
-                                    th:text="${d.name}"></option>
-                        </select>
+                        <!-- Custom modal trigger button, now visible on all screens -->
+                        <button type="button" class="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-3 text-gray-500 text-left mobile-dish-select-btn" th:data-meal="${meal}">
+                            <span class="mobile-dish-select-label">+ Add Dish</span>
+                        </button>
                     </div>
                 </form>
+                <!-- Dish Select Modal (now visible on all screens) -->
+                <div class="hidden fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4 mobile-dish-modal">
+                    <div class="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[70vh] flex flex-col">
+                        <div class="flex items-center justify-between p-4 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800">Select Dish</h3>
+                            <button type="button" class="text-gray-500 hover:text-gray-700 close-mobile-dish-modal">
+                                <i class="fa-solid fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        <div class="overflow-y-auto p-4 flex-1" style="max-height:calc(5*64px); min-height:0; scrollbar-width:thin; scrollbar-color:#007BFF #f1f5f9;">
+                            <div th:each="d : ${allDishes}" th:if="${#strings.toUpperCase(d.mealPeriod) == #strings.toUpperCase(meal)}" class="flex items-center gap-3 p-2 rounded-lg hover:bg-blue-50 cursor-pointer mobile-dish-option" th:data-dish-id="${d.id}" th:data-dish-name="${d.name}" th:data-dish-img="${d.imageUrl}">
+                                <img th:src="${d.imageUrl}" th:alt="${d.name}" class="w-12 h-12 rounded-lg object-cover">
+                                <span class="font-medium text-gray-800">[[${d.name}]]</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    <script>
+    function attachAddDishHandlers() {
+        document.querySelectorAll('.add-dish-form').forEach(function(form) {
+            const select = form.querySelector('select[name="dishId"]');
+            if (select) {
+                select.onchange = function() {
+                    if (select.value) {
+                        // Submit via AJAX
+                        const formData = new FormData(form);
+                        const meal = form.querySelector('input[name="mealPeriod"]').value;
+                        console.log('Submitting dish for meal:', meal, 'dishId:', select.value);
+                        
+                        fetch(form.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        })
+                        .then(response => {
+                            console.log('Response status:', response.status);
+                            return response.text();
+                        })
+                        .then(html => {
+                            console.log('Received HTML response length:', html.length);
+                            console.log('HTML preview:', html.substring(0, 200));
+                            
+                            const mealCard = document.getElementById('meal-card-' + meal);
+                            if (mealCard) {
+                                mealCard.outerHTML = html;
+                                attachAddDishHandlers(); // re-attach
+                                attachRemoveHandlers(); // re-attach remove handlers
+                                setupMobileDishSelect(); // re-attach modal handlers
+                            } else {
+                                console.error('Could not find meal card with id: meal-card-' + meal);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('AJAX error:', error);
+                        });
+                        // Reset dropdown
+                        select.value = '';
+                    }
+                };
+            }
+        });
+    }
+
+    function attachRemoveHandlers() {
+        document.querySelectorAll('.remove-template-form').forEach(function(form) {
+            form.onsubmit = function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                const meal = form.querySelector('input[name="mealPeriod"]').value;
+                const dishId = form.querySelector('input[name="dishId"]').value;
+                console.log('Removing dish for meal:', meal, 'dishId:', dishId);
+                
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => {
+                    console.log('Remove response status:', response.status);
+                    return response.text();
+                })
+                .then(html => {
+                    console.log('Remove response length:', html.length);
+                    
+                    const mealCard = document.getElementById('meal-card-' + meal);
+                    if (mealCard) {
+                        mealCard.outerHTML = html;
+                        attachAddDishHandlers(); // re-attach
+                        attachRemoveHandlers(); // re-attach remove handlers
+                        setupMobileDishSelect(); // re-attach modal handlers
+                    } else {
+                        console.error('Could not find meal card with id: meal-card-' + meal);
+                    }
+                })
+                .catch(error => {
+                    console.error('Remove AJAX error:', error);
+                });
+            };
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        attachAddDishHandlers();
+        attachRemoveHandlers();
+    });
+    // Hamburger menu
+    document.getElementById('mobile-menu-button').onclick = function() {
+        document.getElementById('mobile-menu').classList.remove('hidden');
+    };
+    document.getElementById('close-mobile-menu').onclick = function() {
+        document.getElementById('mobile-menu').classList.add('hidden');
+    };
+    // Mobile calendar modal
+    document.getElementById('mobile-calendar-toggle').onclick = function() {
+        document.getElementById('mobile-calendar-modal').classList.remove('hidden');
+    };
+    document.getElementById('close-calendar-modal').onclick = function() {
+        document.getElementById('mobile-calendar-modal').classList.add('hidden');
+    };
+    // Close modals on outside click
+    document.getElementById('mobile-menu').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.add('hidden');
+    });
+    document.getElementById('mobile-calendar-modal').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.add('hidden');
+    });
+    // Mobile custom dish select modal logic
+    function setupMobileDishSelect() {
+        document.querySelectorAll('.mobile-dish-select-btn').forEach(function(btn) {
+            btn.onclick = function() {
+                // Find the meal for this button
+                var meal = btn.getAttribute('data-meal');
+                // Find the modal for this meal (if multiple meal cards)
+                var modal = btn.closest('.meal-card')?.querySelector('.mobile-dish-modal') || document.querySelector('.mobile-dish-modal');
+                if (modal) modal.classList.remove('hidden');
+                // Store reference to the button for updating label
+                modal._triggerBtn = btn;
+                // Store reference to the form
+                modal._form = btn.closest('form');
+            };
+        });
+        document.querySelectorAll('.close-mobile-dish-modal').forEach(function(btn) {
+            btn.onclick = function() {
+                btn.closest('.mobile-dish-modal').classList.add('hidden');
+            };
+        });
+        document.querySelectorAll('.mobile-dish-modal').forEach(function(modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) modal.classList.add('hidden');
+            });
+            modal.querySelectorAll('.mobile-dish-option').forEach(function(opt) {
+                opt.onclick = function() {
+                    var dishId = opt.getAttribute('data-dish-id');
+                    var dishName = opt.getAttribute('data-dish-name');
+                    // Set hidden input value
+                    if (modal._form) {
+                        var input = modal._form.querySelector('.mobile-dish-id-input');
+                        if (input) input.value = dishId;
+                        // Update button label
+                        if (modal._triggerBtn) {
+                            modal._triggerBtn.querySelector('.mobile-dish-select-label').textContent = dishName;
+                        }
+                        // Submit the form
+                        modal._form.requestSubmit();
+                    }
+                    modal.classList.add('hidden');
+                };
+            });
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        setupMobileDishSelect();
+    });
+    </script>
+    <style>
+    /* Always show vertical scrollbar in modal dish list */
+    .meal-card .mobile-dish-modal .overflow-y-auto {
+      overflow-y: scroll !important;
+      scrollbar-width: thin;
+      scrollbar-color: #007BFF #f1f5f9;
+    }
+    .meal-card .mobile-dish-modal .overflow-y-auto::-webkit-scrollbar {
+      width: 8px;
+      background: #f1f5f9 !important;
+    }
+    .meal-card .mobile-dish-modal .overflow-y-auto::-webkit-scrollbar-thumb {
+      background: #007BFF !important;
+      border-radius: 4px;
+    }
+    </style>
 </body>
 </html> 

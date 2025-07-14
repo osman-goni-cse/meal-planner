@@ -124,11 +124,30 @@ public class WeeklyPlanController {
         List<LocalDate> weekDays = new ArrayList<>();
         for (int i = 0; i < 7; i++) weekDays.add(weekStart.plusDays(i));
 
+        // --- Full month calendar logic for mobile modal ---
+        LocalDate firstOfMonth = today.withDayOfMonth(1);
+        int firstDayOfWeek = firstOfMonth.getDayOfWeek().getValue() % 7; // 0=Sunday
+        LocalDate calendarStart = firstOfMonth.minusDays(firstDayOfWeek);
+        List<Map<String, Object>> calendarDays = new ArrayList<>();
+        for (int i = 0; i < 42; i++) { // 6 weeks x 7 days
+            LocalDate day = calendarStart.plusDays(i);
+            Map<String, Object> dayMap = new HashMap<>();
+            dayMap.put("date", day);
+            dayMap.put("dayOfMonth", day.getDayOfMonth());
+            dayMap.put("inMonth", day.getMonth().equals(today.getMonth()));
+            dayMap.put("selected", day.equals(today));
+            calendarDays.add(dayMap);
+        }
+        model.addAttribute("calendarDays", calendarDays);
+        model.addAttribute("calendarMonthYear", today.getMonth().toString().substring(0,1).toUpperCase() + today.getMonth().toString().substring(1).toLowerCase() + " " + today.getYear());
+        model.addAttribute("prevMonthDate", today.minusMonths(1).withDayOfMonth(1));
+        model.addAttribute("nextMonthDate", today.plusMonths(1).withDayOfMonth(1));
+        // --- End full month calendar logic ---
+
         // Build week plan with deduplication
         Map<LocalDate, Map<String, List<Map<String, Object>>>> weekPlan = new LinkedHashMap<>();
         for (LocalDate d : weekDays) {
             Map<String, List<Map<String, Object>>> meals = new LinkedHashMap<>();
-            
             for (String meal : MEAL_PERIODS) {
                 List<Map<String, Object>> dishList = getUniqueDishesForMeal(d, meal);
                 meals.put(meal, dishList);
