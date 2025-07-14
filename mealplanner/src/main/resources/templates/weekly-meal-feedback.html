@@ -8,6 +8,35 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&display=swap">
     <style>body { font-family: 'Inter', sans-serif !important; }</style>
+    <style>
+        /* Responsive text adjustments */
+        .break-words {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .break-all {
+            word-break: break-all;
+            overflow-wrap: break-word;
+        }
+        
+        /* Ensure text doesn't overflow on small screens */
+        @media (max-width: 640px) {
+            h1, h2, h3, h4 {
+                word-break: break-word;
+                hyphens: auto;
+            }
+        }
+        
+        /* Improve line height for better readability */
+        .leading-tight {
+            line-height: 1.1;
+        }
+        
+        .leading-relaxed {
+            line-height: 1.6;
+        }
+    </style>
 </head>
 <body class="font-sans bg-white flex flex-col min-h-screen">
     <!-- Top Navigation Bar -->
@@ -169,8 +198,8 @@
                             <img class="w-full h-80 object-cover rounded-xl shadow-md" th:src="${selectedDish.imageUrl}" th:alt="${selectedDish.name}">
                         </div>
                         <div id="dish-details">
-                            <h1 class="text-5xl font-bold text-gray-800 tracking-tight" th:text="${selectedDish.name}">Dish Name</h1>
-                            <p class="text-lg text-gray-600 mt-2" th:text="${selectedDish.description}">Dish description</p>
+                            <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 tracking-tight break-words break-all leading-tight" th:text="${selectedDish.name}">Dish Name</h1>
+                            <p class="text-sm sm:text-base md:text-lg text-gray-600 mt-2 leading-relaxed break-words break-all" th:text="${selectedDish.description}">Dish description</p>
                         </div>
                     </div>
                     <!-- Right Column: Feedback -->
@@ -235,8 +264,8 @@
                 
                 <!-- Dish Details - Auto-sized based on content -->
                 <div class="p-6">
-                    <h1 class="text-3xl font-bold text-gray-800 tracking-tight mb-3" th:text="${selectedDish.name}">Dish Name</h1>
-                    <p class="text-base text-gray-600 mb-6" th:text="${selectedDish.description}">Dish description</p>
+                    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 tracking-tight mb-3 break-words break-all leading-tight" th:text="${selectedDish.name}">Dish Name</h1>
+                    <p class="text-sm sm:text-base text-gray-600 mb-6 leading-relaxed break-words break-all" th:text="${selectedDish.description}">Dish description</p>
                     
                     <!-- Likes and Comments -->
                     <div th:if="${!selectedDish.isEmpty() && !selectedDate.isAfter(T(java.time.LocalDate).now())}" class="flex items-center space-x-6">

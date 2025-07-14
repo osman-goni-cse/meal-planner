@@ -9,6 +9,35 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&display=swap">
     <style>body { font-family: 'Inter', sans-serif !important; }</style>
+    <style>
+        /* Responsive text adjustments */
+        .break-words {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .break-all {
+            word-break: break-all;
+            overflow-wrap: break-word;
+        }
+        
+        /* Ensure text doesn't overflow on small screens */
+        @media (max-width: 640px) {
+            h1, h2, h3, h4 {
+                word-break: break-word;
+                hyphens: auto;
+            }
+        }
+        
+        /* Improve line height for better readability */
+        .leading-tight {
+            line-height: 1.1;
+        }
+        
+        .leading-relaxed {
+            line-height: 1.6;
+        }
+    </style>
 </head>
 <body class="font-sans bg-white">
     <!-- Top Navigation Bar -->
@@ -65,10 +94,10 @@
                 <!-- Greeting and Serving Time - Always First -->
                 <div class="mb-6 flex flex-col md:flex-row md:justify-between md:items-start">
                     <div>
-                        <p class="text-lg text-gray-600">
+                        <p class="text-base sm:text-lg text-gray-600">
                             <span th:text="${greeting}">Good Morning</span>, <span th:text="${#authentication.principal.attributes['name']}">Team</span>
                         </p>
-                        <h1 class="text-2xl font-bold text-gray-800 mt-1">
+                        <h1 class="text-xl sm:text-2xl font-bold text-gray-800 mt-1">
                             Today's <span th:text="${topMealPeriod != null ? #strings.capitalize(topMealPeriod) : 'Meal'}">Meal</span>
                         </h1>
                     </div>
@@ -77,8 +106,8 @@
                             <i class="text-primary text-xl fa-solid fa-clock"></i>
                         </div>
                         <div>
-                            <span class="text-lg font-semibold text-gray-800">Serving Time</span>
-                            <div class="text-lg text-gray-600 mt-1" th:text="${servingTime}">12:30 PM – 2:00 PM</div>
+                            <span class="text-base sm:text-lg font-semibold text-gray-800">Serving Time</span>
+                            <div class="text-base sm:text-lg text-gray-600 mt-1" th:text="${servingTime}">12:30 PM – 2:00 PM</div>
                         </div>
                     </div>
                 </div>
@@ -97,14 +126,14 @@
                 <!-- Main Dish Section -->
                 <div class="mb-8">
                     <div class="bg-white">
-                        <h3 class="text-4xl md:text-8xl font-bold text-black mb-2" th:text="${topMealMainDish != null ? topMealMainDish.name : 'Main Dish'}">Main Dish</h3>
-                        <p class="text-lg text-gray-600" th:text="${topMealMainDish != null ? topMealMainDish.description : 'Enjoy the delicious taste of our signature dish'}">Main dish description</p>
+                        <h3 class="text-2xl sm:text-3xl md:text-4xl lg:text-6xl xl:text-8xl font-bold text-black mb-2 break-words break-all leading-tight" th:text="${topMealMainDish != null ? topMealMainDish.name : 'Main Dish'}">Main Dish</h3>
+                        <p class="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed break-words break-all" th:text="${topMealMainDish != null ? topMealMainDish.description : 'Enjoy the delicious taste of our signature dish'}">Main dish description</p>
                     </div>
                 </div>
                 
                 <!-- Also Serving Section -->
                 <div class="mb-6" th:if="${topMealSideDishes != null and !topMealSideDishes.isEmpty()}">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Also Serving</h2>
+                    <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">Also Serving</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div th:each="side : ${topMealSideDishes}" class="bg-white flex items-center">
                             <a th:href="@{'/weekly-feedback'(date=${today},dish=${side != null and dishIdToIndex.containsKey(side.id) ? dishIdToIndex[side.id] : 0})}" class="flex items-center w-full group hover:bg-primary/10 rounded-lg transition-colors duration-150 p-2">
@@ -112,8 +141,8 @@
                                     <img class="w-full h-full object-cover" th:src="${side.imageUrl}" th:alt="${side.name}">
                                 </div>
                                 <div>
-                                    <h3 class="font-semibold text-gray-800 group-hover:underline" th:text="${side.name}">Side Dish</h3>
-                                    <p class="text-sm text-gray-600" th:text="${side.description}">Side description</p>
+                                    <h3 class="font-semibold text-gray-800 group-hover:underline text-sm sm:text-base break-words break-all" th:text="${side.name}">Side Dish</h3>
+                                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed break-words break-all" th:text="${side.description}">Side description</p>
                                 </div>
                             </a>
                         </div>
@@ -134,9 +163,9 @@
         </div>
         <!-- Bottom Meal Section -->
         <div class="mb-4 mt-16">
-            <h2 class="text-4xl font-bold text-gray-800" 
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800" 
                 th:if="${currentMealPeriod != 'snacks'}">Coming Up Next</h2>
-            <h2 class="text-4xl font-bold text-gray-800" 
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800" 
                 th:if="${currentMealPeriod == 'snacks'}">Earlier Today</h2>
         </div>
         <div class="flex flex-col md:flex-row gap-5 mt-10">
@@ -154,11 +183,11 @@
             <!-- Meal Content - Mobile Second, Desktop Right -->
             <div class="w-full md:w-2/3 bg-white flex flex-col md:justify-center md:h-[400px] order-2 md:order-2">
                 <div class="mb-6">
-                    <h2 class="text-4xl md:text-6xl font-bold text-black mb-2" th:text="${bottomMealMainDish != null ? bottomMealMainDish.name : 'Meal'}">Meal</h2>
-                    <p class="text-lg text-gray-600" th:text="${bottomMealMainDish != null ? bottomMealMainDish.description : ''}">Meal description</p>
+                    <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-black mb-2 break-words break-all leading-tight" th:text="${bottomMealMainDish != null ? bottomMealMainDish.name : 'Meal'}">Meal</h2>
+                    <p class="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed break-words break-all" th:text="${bottomMealMainDish != null ? bottomMealMainDish.description : ''}">Meal description</p>
                 </div>
                 <div class="mb-6" th:if="${bottomMealSideDishes != null and !bottomMealSideDishes.isEmpty()}">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">Also Serving</h3>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">Also Serving</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div th:each="side : ${bottomMealSideDishes}" class="bg-white flex items-center">
                             <a th:href="@{'/weekly-feedback'(date=${today},dish=${side != null and dishIdToIndex.containsKey(side.id) ? dishIdToIndex[side.id] : 0})}" class="flex items-center w-full group hover:bg-primary/10 rounded-lg transition-colors duration-150 p-2">
@@ -166,8 +195,8 @@
                                     <img class="w-full h-full object-cover" th:src="${side.imageUrl}" th:alt="${side.name}">
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-800 group-hover:underline" th:text="${side.name}">Side Dish</h4>
-                                    <p class="text-sm text-gray-600" th:text="${side.description}">Side description</p>
+                                    <h4 class="font-semibold text-gray-800 group-hover:underline text-sm sm:text-base break-words break-all" th:text="${side.name}">Side Dish</h4>
+                                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed break-words break-all" th:text="${side.description}">Side description</p>
                                 </div>
                             </a>
                         </div>
