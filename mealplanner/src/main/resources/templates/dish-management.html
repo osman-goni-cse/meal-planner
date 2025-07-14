@@ -3,43 +3,41 @@
 <head th:replace="fragments/layout :: head"></head>
 <body class="bg-gray-50 font-sans">
     <div class="flex">
-        <aside th:replace="fragments/layout :: sidebar"></aside>
-        <div class="flex-1 ml-16 md:ml-64">
-            <header th:replace="fragments/layout :: topnav"></header>
-            <main class="px-6 py-6">
-                <!-- Page-specific content starts here -->
-                
-                <section id="dish-filters-section" class="bg-white rounded-lg shadow-sm p-6 mb-8">
-                    <form id="dish-filters-form" method="get" action="/dishes" class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                        <div class="flex flex-col sm:flex-row gap-4 flex-1">
-                            <div class="relative flex-1 max-w-md">
+        <aside th:replace="fragments/layout :: sidebar" class="hidden md:flex"></aside>
+        <div class="flex-1 ml-0 md:ml-64">
+            <header th:replace="fragments/layout :: topnav" class="hidden md:block"></header>
+            <div th:replace="fragments/layout :: mobile-navbar" class="md:hidden"></div>
+            <main class="px-2 md:px-6 md:py-6">
+                <!-- Responsive Filters/Search -->
+                <section id="dish-filters-section" class="bg-white rounded-lg shadow-sm p-4 md:p-6 mb-4 md:mb-8">
+                    <form id="dish-filters-form" method="get" action="/dishes" class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
+                        <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 flex-1">
+                            <div class="relative flex-1 max-w-md mb-2 md:mb-0">
                                 <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                                 <input type="text" id="search-input" name="search" placeholder="Search dishes by name..." th:value="${search}" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
                             </div>
-                            <select id="meal-period-filter" name="mealPeriod" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <option value="">All Meal Periods</option>
-                                <option value="LUNCH" th:selected="${mealPeriod == 'LUNCH'}">Lunch</option>
-                                <option value="SNACKS" th:selected="${mealPeriod == 'SNACKS'}">Snacks</option>
-                            </select>
-                            <select id="category-filter" name="category" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <option value="">All Categories</option>
-                                <option value="Main Course" th:selected="${category == 'Main Course'}">Main Course</option>
-                                <option value="Side Dish" th:selected="${category == 'Side Dish'}">Side Dish</option>
-                                <option value="Beverage" th:selected="${category == 'Beverage'}">Beverage</option>
-                                <option value="Dessert" th:selected="${category == 'Dessert'}">Dessert</option>
-                            </select>
+                            <div class="flex flex-row gap-2 w-full md:w-auto mb-2 md:mb-0 md:flex-nowrap flex-wrap">
+                                <select id="meal-period-filter" name="mealPeriod" class="flex-1 min-w-0 h-10 text-xs px-2 py-0 md:h-auto md:text-sm md:px-4 md:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <option value="">All Meal Periods</option>
+                                    <option value="LUNCH" th:selected="${mealPeriod == 'LUNCH'}">Lunch</option>
+                                    <option value="SNACKS" th:selected="${mealPeriod == 'SNACKS'}">Snacks</option>
+                                </select>
+                                <select id="category-filter" name="category" class="flex-1 min-w-0 h-10 text-xs px-2 py-0 md:h-auto md:text-sm md:px-4 md:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <option value="">All Categories</option>
+                                    <option value="Main Course" th:selected="${category == 'Main Course'}">Main Course</option>
+                                    <option value="Side Dish" th:selected="${category == 'Side Dish'}">Side Dish</option>
+                                    <option value="Beverage" th:selected="${category == 'Beverage'}">Beverage</option>
+                                    <option value="Dessert" th:selected="${category == 'Dessert'}">Dessert</option>
+                                </select>
+                                <a href="/dishes" class="flex-1 min-w-0 h-10 text-xs px-2 py-0 md:h-auto md:text-sm md:px-4 md:py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center justify-center md:w-auto md:flex-none whitespace-nowrap">
+                                    <i class="fa-solid fa-filter mr-2"></i>
+                                    <span class="whitespace-nowrap">Clear Filters</span>
+                                </a>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition flex items-center">
-                                <i class="fa-solid fa-filter mr-2"></i>
-                                <span>Apply Filters</span>
-                            </button>
-                            <a href="/dishes" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center">
-                                <i class="fa-solid fa-filter mr-2"></i>
-                                <span>Clear Filters</span>
-                            </a>
-                            <div class="" sec:authorize="hasAuthority('ROLE_ADMIN')">
-                                <button class="bg-white text-primary px-6 py-2 rounded-full shadow-md hover:bg-gray-100 transition flex items-center font-medium"
+                        <div class="flex items-center gap-2 w-full md:w-auto">
+                            <div class="w-full md:w-auto" sec:authorize="hasAuthority('ROLE_ADMIN')">
+                                <button class="w-full md:w-auto bg-white text-primary px-6 py-2 rounded-full shadow-md hover:bg-gray-100 transition flex items-center justify-center font-medium"
                                         type="button" onclick="openAddDishModal()">
                                     <i class="fa-solid fa-plus mr-2"></i>
                                     <span>Add New Dish</span>
@@ -53,11 +51,11 @@
                     <div class="bg-white rounded-lg shadow-sm">
                         <div class="p-6 border-b border-gray-200">
                             <div class="flex items-center justify-between">
-                                <h3 class="text-lg font-semibold text-gray-800">All Dishes</h3>
-                                <div class="flex items-center text-sm text-gray-600">
-                                    <span id="dish-count-display" th:text="'Showing ' + (${currentPage * pageSize + 1}) + '-' + (${currentPage * pageSize + dishes.size()}) + ' of ' + ${dishCount} + ' dishes'"></span>
+                                <h3 class="text-lg font-semibold text-gray-800 hidden md:block">All Dishes</h3>
+                                <div class="flex items-center text-sm text-gray-600 w-full md:w-auto justify-end">
+                                    <span id="dish-count-display" class="hidden md:inline" th:text="'Showing ' + (${currentPage * pageSize + 1}) + '-' + (${currentPage * pageSize + dishes.size()}) + ' of ' + ${dishCount} + ' dishes'"></span>
                                     <!-- Pagination Controls (Top Right) -->
-                                    <nav class="flex items-center gap-1 ml-6 overflow-x-auto" aria-label="Pagination" th:if="${dishesPage.totalPages > 1}">
+                                    <nav class="flex items-center gap-1 ml-0 md:ml-6 overflow-x-auto" aria-label="Pagination" th:if="${dishesPage.totalPages > 1}">
                                         <a th:href="@{/dishes(page=${currentPage-1},size=${pageSize},search=${search},mealPeriod=${mealPeriod},category=${category})}"
                                            class="px-2 py-1 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-100 rounded-l-md"
                                            th:classappend="${dishesPage.first} ? 'pointer-events-none opacity-50' : ''"
@@ -675,6 +673,39 @@
     document.addEventListener('DOMContentLoaded', function() {
         // The client-side filtering logic is now handled by the server-side Thymeleaf template
         // and the form submission.
+        // --- Auto-submit for filters ---
+        const form = document.getElementById('dish-filters-form');
+        const mealPeriod = document.getElementById('meal-period-filter');
+        const category = document.getElementById('category-filter');
+        const searchInput = document.getElementById('search-input');
+        if (form && mealPeriod && category && searchInput) {
+            mealPeriod.addEventListener('change', () => form.submit());
+            category.addEventListener('change', () => form.submit());
+            let debounceTimeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(debounceTimeout);
+                debounceTimeout = setTimeout(() => {
+                    form.submit();
+                }, 2000);
+            });
+        }
+    });
+    // Hamburger menu logic for mobile
+    document.addEventListener('DOMContentLoaded', function() {
+        var menuBtn = document.getElementById('mobile-menu-button');
+        var menu = document.getElementById('mobile-menu');
+        var closeBtn = document.getElementById('close-mobile-menu');
+        if (menuBtn && menu) {
+            menuBtn.onclick = function() { menu.classList.remove('hidden'); };
+        }
+        if (closeBtn && menu) {
+            closeBtn.onclick = function() { menu.classList.add('hidden'); };
+        }
+        if (menu) {
+            menu.addEventListener('click', function(e) {
+                if (e.target === menu) menu.classList.add('hidden');
+            });
+        }
     });
     </script>
 </body>
