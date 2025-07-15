@@ -11,7 +11,7 @@
         theme: {
           extend: {
             colors: {
-              primary: '#007BFF',
+              primary: '#ff7300',
               secondary: '#F8F9FA',
               success: '#28A945',
               warning: '#F59E0B',
@@ -53,11 +53,10 @@
 </head>
 <body>
     <aside th:fragment="sidebar" class="hidden md:flex w-16 md:w-64 bg-slate-800 text-white flex-col fixed h-full">
+        <!-- Sidebar logo and name -->
         <div class="p-4 flex items-center justify-center md:justify-start">
-            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                <i class="fa-solid fa-utensils text-primary"></i>
-            </div>
-            <span class="ml-3 text-xl font-bold hidden md:block">DSi Eats</span>
+            <img src="/images/foodsi.svg" alt="Foodsi logo" class="w-12 h-12">
+            <span class="ml-3 text-3xl font-bold hidden md:block">Foodsi</span>
         </div>
         <nav class="mt-8">
             <ul>
@@ -89,6 +88,7 @@
         </nav>
     </aside>
     <header th:fragment="topnav" class="bg-white shadow-sm h-16 flex items-center justify-between px-6">
+        <!-- Desktop topnav logo and name -->
         <div class="hidden md:flex items-center">
             <h1 class="text-xl font-semibold text-gray-800 mr-4" th:text="${pageTitle}">Meal Planner</h1>
             <div class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium flex items-center" th:if="${weekStart != null and weekEnd != null}">
@@ -194,12 +194,11 @@
     </script>
     <!-- Add after topnav fragment, before footer-scripts -->
     <div th:fragment="mobile-navbar">
+        <!-- Mobile navbar logo and name -->
         <div class="md:hidden fixed top-0 left-0 w-full z-50 bg-white shadow-sm h-16 flex items-center justify-between px-4">
             <div class="flex items-center">
-                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                    <i class="fa-solid fa-utensils text-primary"></i>
-                </div>
-                <span class="ml-3 text-xl font-bold text-gray-800">DSi Eats</span>
+                <img src="/images/foodsi.svg" alt="Foodsi logo" class="w-12 h-12">
+                <span class="ml-3 text-3xl font-bold text-gray-800">Foodsi</span>
             </div>
             <button id="mobile-menu-button" class="p-2 rounded-md text-gray-600 hover:text-primary hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary">
                 <i class="fa-solid fa-bars text-xl"></i>
