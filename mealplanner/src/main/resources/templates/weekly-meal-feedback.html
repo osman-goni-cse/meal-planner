@@ -337,19 +337,7 @@
             </div>
         </div>
     </div>
-    <!-- Footer -->
-    <footer id="footer" class="bg-white border-t border-gray-medium mt-6">
-        <div class="container mx-auto px-5 py-4">
-            <div class="flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
-                <div class="">© 2025 DSi Internal Food Menu System</div>
-                <div class="flex space-x-4 mt-2 md:mt-0">
-                    <span class="hover:text-primary cursor-pointer">Dietary Restrictions</span>
-                    <span class="hover:text-primary cursor-pointer">Suggest a Meal</span>
-                    <a href="/food-committee" target="_blank" rel="noopener" class="hover:text-primary cursor-pointer">Food Committee</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <div th:replace="fragments/layout :: footer"></div>
     <script th:inline="javascript">
     /*<![CDATA[*/
     let currentPage = 0;

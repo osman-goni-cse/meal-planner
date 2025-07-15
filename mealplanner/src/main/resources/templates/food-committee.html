@@ -32,18 +32,15 @@
     <!-- Mobile Navbar (reuse fragment) -->
     <div th:replace="fragments/layout :: mobile-navbar" class="md:hidden"></div>
     <main class="container mx-auto px-4 py-8">
-        <section id="committee-intro" class="mb-10">
+        <section id="committee-intro" class="my-10">
             <div class="bg-white rounded-lg shadow-sm p-8">
                 <h1 class="text-3xl font-bold text-dark mb-4">Meet Your Food Committee</h1>
                 <p class="text-gray-600 mb-6">
                     Our dedicated team works tirelessly to ensure that lunch and snack options meet everyone's preferences and dietary needs. Feel free to reach out to any committee member with your suggestions or concerns.
                 </p>
                 <div class="flex flex-wrap items-center gap-4">
-                    <a href="mailto:" class="bg-primary text-white px-6 py-3 rounded-lg font-medium flex items-center">
-                        <i class="fa-solid fa-envelope mr-2"></i>
-                        Contact Committee
-                    </a>
-                    <a href="/weekly-feedback" class="border border-border bg-white text-dark px-6 py-3 rounded-lg font-medium flex items-center">
+                    
+                    <a href="/weekly-feedback" class="border border-border bg-primary text-white px-6 py-3 rounded-lg font-medium flex items-center">
                         <i class="fa-solid fa-comment-dots mr-2"></i>
                         Submit Feedback
                     </a>
@@ -78,5 +75,6 @@
             </div>
         </div>
     </main>
+    <div th:replace="fragments/layout :: footer"></div>
 </body>
 </html> 

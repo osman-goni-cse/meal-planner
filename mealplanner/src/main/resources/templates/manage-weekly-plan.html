@@ -2,9 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="fragments/layout :: head"></head>
 <body class="bg-gray-50 font-sans">
-    <div class="flex">
+    <div class="flex min-h-screen">
         <aside th:replace="fragments/layout :: sidebar"></aside>
-        <div class="w-full md:ml-64">
+        <div class="w-full md:ml-64 flex flex-col">
             <header th:replace="fragments/layout :: topnav"></header>
             <!-- Mobile Topbar (overrides only on mobile) -->
             <div class="md:hidden fixed top-0 left-0 w-full z-50 bg-white shadow-sm h-16 flex items-center justify-between px-4">
@@ -56,7 +56,7 @@
                     </form>
                 </div>
             </div>
-            <main class="px-6 py-6 overflow-y-auto">
+            <main class="px-6 py-6 overflow-y-auto flex-1">
                 <!-- Mobile Date Selection -->
                 <div class="md:hidden flex items-center justify-between md:mb-6 md:pt-16">
                     <span class="text-lg font-semibold text-gray-800" th:text="'Planning for ' + ${#temporals.format(selectedDate, 'EEEE, MMMM d, yyyy')}"></span>
@@ -169,8 +169,11 @@
                     </div>
                 </section>
             </main>
+            <div th:replace="fragments/layout :: footer"></div>
         </div>
     </div>
+
+    
     <script>
     function attachAddDishHandlers() {
         document.querySelectorAll('.add-dish-form').forEach(function(form) {

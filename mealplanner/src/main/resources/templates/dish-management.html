@@ -2,12 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.springframework.org/security/tags">
 <head th:replace="fragments/layout :: head"></head>
 <body class="bg-gray-50 font-sans">
-    <div class="flex">
+    <div class="flex min-h-screen">
         <aside th:replace="fragments/layout :: sidebar" class="hidden md:flex"></aside>
-        <div class="flex-1 ml-0 md:ml-64">
+        <div class="flex flex-col flex-1 ml-0 md:ml-64">
             <header th:replace="fragments/layout :: topnav" class="hidden md:block"></header>
             <div th:replace="fragments/layout :: mobile-navbar" class="md:hidden"></div>
-            <main class="px-2 md:px-6 md:py-6">
+            <main class="flex-1 px-2 md:px-6 md:py-6">
                 <!-- Responsive Filters/Search -->
                 <section id="dish-filters-section" class="bg-white rounded-lg shadow-sm p-4 md:p-6 mb-4 md:mb-8">
                     <form id="dish-filters-form" method="get" action="/dishes" class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
@@ -136,6 +136,7 @@
                     </div>
                 </section>
             </main>
+            <div th:replace="fragments/layout :: footer"></div>
         </div>
     </div>
     <!-- Add Dish Modal Fragment -->

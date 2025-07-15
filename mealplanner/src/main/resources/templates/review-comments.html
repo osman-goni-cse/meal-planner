@@ -4,12 +4,12 @@
 <body class="font-sans bg-gray-50 flex flex-col min-h-screen">
     <!-- Desktop Sidebar (Desktop Only) -->
     <div th:replace="fragments/layout :: sidebar" class="hidden md:block"></div>
-    <div class="flex-1 md:ml-64">
+    <div class="flex flex-col flex-1 md:ml-64">
         <!-- Desktop Topnav (Desktop Only) -->
         <div th:replace="fragments/layout :: topnav" class="hidden md:block"></div>
         <!-- Mobile Navbar (reuse fragment) -->
         <div th:replace="fragments/layout :: mobile-navbar" class="md:hidden"></div>
-        <main class="overflow-y-auto h-full">
+        <main class="overflow-y-auto h-full flex-1">
             <!-- Filters Section -->
             <section class="bg-white rounded-lg shadow-sm p-4 md:p-6 mb-4 md:mb-8">
                 <form id="review-comments-filters-form" method="get" action="/review-comments" class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
@@ -98,6 +98,7 @@
                 </div>
             </div>
         </main>
+        <div th:replace="fragments/layout :: footer"></div>
     </div>
     <footer th:replace="fragments/layout :: footer-scripts"></footer>
     <!-- Modal HTML (dynamic, hidden by default) -->
