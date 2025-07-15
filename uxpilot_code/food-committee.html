@@ -1,0 +1,279 @@
+<html><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script> window.FontAwesomeConfig = { autoReplaceSvg: 'nest'};</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>::-webkit-scrollbar { display: none;}</style>
+    
+    <script>tailwind.config = {
+  "theme": {
+    "extend": {
+      "colors": {
+        "primary": "#3F20FB",
+        "secondary": "#F5F5F7",
+        "dark": "#333333",
+        "light": "#FFFFFF",
+        "border": "#E5E7EB"
+      },
+      "fontFamily": {
+        "sans": [
+          "Inter",
+          "sans-serif"
+        ]
+      }
+    }
+  }
+};</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&amp;display=swap"><style>
+      body {
+        font-family: 'Inter', sans-serif !important;
+      }
+      
+      /* Preserve Font Awesome icons */
+      .fa, .fas, .far, .fal, .fab {
+        font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+      }
+    </style><style>
+  .highlighted-section {
+    outline: 2px solid #3F20FB;
+    background-color: rgba(63, 32, 251, 0.1);
+  }
+
+  .edit-button {
+    position: absolute;
+    z-index: 1000;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  html, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  </style></head>
+<body class="font-sans bg-secondary">
+    <header id="header" class="bg-white shadow-sm py-4 px-6">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white">
+                    <i class="fa-solid fa-utensils"></i>
+                </div>
+                <span class="ml-3 text-xl font-semibold text-dark">Food Committee</span>
+            </div>
+            <nav class="hidden md:flex items-center space-x-6">
+                <span class="text-dark hover:text-primary transition-colors cursor-pointer">Home</span>
+                <span class="text-primary font-medium cursor-pointer">Committee</span>
+                <span class="text-dark hover:text-primary transition-colors cursor-pointer">Menu</span>
+                <span class="text-dark hover:text-primary transition-colors cursor-pointer">Feedback</span>
+            </nav>
+            <div class="md:hidden">
+                <button class="text-dark">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <section id="committee-intro" class="mb-10">
+            <div class="bg-white rounded-lg shadow-sm p-8">
+                <h1 class="text-3xl font-bold text-dark mb-4">Meet Your Food Committee</h1>
+                <p class="text-gray-600 mb-6">
+                    Our dedicated team works tirelessly to ensure that lunch and snack options meet everyone's preferences and dietary needs. Feel free to reach out to any committee member with your suggestions or concerns.
+                </p>
+                <div class="flex flex-wrap items-center gap-4">
+                    <button class="bg-primary text-white px-6 py-3 rounded-lg font-medium flex items-center">
+                        <i class="fa-solid fa-envelope mr-2"></i>
+                        Contact Committee
+                    </button>
+                    <button class="border border-border bg-white text-dark px-6 py-3 rounded-lg font-medium flex items-center">
+                        <i class="fa-solid fa-comment-dots mr-2"></i>
+                        Submit Feedback
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="committee-members">
+                <!-- Member 1 -->
+                <div id="member-1" class="bg-white rounded-lg shadow-sm border border-border overflow-hidden">
+                    <div class="h-64 overflow-hidden bg-gray-100">
+                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" alt="Sarah Johnson" class="w-full h-full object-cover object-center">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-3">
+                            <h3 class="text-xl font-bold text-dark">Sarah Johnson</h3>
+                            <span class="ml-2 px-3 py-1 bg-blue-100 text-blue-600 text-xs font-medium rounded-full">Nutritionist</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Sarah ensures all meals meet nutritional standards while still being delicious. She specializes in creating balanced menus that cater to various dietary needs.
+                        </p>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-envelope text-primary mr-2 w-5"></i>
+                                <span class="text-gray-600 text-sm">sarah.j@foodcommittee.com</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-phone text-primary mr-2 w-5"></i>
+                                <span class="text-gray-600 text-sm">(555) 234-5678</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-white border border-primary text-primary px-4 py-2 rounded-lg font-medium text-sm hover:bg-primary hover:text-white transition-colors">
+                            Contact Sarah
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Member 2 -->
+                <div id="member-2" class="bg-white rounded-lg shadow-sm border border-border overflow-hidden">
+                    <div class="h-64 overflow-hidden bg-gray-100">
+                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg" alt="David Rodriguez" class="w-full h-full object-cover object-center">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-3">
+                            <h3 class="text-xl font-bold text-dark">David Rodriguez</h3>
+                            <span class="ml-2 px-3 py-1 bg-green-100 text-green-600 text-xs font-medium rounded-full">Chef Liaison</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">
+                            David works directly with our catering partners and chefs to implement menu changes and special requests. He has a culinary background and excellent taste.
+                        </p>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-envelope text-primary mr-2 w-5"></i>
+                                <span class="text-gray-600 text-sm">david.r@foodcommittee.com</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-phone text-primary mr-2 w-5"></i>
+                                <span class="text-gray-600 text-sm">(555) 345-6789</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-white border border-primary text-primary px-4 py-2 rounded-lg font-medium text-sm hover:bg-primary hover:text-white transition-colors">
+                            Contact David
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Member 3 -->
+                <div id="member-3" class="bg-white rounded-lg shadow-sm border border-border overflow-hidden">
+                    <div class="h-64 overflow-hidden bg-gray-100">
+                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg" alt="Priya Patel" class="w-full h-full object-cover object-center">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-3">
+                            <h3 class="text-xl font-bold text-dark">Priya Patel</h3>
+                            <span class="ml-2 px-3 py-1 bg-purple-100 text-purple-600 text-xs font-medium rounded-full">Feedback Coordinator</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Priya collects and analyzes feedback on meals and snacks. She conducts surveys and focus groups to ensure everyone's preferences are considered.
+                        </p>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-envelope text-primary mr-2 w-5"></i>
+                                <span class="text-gray-600 text-sm">priya.p@foodcommittee.com</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-phone text-primary mr-2 w-5"></i>
+                                <span class="text-gray-600 text-sm">(555) 456-7890</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-white border border-primary text-primary px-4 py-2 rounded-lg font-medium text-sm hover:bg-primary hover:text-white transition-colors">
+                            Contact Priya
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Member 4 -->
+                <div id="member-4" class="bg-white rounded-lg shadow-sm border border-border overflow-hidden">
+                    <div class="h-64 overflow-hidden bg-gray-100">
+                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-4.jpg" alt="James Wilson" class="w-full h-full object-cover object-center">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-3">
+                            <h3 class="text-xl font-bold text-dark">James Wilson</h3>
+                            <span class="ml-2 px-3 py-1 bg-amber-100 text-amber-600 text-xs font-medium rounded-full">Budget Manager</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">
+                            James manages the food budget and works to ensure we get the best quality for our spending. He negotiates with vendors and tracks expenditures.
+                        </p>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-envelope text-primary mr-2 w-5"></i>
+                                <span class="text-gray-600 text-sm">james.w@foodcommittee.com</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-phone text-primary mr-2 w-5"></i>
+                                <span class="text-gray-600 text-sm">(555) 567-8901</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-white border border-primary text-primary px-4 py-2 rounded-lg font-medium text-sm hover:bg-primary hover:text-white transition-colors">
+                            Contact James
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Member 5 -->
+                <div id="member-5" class="bg-white rounded-lg shadow-sm border border-border overflow-hidden">
+                    <div class="h-64 overflow-hidden bg-gray-100">
+                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-6.jpg" alt="Lisa Kim" class="w-full h-full object-cover object-center">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-3">
+                            <h3 class="text-xl font-bold text-dark">Lisa Kim</h3>
+                            <span class="ml-2 px-3 py-1 bg-pink-100 text-pink-600 text-xs font-medium rounded-full">Special Events</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Lisa plans special food events and themed days. She's responsible for holiday meals, cultural celebrations, and other food-related special occasions.
+                        </p>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-envelope text-primary mr-2 w-5"></i>
+                                <span class="text-gray-600 text-sm">lisa.k@foodcommittee.com</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-phone text-primary mr-2 w-5"></i>
+                                <span class="text-gray-600 text-sm">(555) 678-9012</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-white border border-primary text-primary px-4 py-2 rounded-lg font-medium text-sm hover:bg-primary hover:text-white transition-colors">
+                            Contact Lisa
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Member 6 -->
+                <div id="member-6" class="bg-white rounded-lg shadow-sm border border-border overflow-hidden">
+                    <div class="h-64 overflow-hidden bg-gray-100">
+                        <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-8.jpg" alt="Marcus Johnson" class="w-full h-full object-cover object-center">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center mb-3">
+                            <h3 class="text-xl font-bold text-dark">Marcus Johnson</h3>
+                            <span class="ml-2 px-3 py-1 bg-teal-100 text-teal-600 text-xs font-medium rounded-full">Dietary Specialist</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">
+                            Marcus ensures that all dietary restrictions and allergies are accommodated. He works closely with the kitchen to create inclusive menu options.
+                        </p>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-envelope text-primary mr-2 w-5"></i>
+                                <span class="text-gray-600 text-sm">marcus.j@foodcommittee.com</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i class="fa-solid fa-phone text-primary mr-2 w-5"></i>
+                                <span class="text-gray-600 text-sm">(555) 789-0123</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-white border border-primary text-primary px-4 py-2 rounded-lg font-medium text-sm hover:bg-primary hover:text-white transition-colors">
+                            Contact Marcus
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+    </main>
+
+</body></html>

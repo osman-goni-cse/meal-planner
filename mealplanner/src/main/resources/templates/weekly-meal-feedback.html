@@ -345,7 +345,7 @@
                 <div class="flex space-x-4 mt-2 md:mt-0">
                     <span class="hover:text-primary cursor-pointer">Dietary Restrictions</span>
                     <span class="hover:text-primary cursor-pointer">Suggest a Meal</span>
-                    <span class="hover:text-primary cursor-pointer">Contact Cafeteria</span>
+                    <a href="/food-committee" target="_blank" rel="noopener" class="hover:text-primary cursor-pointer">Food Committee</a>
                 </div>
             </div>
         </div>
@@ -372,7 +372,7 @@
             data.comments.forEach(comment => {
                 commentsList.innerHTML += `
                     <div class="flex items-start space-x-3">
-                        <img src="${comment.avatarUrl}" alt="${comment.userName}" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow">
+                        <img src="${comment.avatarUrl}" alt="${comment.userName}" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow referrerpolicy="no-referrer"">
                         <div>
                             <p class="font-semibold text-gray-800 text-sm">${comment.userName}</p>
                             <p class="text-gray-600 text-sm">${comment.text}</p>

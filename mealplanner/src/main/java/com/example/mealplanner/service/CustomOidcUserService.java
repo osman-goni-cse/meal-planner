@@ -38,13 +38,14 @@ public class CustomOidcUserService extends OidcUserService {
         
         OidcUser oidcUser = super.loadUser(userRequest);
         String email = oidcUser.getEmail();
+        String profileImageUrl = (String) oidcUser.getAttribute("picture");
         
         logger.info("Google OIDC login attempt for email: {}", email);
         logger.info("Original OidcUser authorities: {}", oidcUser.getAuthorities());
 
         try {
             // Use the onboarding service to handle user creation/retrieval
-            User user = userOnboardingService.onboardUser(email);
+            User user = userOnboardingService.onboardUser(email, profileImageUrl);
             
             logger.info("User processed through onboarding: {} with role: {}", email, user.getRole());
             

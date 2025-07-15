@@ -113,7 +113,7 @@
             
             <div sec:authorize="isAuthenticated()" class="relative" id="user-dropdown">
                 <button id="user-dropdown-button" onclick="toggleDropdown()" class="flex items-center text-gray-700 hover:text-primary transition-colors">
-                    <img th:src="${#authentication.principal.attributes['picture']}" class="w-8 h-8 rounded-full mr-2" alt="User Avatar">
+                    <img th:src="${#authentication.principal.attributes['picture']}" class="w-8 h-8 rounded-full mr-2" alt="User Avatar" referrerpolicy="no-referrer">
                     <!-- <span th:text="${#authentication.principal.attributes['name']}" class="font-medium mr-1 hidden md:inline-block">John Doe</span>  -->
                     <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
                 </button>
@@ -137,7 +137,7 @@
     <!-- User dropdown fragment for reuse -->
     <div th:fragment="topnav-user" sec:authorize="isAuthenticated()" class="relative hidden md:block" id="user-dropdown">
         <button id="user-dropdown-button" onclick="toggleDropdown()" class="flex items-center text-gray-700 hover:text-primary transition-colors">
-            <img th:src="${#authentication.principal.attributes['picture']}" class="w-8 h-8 rounded-full mr-2" alt="User Avatar">
+            <img th:src="${#authentication.principal.attributes['picture']}" class="w-8 h-8 rounded-full mr-2" alt="User Avatar" referrerpolicy="no-referrer">
             <!-- <span th:text="${#authentication.principal.attributes['name']}" class="font-medium mr-1 hidden md:inline-block">John Doe</span> -->
             <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
         </button>

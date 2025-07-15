@@ -177,7 +177,7 @@
             data.comments.forEach(comment => {
                 commentsList.innerHTML += `
                     <div class="flex items-start space-x-4">
-                        <img src="${comment.avatarUrl}" alt="${comment.userName}'s avatar" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow">
+                        <img src="${comment.avatarUrl}" alt="${comment.userName}'s avatar" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow referrerpolicy="no-referrer" ">
                         <div class="flex-1">
                             <h4 class="font-semibold text-sm text-brand-gray-900">${comment.userName}</h4>
                             <p class="text-sm text-brand-gray-700">${comment.text}</p>

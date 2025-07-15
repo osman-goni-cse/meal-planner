@@ -27,12 +27,28 @@ public class UserOnboardingService {
      * @return The user (either existing or newly created)
      */
     public User onboardUser(String email) {
+        return onboardUser(email, null);
+    }
+
+    /**
+     * Onboards a user by checking if they exist in the database.
+     * If the user doesn't exist, creates a new user with EMPLOYEE role and profile image URL.
+     * If the user exists, updates the profile image URL if changed.
+     *
+     * @param email The user's email address
+     * @param profileImageUrl The user's Google profile image URL
+     * @return The user (either existing or newly created)
+     */
+    public User onboardUser(String email, String profileImageUrl) {
         logger.info("Starting user onboarding process for email: {}", email);
-        
         Optional<User> existingUser = userRepository.findByEmail(email);
-        
         if (existingUser.isPresent()) {
             User user = existingUser.get();
+            if (profileImageUrl != null && !profileImageUrl.equals(user.getProfileImageUrl())) {
+                user.setProfileImageUrl(profileImageUrl);
+                userRepository.save(user);
+                logger.info("Updated profile image URL for user: {}", email);
+            }
             logger.info("Existing user found: {} with role: {}", email, user.getRole());
             return user;
         } else {
@@ -40,11 +56,10 @@ public class UserOnboardingService {
             User newUser = new User();
             newUser.setEmail(email);
             newUser.setRole(DEFAULT_ROLE);
-            
+            newUser.setProfileImageUrl(profileImageUrl);
             User savedUser = userRepository.save(newUser);
             logger.info("Successfully created new user: {} with role: {} and ID: {}", 
                        email, savedUser.getRole(), savedUser.getId());
-            
             return savedUser;
         }
     }

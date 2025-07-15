@@ -15,6 +15,9 @@ public class User {
     @Column(nullable = false)
     private String role;
 
+    @Column(name = "profile_image_url", nullable = true)
+    private String profileImageUrl;
+
     // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -22,4 +25,6 @@ public class User {
     public void setEmail(String email) { this.email = email; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    public String getProfileImageUrl() { return profileImageUrl; }
+    public void setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; }
 } 

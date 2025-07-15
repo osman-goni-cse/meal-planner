@@ -34,13 +34,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         
         OAuth2User oauth2User = super.loadUser(userRequest);
         String email = oauth2User.getAttribute("email");
+        String profileImageUrl = (String) oauth2User.getAttribute("picture");
         
         logger.info("Google OAuth2 login attempt for email: {}", email);
         logger.info("Original OAuth2User authorities: {}", oauth2User.getAuthorities());
 
         try {
             // Use the onboarding service to handle user creation/retrieval
-            User user = userOnboardingService.onboardUser(email);
+            User user = userOnboardingService.onboardUser(email, profileImageUrl);
             
             logger.info("User processed through onboarding: {} with role: {}", email, user.getRole());
             

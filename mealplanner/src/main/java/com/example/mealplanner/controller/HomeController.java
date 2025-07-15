@@ -21,6 +21,19 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StreamUtils;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.net.URL;
+import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 @Controller
 public class HomeController {
@@ -35,6 +48,20 @@ public class HomeController {
 
     @Autowired
     private MealService mealService;
+
+    // In-memory cache for profile images (url -> (image bytes, timestamp))
+    private static final ConcurrentHashMap<String, CachedImage> profileImageCache = new ConcurrentHashMap<>();
+    private static final long CACHE_TTL_MS = TimeUnit.MINUTES.toMillis(30); // 30 min
+    private static class CachedImage {
+        byte[] data;
+        long timestamp;
+        String contentType;
+        CachedImage(byte[] data, String contentType) {
+            this.data = data;
+            this.timestamp = System.currentTimeMillis();
+            this.contentType = contentType;
+        }
+    }
 
     @GetMapping("/")
     public String home(Model model, @AuthenticationPrincipal OAuth2User oauth2User) {
@@ -180,5 +207,83 @@ public class HomeController {
         
         return String.format("User processed through onboarding:<br>Email: %s<br>Role: %s<br>ID: %s", 
                            user.getEmail(), user.getRole(), user.getId());
+    }
+
+    @RequestMapping("/user/profile-image")
+    @ResponseBody
+    public ResponseEntity<byte[]> proxyProfileImage(@AuthenticationPrincipal OAuth2User oauth2User) {
+        if (oauth2User == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String imageUrl = (String) oauth2User.getAttribute("picture");
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            return defaultAvatar();
+        }
+        try {
+            // Check cache
+            CachedImage cached = profileImageCache.get(imageUrl);
+            if (cached != null && (System.currentTimeMillis() - cached.timestamp) < CACHE_TTL_MS) {
+                return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(cached.contentType))
+                    .body(cached.data);
+            }
+            // Fetch from Google
+            URL url = new URL(imageUrl);
+            try (InputStream in = url.openStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                String contentType = guessContentType(imageUrl);
+                byte[] buffer = new byte[4096];
+                int n;
+                while ((n = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, n);
+                }
+                byte[] imageBytes = out.toByteArray();
+                profileImageCache.put(imageUrl, new CachedImage(imageBytes, contentType));
+                return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(imageBytes);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to fetch Google profile image: {}", e.getMessage());
+            return defaultAvatar();
+        }
+    }
+
+    private ResponseEntity<byte[]> defaultAvatar() {
+        try {
+            ClassPathResource imgFile = new ClassPathResource("static/default-avatar.png");
+            byte[] bytes = StreamUtils.copyToByteArray(imgFile.getInputStream());
+            return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(bytes);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    private String guessContentType(String url) {
+        if (url.endsWith(".jpg") || url.endsWith(".jpeg")) return "image/jpeg";
+        if (url.endsWith(".png")) return "image/png";
+        if (url.endsWith(".gif")) return "image/gif";
+        return "image/jpeg";
+    }
+
+    @GetMapping("/food-committee")
+    public String foodCommittee(Model model) {
+        List<User> admins = userRepository.findByRole("ADMIN");
+        List<Map<String, String>> committee = new ArrayList<>();
+        for (User user : admins) {
+            Map<String, String> member = new HashMap<>();
+            member.put("name", user.getEmail().split("@")[0]); // Use email prefix as name if no name field
+            member.put("role", "Committee Chair");
+            member.put("email", user.getEmail());
+            member.put("phone", "+1 234 567 8901"); // Placeholder, replace if you have phone field
+            String imageUrl = user.getProfileImageUrl();
+            if (imageUrl == null || imageUrl.isEmpty()) {
+                imageUrl = "https://randomuser.me/api/portraits/men/32.jpg"; // Fallback placeholder
+            }
+            member.put("image", imageUrl);
+            member.put("bio", "Passionate about food quality and student satisfaction. Reach out for any menu suggestions or dietary needs!");
+            committee.add(member);
+        }
+        model.addAttribute("committee", committee);
+        return "food-committee";
     }
 } 

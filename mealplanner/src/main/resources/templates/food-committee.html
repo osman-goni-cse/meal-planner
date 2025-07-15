@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head}">
+    <title>Food Committee</title>
+</head>
+<body class="font-sans bg-secondary min-h-screen">
+    <header class="bg-white shadow-sm fixed top-0 left-0 w-full z-50">
+        <div class="container mx-auto px-5 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="text-primary text-xl fa-solid fa-utensils"></i>
+                    <span class="font-bold text-xl text-gray-800">DSi Menu</span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <!-- Desktop Navigation -->
+                    <nav class="hidden md:flex items-center space-x-6">
+                        <a th:href="@{/}" class="">Today's Menu</a>
+                        <a th:href="@{/weekly-feedback}" class="">Weekly Menu</a>
+                    </nav>
+                    <!-- Desktop User Profile -->
+                    <div th:replace="fragments/layout :: topnav-user"></div>
+                    
+                    <!-- Mobile Hamburger Menu Button - Only on Mobile -->
+                    <button id="mobile-menu-button" class="block md:hidden flex items-center p-2 rounded-md text-gray-600 hover:text-primary hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+    </header>
+    <!-- Mobile Navbar (reuse fragment) -->
+    <div th:replace="fragments/layout :: mobile-navbar" class="md:hidden"></div>
+    <main class="container mx-auto px-4 py-8">
+        <section id="committee-intro" class="mb-10">
+            <div class="bg-white rounded-lg shadow-sm p-8">
+                <h1 class="text-3xl font-bold text-dark mb-4">Meet Your Food Committee</h1>
+                <p class="text-gray-600 mb-6">
+                    Our dedicated team works tirelessly to ensure that lunch and snack options meet everyone's preferences and dietary needs. Feel free to reach out to any committee member with your suggestions or concerns.
+                </p>
+                <div class="flex flex-wrap items-center gap-4">
+                    <a href="mailto:" class="bg-primary text-white px-6 py-3 rounded-lg font-medium flex items-center">
+                        <i class="fa-solid fa-envelope mr-2"></i>
+                        Contact Committee
+                    </a>
+                    <a href="/weekly-feedback" class="border border-border bg-white text-dark px-6 py-3 rounded-lg font-medium flex items-center">
+                        <i class="fa-solid fa-comment-dots mr-2"></i>
+                        Submit Feedback
+                    </a>
+                </div>
+            </div>
+        </section>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="committee-members">
+            <div th:each="member : ${committee}" class="bg-white rounded-lg shadow-sm border border-border overflow-hidden">
+                <div class="h-64 overflow-hidden bg-gray-100">
+                    <img th:src="${member.image}" th:alt="${member.name}" class="w-full h-full object-cover object-center" onerror="this.onerror=null;this.src='/images/default-avatar.png';" referrerpolicy="no-referrer">
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center mb-3">
+                        <h3 class="text-xl font-bold text-dark" th:text="${member.name}">Name</h3>
+                        <span class="ml-2 px-3 py-1 bg-blue-100 text-blue-600 text-xs font-medium rounded-full" th:text="${member.role}">Role</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-4" th:text="${member.bio}">Bio</p>
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-envelope text-primary mr-2 w-5"></i>
+                            <span class="text-gray-600 text-sm" th:text="${member.email}"></span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fa-solid fa-phone text-primary mr-2 w-5"></i>
+                            <span class="text-gray-600 text-sm" th:text="${member.phone}"></span>
+                        </div>
+                    </div>
+                    <a th:href="'mailto:' + ${member.email}" class="w-full bg-white border border-primary text-primary px-4 py-2 rounded-lg font-medium text-sm hover:bg-primary hover:text-white transition-colors block text-center">
+                        Contact <span th:text="${member.name}">Name</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html> 
