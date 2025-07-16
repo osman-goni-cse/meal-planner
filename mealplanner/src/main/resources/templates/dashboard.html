@@ -38,7 +38,7 @@
         }
     </style>
 </head>
-<body class="font-sans bg-white">
+<body class="font-sans bg-white flex flex-col min-h-screen">
     <!-- Top Navigation Bar -->
     <header class="bg-white shadow-sm fixed top-0 left-0 w-full z-50">
         <div class="container mx-auto px-5 py-4">
@@ -84,8 +84,18 @@
         </div>
     </div>
 
-    <!-- Main Content -->
-    <main class="container mx-auto pt-20 px-5 pb-10">
+    <!-- Show the message if both are missing -->
+    <div th:if="${topMealMainDish == null and bottomMealMainDish == null}" class="flex-1 flex flex-col items-center justify-center w-full bg-white rounded-lg shadow-md px-8 py-16 mt-20">
+        <i class="fa-solid fa-face-frown text-5xl text-primary mb-6"></i>
+        <h3 class="text-2xl font-bold text-gray-800 mb-2">No meals are scheduled for today</h3>
+        <p class="text-gray-600 mb-4">It looks like no meals have been planned for today. This could be a weekend or an oversight. If you have questions or suggestions, please contact the Food Committee.</p>
+        <a href="/food-committee" class="inline-flex items-center px-5 py-2 bg-primary text-white rounded-lg shadow hover:bg-orange-600 transition font-semibold">
+            <i class="fa-solid fa-users mr-2"></i> Food Committee
+        </a>
+    </div>
+
+    <!-- Show the main dashboard content only if at least one meal exists -->
+    <main class="container mx-auto pt-20 px-5 pb-10" th:unless="${topMealMainDish == null and bottomMealMainDish == null}">
         <!-- Top Meal Section -->
         <div class="flex flex-col md:flex-row gap-5 mt-4">
             <!-- Left Column (66.6%) -->
