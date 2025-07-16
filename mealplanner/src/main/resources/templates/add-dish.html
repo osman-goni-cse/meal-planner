@@ -1,32 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
+<head th:replace="~{fragments/layout :: head}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config = {
-        "theme": {
-          "extend": {
-            "colors": {
-              "primary": "#007BFF",
-              "secondary": "#F8F9FA",
-              "success": "#28A945",
-              "warning": "#F59E0B",
-              "danger": "#DC2626",
-              "gray": {
-                "light": "#CED4DA"
-              }
-            },
-            "fontFamily": {
-              "sans": [
-                "Inter",
-                "sans-serif"
-              ]
-            }
-          }
-        }
-      };</script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&display=swap">
