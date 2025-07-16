@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&display=swap">
-    <style>body { font-family: 'Inter', sans-serif !important; }</style>
+    <style>body { font-family: 'Inter', sans-serif !important; }</style> -->
     <style>
         /* Responsive text adjustments */
         .break-words {
@@ -37,7 +37,7 @@
         }
     </style>
 </head>
-<body class="font-sans bg-white flex flex-col min-h-screen">
+<body class="bg-white flex flex-col min-h-screen">
     <!-- Top Navigation Bar -->
     <header class="bg-white shadow-sm fixed top-0 left-0 w-full z-50">
         <div class="container mx-auto px-5 py-4">
@@ -141,7 +141,8 @@
             </div>
         </div>
     </div>
-    <main id="main-content" class="container mx-auto pt-20 md:pt-20 px-5 pb-10 flex-grow">
+
+    <main id="main-content" class="container mt-8 mx-auto pt-20 md:pt-20 px-5 pb-10 flex-grow">
         <!-- Desktop Layout -->
         <div class="hidden md:flex gap-6 items-start">
             <!-- Calendar Column -->
@@ -172,7 +173,7 @@
                            th:text="${day.dayOfMonth}"
                            class="block w-8 h-8 mx-auto flex items-center justify-center transition-all duration-150"
                            th:classappend="
-                                ${day.selected} ? 'bg-primary text-white rounded-full font-bold ring-2 ring-primary' :
+                                ${day.selected} ? 'bg-primary text-customTomato rounded-full font-bold ring-2 ring-primary' :
                                 (${day.inMonth?.toString() == 'true'} ? 'text-gray-800 hover:bg-primary/10 hover:rounded-full cursor-pointer' : 'text-gray-400 hover:bg-primary/10 hover:rounded-full cursor-pointer')
                            ">
                         </a>
@@ -180,7 +181,7 @@
                 </div>
             </div>
             <!-- Content Column -->
-            <div id="content-column" class="w-3/4 bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex flex-col font-sans">
+            <div id="content-column" class="w-3/4 bg-white rounded-lg shadow-sm flex flex-col">
                 <!-- Dish Tabs -->
                 <div id="dish-tabs" class="flex items-center space-x-6 sm:space-x-8 mb-6">
                     <button th:each="dish,iter : ${dishes}" th:text="${dish.name}"
@@ -198,7 +199,7 @@
                         </div>
                         <div id="dish-details">
                             <div class="flex items-center justify-between mb-2">
-                                <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 tracking-tight break-words break-all leading-tight" th:text="${selectedDish.name}">Dish Name</h1>
+                                <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-dmSerifDisplay text-gray-800 tracking-tight break-words break-all leading-tight" th:text="${selectedDish.name}">Dish Name</h1>
                                 <span th:if="${selectedDish.mealPeriod != null}" 
                                       class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-sm font-medium whitespace-nowrap">
                                     <span th:text="${#strings.capitalize(selectedDish.mealPeriod)}">Lunch</span>
