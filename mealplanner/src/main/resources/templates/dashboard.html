@@ -116,10 +116,10 @@
                 <div class="md:hidden mb-6">
                     <div class="relative rounded-lg overflow-hidden h-64">
                         <img class="w-full h-full object-cover" th:src="${topMealImageUrl}" th:alt="${topMealName}">
-                        <div class="absolute bottom-4 right-4 flex items-center bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-all duration-200 bg-primary">
-                            <a th:href="@{'/weekly-feedback'(date=${today},dish=${topMealMainDish != null and dishIdToIndex.containsKey(topMealMainDish.id) ? dishIdToIndex[topMealMainDish.id] : 0})}" class="text-sm font-medium text-black">Add Feedback</a>
+                        <a th:href="@{'/weekly-feedback'(date=${today},dish=${topMealMainDish != null and dishIdToIndex.containsKey(topMealMainDish.id) ? dishIdToIndex[topMealMainDish.id] : 0})}" class="absolute bottom-4 right-4 flex items-center bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-all duration-200 bg-primary text-sm font-medium text-black">
+                            Add Feedback
                             <i class="text-black text-sm fa-solid fa-arrow-right ml-2"></i>
-                        </div>
+                        </a>
                     </div>
                 </div>
                 
@@ -154,10 +154,10 @@
             <div class="hidden md:flex w-full md:w-1/3 flex flex-col">
                 <div class="relative rounded-lg overflow-hidden h-[600px]">
                     <img class="w-full h-full object-cover" th:src="${topMealImageUrl}" th:alt="${topMealName}">
-                    <div class="absolute bottom-4 right-4 flex items-center bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-all duration-200 bg-primary">
-                        <a th:href="@{'/weekly-feedback'(date=${today},dish=${topMealMainDish != null and dishIdToIndex.containsKey(topMealMainDish.id) ? dishIdToIndex[topMealMainDish.id] : 0})}" class="text-sm font-medium text-black">Add Feedback</a>
+                    <a th:href="@{'/weekly-feedback'(date=${today},dish=${topMealMainDish != null and dishIdToIndex.containsKey(topMealMainDish.id) ? dishIdToIndex[topMealMainDish.id] : 0})}" class="absolute bottom-4 right-4 flex items-center bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-all duration-200 bg-primary text-sm font-medium text-black">
+                        Add Feedback
                         <i class="text-black text-sm fa-solid fa-arrow-right ml-2"></i>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>
@@ -174,10 +174,10 @@
                 <div class="relative rounded-lg overflow-hidden h-64 md:h-[400px]">
                     <img class="w-full h-full object-cover" th:src="${bottomMealImageUrl}" th:alt="${bottomMealName}">
                     
-                    <div class="absolute bottom-4 right-4 flex items-center bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-all duration-200 bg-primary">
-                        <a th:href="@{'/weekly-feedback'(date=${today},dish=${bottomMealMainDish != null and dishIdToIndex.containsKey(bottomMealMainDish.id) ? dishIdToIndex[bottomMealMainDish.id] : 0})}" class="text-sm font-medium text-black">Add Feedback</a>
+                    <a th:href="@{'/weekly-feedback'(date=${today},dish=${bottomMealMainDish != null and dishIdToIndex.containsKey(bottomMealMainDish.id) ? dishIdToIndex[bottomMealMainDish.id] : 0})}" class="absolute bottom-4 right-4 flex items-center bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-all duration-200 bg-primary text-sm font-medium text-black">
+                        Add Feedback
                         <i class="text-black text-sm fa-solid fa-arrow-right ml-2"></i>
-                    </div>
+                    </a>
                 </div>
             </div>
             <!-- Meal Content - Mobile Second, Desktop Right -->
