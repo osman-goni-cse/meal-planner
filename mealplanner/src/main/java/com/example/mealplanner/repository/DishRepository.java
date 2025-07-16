@@ -14,7 +14,8 @@ public interface DishRepository extends JpaRepository<Dish, Long> {
     @Query(value = "SELECT * FROM dishes d WHERE " +
               "(:search IS NULL OR LOWER(d.name) LIKE LOWER('%' || :search || '%')) AND " +
               "(:mealPeriod IS NULL OR d.meal_period = :mealPeriod) AND " +
-              "(:category IS NULL OR d.category = :category)", 
+              "(:category IS NULL OR d.category = :category) " +
+              "ORDER BY d.created_date DESC", 
        nativeQuery = true)
     Page<Dish> findByFilters(@Param("search") String search, 
                         @Param("mealPeriod") String mealPeriod, 

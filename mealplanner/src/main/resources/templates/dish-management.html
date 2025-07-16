@@ -8,6 +8,24 @@
             <header th:replace="fragments/layout :: topnav" class="hidden md:block"></header>
             <div th:replace="fragments/layout :: mobile-navbar" class="md:hidden"></div>
             <main class="flex-1 px-2 md:px-6 md:py-6">
+                <!-- Success Toast -->
+                <div th:if="${successMessage}" id="success-toast" 
+                     class="fixed top-6 right-6 z-50 flex items-center max-w-xs w-full bg-green-100 border border-green-400 text-green-800 px-6 py-4 rounded-lg shadow-lg animate-fade-in"
+                     style="display: none;">
+                    <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    <span th:text="${successMessage}"></span>
+                </div>
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    var toast = document.getElementById('success-toast');
+                    if (toast) {
+                        toast.style.display = 'flex';
+                        setTimeout(function() {
+                            toast.style.display = 'none';
+                        }, 3000); // 3 seconds
+                    }
+                });
+                </script>
                 <!-- Responsive Filters/Search -->
                 <section id="dish-filters-section" class="bg-white rounded-lg shadow-sm p-4 md:p-6 mb-4 md:mb-8">
                     <form id="dish-filters-form" method="get" action="/dishes" class="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">

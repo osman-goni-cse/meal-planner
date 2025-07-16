@@ -27,6 +27,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class DishController {
@@ -56,7 +57,8 @@ public class DishController {
                          org.springframework.validation.BindingResult bindingResult,
                          @RequestParam("imageFile") MultipartFile imageFile,
                          @RequestParam(value = "dietaryInfo", required = false) List<String> dietaryInfo,
-                         Model model) throws IOException {
+                         Model model,
+                         RedirectAttributes redirectAttributes) throws IOException {
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", CATEGORIES);
             model.addAttribute("dietaryTags", DIETARY_TAGS);
@@ -78,6 +80,7 @@ public class DishController {
         // Handle dietary info
         dish.setDietaryInfo(dietaryInfo != null ? dietaryInfo : new ArrayList<>());
         dishRepository.save(dish);
+        redirectAttributes.addFlashAttribute("successMessage", "Dish added successfully!");
         return "redirect:/dishes";
     }
 
@@ -115,8 +118,9 @@ public class DishController {
     }
 
     @PostMapping("/dishes/delete/{id}")
-    public String deleteDish(@PathVariable Long id) {
+    public String deleteDish(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         dishRepository.deleteById(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Dish deleted successfully!");
         return "redirect:/dishes";
     }
 
@@ -143,7 +147,8 @@ public class DishController {
                            org.springframework.validation.BindingResult bindingResult,
                            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
                            @RequestParam(value = "dietaryInfo", required = false) List<String> dietaryInfo,
-                           Model model) throws IOException {
+                           Model model,
+                           RedirectAttributes redirectAttributes) throws IOException {
         
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", CATEGORIES);
@@ -179,6 +184,7 @@ public class DishController {
         existingDish.setDietaryInfo(dietaryInfo != null ? dietaryInfo : new ArrayList<>());
         
         dishRepository.save(existingDish);
+        redirectAttributes.addFlashAttribute("successMessage", "Dish updated successfully!");
         return "redirect:/dishes";
     }
 
