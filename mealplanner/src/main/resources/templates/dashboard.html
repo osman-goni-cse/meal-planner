@@ -265,14 +265,6 @@
                 });
             }
         });
-        // --- REDIRECT AFTER LOGIN ---
-        document.addEventListener('DOMContentLoaded', function() {
-            var redirectUrl = sessionStorage.getItem('redirectAfterLogin');
-            if (redirectUrl) {
-                sessionStorage.removeItem('redirectAfterLogin');
-                window.location.href = redirectUrl;
-            }
-        });
     </script>
 </body>
 </html> 

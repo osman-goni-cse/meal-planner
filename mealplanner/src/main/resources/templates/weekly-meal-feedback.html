@@ -545,10 +545,10 @@
                 const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
                 console.log('isAuthenticated', isAuthenticated);
                 if (!isAuthenticated) {
-                    // Save current URL and redirect to login
-                    const currentUrl = window.location.pathname + window.location.search + window.location.hash;
-                    console.log('redirecting to login', '/login?redirect=' + encodeURIComponent(currentUrl));
-                    window.location.href = '/login?redirect=' + encodeURIComponent(currentUrl);
+                    // Save current URL in a cookie and redirect to login
+                    var currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                    document.cookie = "redirectAfterLogin=" + encodeURIComponent(currentUrl) + "; path=/";
+                    window.location.href = '/login';
                     return;
                 }
                 
@@ -593,9 +593,10 @@
                 // Check if user is authenticated
                 const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
                 if (!isAuthenticated) {
-                    // Save current URL and redirect to login
-                    const currentUrl = window.location.pathname + window.location.search + window.location.hash;
-                    window.location.href = '/login?redirect=' + encodeURIComponent(currentUrl);
+                    // Save current URL in a cookie and redirect to login
+                    var currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                    document.cookie = "redirectAfterLogin=" + encodeURIComponent(currentUrl) + "; path=/";
+                    window.location.href = '/login';
                     return;
                 }
                 
@@ -664,9 +665,10 @@
                 // Check if user is authenticated
                 const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
                 if (!isAuthenticated) {
-                    // Save current URL and redirect to login
-                    const currentUrl = window.location.pathname + window.location.search + window.location.hash;
-                    window.location.href = '/login?redirect=' + encodeURIComponent(currentUrl);
+                    // Save current URL in a cookie and redirect to login
+                    var currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                    document.cookie = "redirectAfterLogin=" + encodeURIComponent(currentUrl) + "; path=/";
+                    window.location.href = '/login';
                     return false; // Prevent form submission
                 }
                 
@@ -718,8 +720,9 @@
                 const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
                 if (!isAuthenticated) {
                     e.preventDefault();
-                    const currentUrl = window.location.pathname + window.location.search + window.location.hash;
-                    window.location.href = '/login?redirect=' + encodeURIComponent(currentUrl);
+                    var currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                    document.cookie = "redirectAfterLogin=" + encodeURIComponent(currentUrl) + "; path=/";
+                    window.location.href = '/login';
                     return false;
                 }
             });
@@ -731,8 +734,9 @@
             feedbackFormInput.addEventListener('keyup', function(e) {
                 const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
                 if (!isAuthenticated) {
-                    const currentUrl = window.location.pathname + window.location.search + window.location.hash;
-                    window.location.href = '/login?redirect=' + encodeURIComponent(currentUrl);
+                    var currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                    document.cookie = "redirectAfterLogin=" + encodeURIComponent(currentUrl) + "; path=/";
+                    window.location.href = '/login';
                 }
             });
         }
@@ -808,14 +812,5 @@
             }
         }
     </style>
-    <script th:inline="javascript">
-    /*<![CDATA[*/
-    var redirectUrl = sessionStorage.getItem('redirectAfterLogin');
-    if (redirectUrl) {
-        sessionStorage.removeItem('redirectAfterLogin');
-        window.location.href = redirectUrl;
-    }
-    /*]]>*/
-    </script>
 </body>
 </html> 
