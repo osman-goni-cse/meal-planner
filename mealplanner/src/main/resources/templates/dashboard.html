@@ -50,8 +50,8 @@
                 <div class="flex items-center space-x-6">
                     <!-- Desktop Navigation -->
                     <nav class="hidden md:flex items-center space-x-6">
-                        <a th:href="@{/}" class="text-primary font-semibold border-b-2 border-primary pb-1 cursor-pointer">Today's Menu</a>
-                        <a th:href="@{/weekly-feedback}" class="text-gray-600 hover:text-primary cursor-pointer">Weekly Menu</a>
+                        <a th:href="@{/}" class="text-orange-600 font-semibold border-b-2 border-orange-600 pb-1 cursor-pointer">Today's Menu</a>
+                        <a th:href="@{/weekly-feedback}" class="hover:text-orange-600 cursor-pointer">Weekly Menu</a>
                     </nav>
                     <!-- Desktop User Profile -->
                     <div th:replace="fragments/layout :: topnav-user"></div>
@@ -74,7 +74,7 @@
                 <a th:href="@{/weekly-feedback}" class="text-gray-600 hover:text-primary cursor-pointer py-2 w-fit">Weekly Menu</a>
                 <div class="border-t border-gray-200 pt-3">
                     <!-- Show login for anonymous users -->
-                    <a th:if="${!isAuthenticated}" th:href="@{/login}" class="text-gray-600 hover:text-primary cursor-pointer w-fit text-left py-2 flex items-center">
+                    <a th:if="${!isAuthenticated}" th:href="@{/login}" class="hover:text-orange-600 cursor-pointer w-fit text-left py-2 flex items-center">
                         Sign In
                     </a>
                     <!-- Show logout for authenticated users -->

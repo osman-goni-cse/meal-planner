@@ -98,7 +98,7 @@
             
             <div class="relative" id="user-dropdown">
                 <!-- Show login for anonymous users -->
-                <a th:if="${!isAuthenticated}" th:href="@{/login}" class="flex items-center text-gray-700 hover:text-primary transition-colors">
+                <a th:if="${!isAuthenticated}" th:href="@{/login}" class="flex items-center hover:text-orange-600 transition-colors">
                     <span class="font-medium">Sign In</span>
                 </a>
                 
@@ -130,7 +130,7 @@
     <!-- User dropdown fragment for reuse -->
     <div th:fragment="topnav-user" class="relative hidden md:block">
         <!-- Show login for anonymous users -->
-        <a th:if="${!isAuthenticated}" th:href="@{/login}" class="flex items-center text-gray-700 hover:text-primary transition-colors">
+        <a th:if="${!isAuthenticated}" th:href="@{/login}" class="flex items-center hover:text-orange-600 transition-colors">
             <span class="font-medium">Sign In</span>
         </a>
         

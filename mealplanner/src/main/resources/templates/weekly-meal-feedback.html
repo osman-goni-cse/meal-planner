@@ -49,8 +49,8 @@
                 <div class="flex items-center space-x-6">
                     <!-- Desktop Navigation -->
                     <nav class="hidden md:flex items-center space-x-6">
-                        <a th:href="@{/}" class="text-gray-600 hover:text-primary cursor-pointer">Today's Menu</a>
-                        <a th:href="@{/weekly-feedback}" class="text-primary font-semibold border-b-2 border-primary pb-1 cursor-pointer">Weekly Menu</a>
+                        <a th:href="@{/}" class="hover:text-orange-600 cursor-pointer">Today's Menu</a>
+                        <a th:href="@{/weekly-feedback}" class="text-orange-600 font-semibold border-b-2 border-orange-600 pb-1 cursor-pointer">Weekly Menu</a>
                     </nav>
                     <!-- Desktop User Profile -->
                     <div th:replace="fragments/layout :: topnav-user"></div>
@@ -86,7 +86,7 @@
                 <a th:href="@{/weekly-feedback}" class="text-primary font-semibold border-b-2 border-primary pb-1 cursor-pointer py-2 w-fit">Weekly Menu</a>
                 <div class="border-t border-gray-200 pt-3">
                     <!-- Show login for anonymous users -->
-                    <a th:if="${!isAuthenticated}" th:href="@{/login}" class="text-gray-600 hover:text-primary cursor-pointer w-fit text-left py-2 flex items-center">
+                    <a th:if="${!isAuthenticated}" th:href="@{/login}" class="hover:text-orange-600 cursor-pointer w-fit text-left py-2 flex items-center">
                         Sign In
                     </a>
                     <!-- Show logout for authenticated users -->
@@ -190,7 +190,7 @@
                 <!-- Dish Tabs -->
                 <div id="dish-tabs" class="flex items-center space-x-6 sm:space-x-8 mb-6">
                     <button th:each="dish,iter : ${dishes}" th:text="${dish.name}"
-                        th:classappend="${iter.index} == ${selectedDishIndex} ? 'tab-button active-tab text-base font-semibold text-blue-800 bg-blue-100 px-6 py-3 rounded-full shadow-sm transition-all duration-200' : 'tab-button text-base font-medium text-gray-600 bg-gray-100 hover:text-gray-800 hover:bg-gray-200 px-6 py-3 rounded-full transition-all duration-200'"
+                        th:classappend="${iter.index} == ${selectedDishIndex} ? 'tab-button active-tab text-base font-semibold text-orange-600 border-b-2 border-orange-600 py-3 shadow-sm transition-all duration-200' : 'tab-button text-base font-medium hover:text-orange-600 py-3 transition-all duration-200'"
                         th:onclick="|window.location='@{/weekly-feedback(date=${selectedDate},dish=${iter.index})}'|">
                         Dish Name
                     </button>
@@ -204,7 +204,7 @@
                         </div>
                         <div id="dish-details">
                             <div class="flex items-center justify-between mb-2">
-                                <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-dmSerifDisplay text-gray-800 tracking-tight break-words break-all leading-tight" th:text="${selectedDish.name}">Dish Name</h1>
+                                <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-dmSerifDisplay text-gray-800 break-words break-all" th:text="${selectedDish.name}">Dish Name</h1>
                                 <span th:if="${selectedDish.mealPeriod != null}" 
                                       class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-sm font-medium whitespace-nowrap">
                                     <span th:text="${#strings.capitalize(selectedDish.mealPeriod)}">Lunch</span>
@@ -276,7 +276,7 @@
                 <!-- Dish Details - Auto-sized based on content -->
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-3">
-                        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 tracking-tight break-words break-all leading-tight" th:text="${selectedDish.name}">Dish Name</h1>
+                        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 break-words" th:text="${selectedDish.name}">Dish Name</h1>
                         <span th:if="${selectedDish.mealPeriod != null}" 
                               class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-sm font-medium whitespace-nowrap">
                             <span th:text="${#strings.capitalize(selectedDish.mealPeriod)}">Lunch</span>
