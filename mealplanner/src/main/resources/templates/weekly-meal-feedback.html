@@ -66,10 +66,10 @@
             <div class="md:hidden mt-4 pb-4 border-t border-gray-200">
                 <div class="flex items-center justify-between pt-4">
                     <div class="flex items-center space-x-3">
-                        <i class="text-primary text-lg fa-solid fa-calendar"></i>
+                        <i class="text-orange-600 text-lg fa-solid fa-calendar"></i>
                         <span class="text-lg font-semibold text-gray-800" th:text="${#temporals.format(selectedDate, 'dd MMMM, yyyy')}">18 July, 2025</span>
                     </div>
-                    <button id="mobile-calendar-toggle" class="flex items-center space-x-2 text-primary hover:text-primary/80">
+                    <button id="mobile-calendar-toggle" class="flex items-center space-x-2 text-orange-600">
                         <span class="text-sm font-medium">Change Date</span>
                         <i class="fa-solid fa-chevron-down text-xs"></i>
                     </button>
@@ -210,7 +210,7 @@
                                     <span th:text="${#strings.capitalize(selectedDish.mealPeriod)}">Lunch</span>
                                 </span>
                             </div>
-                            <p class="text-sm sm:text-base md:text-lg text-gray-600 mt-2 leading-relaxed break-words break-all" th:text="${selectedDish.description}">Dish description</p>
+                            <p class="text-lg text-gray-600 mt-2 leading-relaxed break-words" th:text="${selectedDish.description}">Dish description</p>
                         </div>
                     </div>
                     <!-- Right Column: Feedback -->
@@ -260,7 +260,7 @@
             <!-- Dish Tabs - Horizontally Scrollable -->
             <div id="mobile-dish-tabs" class="flex items-center space-x-6 my-8 overflow-x-auto pb-2 scrollbar-hide">
                 <button th:each="dish,iter : ${dishes}" th:text="${dish.name}"
-                    th:classappend="${iter.index} == ${selectedDishIndex} ? 'tab-button active-tab text-base font-semibold text-blue-800 bg-blue-100 px-6 py-3 rounded-full shadow-sm transition-all duration-200 whitespace-nowrap flex-shrink-0' : 'tab-button text-base font-medium text-gray-600 bg-gray-100 hover:text-gray-800 hover:bg-gray-200 px-6 py-3 rounded-full transition-all duration-200 whitespace-nowrap flex-shrink-0'"
+                    th:classappend="${iter.index} == ${selectedDishIndex} ? 'tab-button active-tab text-base font-semibold text-orange-600 border-b-2 border-orange-600 py-3 shadow-sm transition-all duration-200 whitespace-nowrap flex-shrink-0' : 'tab-button text-base font-medium hover:text-orange-600 py-3 transition-all duration-200 whitespace-nowrap flex-shrink-0'"
                     th:onclick="|window.location='@{/weekly-feedback(date=${selectedDate},dish=${iter.index})}'|">
                     Dish Name
                 </button>
@@ -282,7 +282,7 @@
                             <span th:text="${#strings.capitalize(selectedDish.mealPeriod)}">Lunch</span>
                         </span>
                     </div>
-                    <p class="text-sm sm:text-base text-gray-600 mb-6 leading-relaxed break-words break-all" th:text="${selectedDish.description}">Dish description</p>
+                    <p class="text-lg text-gray-600 mb-6 leading-relaxed break-words" th:text="${selectedDish.description}">Dish description</p>
                     
                     <!-- Likes and Comments -->
                     <div th:if="${!selectedDish.isEmpty() && !selectedDate.isAfter(T(java.time.LocalDate).now())}" class="flex items-center space-x-6">
