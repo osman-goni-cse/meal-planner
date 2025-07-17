@@ -51,6 +51,10 @@ module.exports = {
     'border-orange-500',
     'border-orange-600',
     'border-orange-700',
+    'text-wrap',
+    'text-pretty',
+    'text-nowrap',
+    'text-balance'
   ],
   plugins: [],
 } 

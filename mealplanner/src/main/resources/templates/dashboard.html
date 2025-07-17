@@ -75,7 +75,6 @@
                 <div class="border-t border-gray-200 pt-3">
                     <!-- Show login for anonymous users -->
                     <a th:if="${!isAuthenticated}" th:href="@{/login}" class="text-gray-600 hover:text-primary cursor-pointer w-fit text-left py-2 flex items-center">
-                        <i class="fa-solid fa-sign-in-alt mr-2"></i>
                         Sign In
                     </a>
                     <!-- Show logout for authenticated users -->
@@ -101,7 +100,7 @@
     </div>
 
     <!-- Show the main dashboard content only if at least one meal exists -->
-    <main class="container mx-auto pt-20 px-5 pb-10" th:unless="${topMealMainDish == null and bottomMealMainDish == null}">
+    <main class="container mt-8 mx-auto pt-20 px-5 pb-10" th:unless="${topMealMainDish == null and bottomMealMainDish == null}">
         <!-- Top Meal Section -->
         <div class="flex flex-col md:flex-row gap-5 mt-4">
             <!-- Left Column (66.6%) -->
@@ -129,7 +128,7 @@
                 
                 <!-- Main Dish Image - Mobile Only -->
                 <div class="md:hidden mb-6">
-                    <div class="relative rounded-lg overflow-hidden h-64">
+                    <div class="relative rounded-3xl overflow-hidden h-64">
                         <img class="w-full h-full object-cover" th:src="${topMealImageUrl}" th:alt="${topMealName}">
                         <a th:href="@{'/weekly-feedback'(date=${today},dish=${topMealMainDish != null and dishIdToIndex.containsKey(topMealMainDish.id) ? dishIdToIndex[topMealMainDish.id] : 0})}" class="absolute bottom-4 right-4 flex items-center bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-all duration-200 bg-primary text-sm font-medium text-customTomato">
                             Add Feedback
@@ -141,8 +140,8 @@
                 <!-- Main Dish Section -->
                 <div class="mb-8">
                     <div class="bg-white">
-                        <h3 class="font-dmSerifDisplay text-2xl sm:text-3xl md:text-4xl lg:text-6xl xl:text-8xl font-bold text-black mb-6 mt-2 break-words break-all leading-tight" th:text="${topMealMainDish != null ? topMealMainDish.name : 'Main Dish'}">Main Dish</h3>
-                        <p class="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed break-words break-all" th:text="${topMealMainDish != null ? topMealMainDish.description : 'Enjoy the delicious taste of our signature dish'}">Main dish description</p>
+                        <h3 class="font-dmSerifDisplay text-2xl sm:text-3xl md:text-4xl lg:text-6xl xl:text-8xl font-bold text-black mb-6 mt-2 break-words tracking-normal" th:text="${topMealMainDish != null ? topMealMainDish.name : 'Main Dish'}">Main Dish</h3>
+                        <p class="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed break-words md:pr-40" th:text="${topMealMainDish != null ? topMealMainDish.description : 'Enjoy the delicious taste of our signature dish'}">Main dish description</p>
                     </div>
                 </div>
                 
@@ -152,12 +151,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div th:each="side : ${topMealSideDishes}" class="bg-white flex items-center">
                             <a th:href="@{'/weekly-feedback'(date=${today},dish=${side != null and dishIdToIndex.containsKey(side.id) ? dishIdToIndex[side.id] : 0})}" class="flex items-center w-full group hover:bg-primary/10 rounded-lg transition-colors duration-150 p-2">
-                                <div class="w-16 h-16 rounded-lg overflow-hidden mr-3 flex-shrink-0">
+                                <div class="w-24 h-24 rounded-xl overflow-hidden mr-3 flex-shrink-0">
                                     <img class="w-full h-full object-cover" th:src="${side.imageUrl}" th:alt="${side.name}">
                                 </div>
                                 <div>
-                                    <h3 class="font-semibold font-dmSerifDisplay text-gray-800 group-hover:underline text-sm sm:text-base break-words break-all" th:text="${side.name}">Side Dish</h3>
-                                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed break-words break-all" th:text="${side.description}">Side description</p>
+                                    <h3 class="mb-1 sm:text-sm font-semibold font-dmSerifDisplay text-gray-800 group-hover:underline md:text-2xl break-words" th:text="${side.name}">Side Dish</h3>
+                                    <p class="md:text-xl sm:text-sm text-gray-600 leading-relaxed break-words" th:text="${side.description}">Side description</p>
                                 </div>
                             </a>
                         </div>
@@ -167,7 +166,7 @@
             </div>
             <!-- Right Column (33.3%) - Desktop Only -->
             <div class="hidden md:flex w-full md:w-1/3 flex flex-col">
-                <div class="relative rounded-lg overflow-hidden h-[600px]">
+                <div class="relative rounded-3xl overflow-hidden h-[600px]">
                     <img class="w-full h-full object-cover" th:src="${topMealImageUrl}" th:alt="${topMealName}">
                     <a th:href="@{'/weekly-feedback'(date=${today},dish=${topMealMainDish != null and dishIdToIndex.containsKey(topMealMainDish.id) ? dishIdToIndex[topMealMainDish.id] : 0})}" class="absolute bottom-4 right-4 flex items-center bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-all duration-200 bg-primary text-sm font-medium text-customTomato">
                         Add Feedback
@@ -186,7 +185,7 @@
         <div class="flex flex-col md:flex-row gap-5 mt-10">
             <!-- Meal Image - Mobile First, Desktop Left -->
             <div class="w-full md:w-1/3 flex flex-col order-1 md:order-1">
-                <div class="relative rounded-lg overflow-hidden h-64 md:h-[400px]">
+                <div class="relative rounded-3xl overflow-hidden h-64 md:h-[400px]">
                     <img class="w-full h-full object-cover" th:src="${bottomMealImageUrl}" th:alt="${bottomMealName}">
                     
                     <a th:href="@{'/weekly-feedback'(date=${today},dish=${bottomMealMainDish != null and dishIdToIndex.containsKey(bottomMealMainDish.id) ? dishIdToIndex[bottomMealMainDish.id] : 0})}" class="absolute bottom-4 right-4 flex items-center bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 cursor-pointer transition-all duration-200 bg-primary text-sm font-medium text-customTomato">
@@ -198,7 +197,7 @@
             <!-- Meal Content - Mobile Second, Desktop Right -->
             <div class="w-full md:w-2/3 bg-white flex flex-col md:justify-center md:h-[400px] order-2 md:order-2">
                 <div class="mb-6">
-                    <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold font-dmSerifDisplay text-black mb-6 mt-2 break-words break-all leading-tight" th:text="${bottomMealMainDish != null ? bottomMealMainDish.name : 'Meal'}">Meal</h2>
+                    <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold font-dmSerifDisplay text-black mb-3 mt-2 break-words break-all leading-tight" th:text="${bottomMealMainDish != null ? bottomMealMainDish.name : 'Meal'}">Meal</h2>
                     <p class="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed break-words break-all" th:text="${bottomMealMainDish != null ? bottomMealMainDish.description : ''}">Meal description</p>
                 </div>
                 <div class="mb-6" th:if="${bottomMealSideDishes != null and !bottomMealSideDishes.isEmpty()}">
@@ -206,12 +205,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div th:each="side : ${bottomMealSideDishes}" class="bg-white flex items-center">
                             <a th:href="@{'/weekly-feedback'(date=${today},dish=${side != null and dishIdToIndex.containsKey(side.id) ? dishIdToIndex[side.id] : 0})}" class="flex items-center w-full group hover:bg-primary/10 rounded-lg transition-colors duration-150 p-2">
-                                <div class="w-16 h-16 rounded-lg overflow-hidden mr-3 flex-shrink-0">
+                                <div class="w-24 h-24 rounded-2xl overflow-hidden mr-3 flex-shrink-0">
                                     <img class="w-full h-full object-cover" th:src="${side.imageUrl}" th:alt="${side.name}">
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold font-dmSerifDisplay text-gray-800 group-hover:underline text-sm sm:text-base break-words break-all" th:text="${side.name}">Side Dish</h4>
-                                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed break-words break-all" th:text="${side.description}">Side description</p>
+                                    <h4 class="font-semibold font-dmSerifDisplay text-gray-800 group-hover:underline md:text-2xl sm:text-base break-words" th:text="${side.name}">Side Dish</h4>
+                                    <p class="md:text-lg sm:text-sm text-gray-600 leading-relaxed break-words" th:text="${side.description}">Side description</p>
                                 </div>
                             </a>
                         </div>

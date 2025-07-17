@@ -87,7 +87,6 @@
                 <div class="border-t border-gray-200 pt-3">
                     <!-- Show login for anonymous users -->
                     <a th:if="${!isAuthenticated}" th:href="@{/login}" class="text-gray-600 hover:text-primary cursor-pointer w-fit text-left py-2 flex items-center">
-                        <i class="fa-solid fa-sign-in-alt mr-2"></i>
                         Sign In
                     </a>
                     <!-- Show logout for authenticated users -->
