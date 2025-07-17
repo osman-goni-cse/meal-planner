@@ -37,9 +37,10 @@ public class SecurityConfig {
             )
 
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/login", "/error", "/webjars/**", "/css/**", "/js/**", "/images/**", "/api/reactions", "/test-auth", "/debug-user").permitAll()
+                .requestMatchers("/login", "/error", "/webjars/**", "/css/**", "/js/**", "/images/**", "/test-auth", "/debug-user").permitAll()
                 .requestMatchers("/weekly-plan/**", "/dishes/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers("/", "/weekly-feedback").hasAuthority("ROLE_EMPLOYEE")
+                .requestMatchers("/", "/weekly-feedback/**", "/uploads/**").permitAll() // Allow anonymous access to home and weekly-feedback
+                .requestMatchers("/api/reactions", "/weekly-feedback/feedback").authenticated() // Require auth for interactions
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
@@ -56,6 +57,9 @@ public class SecurityConfig {
             )
             .exceptionHandling(exceptionHandling -> exceptionHandling
                 .accessDeniedHandler(accessDeniedHandler())
+            )
+            .requestCache(requestCache -> requestCache
+                .requestCache(new org.springframework.security.web.savedrequest.HttpSessionRequestCache())
             );
         return http.build();
     }

@@ -73,7 +73,13 @@
                 <a th:href="@{/}" class="text-primary font-semibold border-b-2 border-primary pb-1 cursor-pointer py-2 w-fit">Today's Menu</a>
                 <a th:href="@{/weekly-feedback}" class="text-gray-600 hover:text-primary cursor-pointer py-2 w-fit">Weekly Menu</a>
                 <div class="border-t border-gray-200 pt-3">
-                    <form th:action="@{/logout}" method="post" class="inline">
+                    <!-- Show login for anonymous users -->
+                    <a th:if="${!isAuthenticated}" th:href="@{/login}" class="text-gray-600 hover:text-primary cursor-pointer w-fit text-left py-2 flex items-center">
+                        <i class="fa-solid fa-sign-in-alt mr-2"></i>
+                        Sign In
+                    </a>
+                    <!-- Show logout for authenticated users -->
+                    <form th:if="${isAuthenticated}" th:action="@{/logout}" method="post" class="inline">
                         <button type="submit" class="text-gray-600 hover:text-primary cursor-pointer w-fit text-left py-2 flex items-center">
                             <i class="fa-solid fa-sign-out-alt mr-2"></i>
                             Sign Out
@@ -104,7 +110,7 @@
                 <div class="mb-6 flex flex-col md:flex-row md:justify-between md:items-start">
                     <div>
                         <p class="text-base sm:text-lg text-gray-600">
-                            <span th:text="${greeting}">Good Morning</span>, <span th:text="${#authentication.principal.attributes['name']}">Team</span>
+                            <span th:text="${greeting}">Good Morning</span>, <span th:text="${userName}">Team</span>
                         </p>
                         <h1 class="text-xl sm:text-2xl font-bold text-gray-800 mt-1">
                             Today's <span th:text="${topMealPeriod != null ? #strings.capitalize(topMealPeriod) : 'Meal'}">Meal</span>
@@ -257,6 +263,14 @@
                 mobileMenu.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
+            }
+        });
+        // --- REDIRECT AFTER LOGIN ---
+        document.addEventListener('DOMContentLoaded', function() {
+            var redirectUrl = sessionStorage.getItem('redirectAfterLogin');
+            if (redirectUrl) {
+                sessionStorage.removeItem('redirectAfterLogin');
+                window.location.href = redirectUrl;
             }
         });
     </script>

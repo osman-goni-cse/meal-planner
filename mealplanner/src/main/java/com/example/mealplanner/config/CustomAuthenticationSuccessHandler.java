@@ -14,8 +14,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
-        String redirectUrl = "/"; // default for EMPLOYEE
-
+        String redirectUrl = "/";
         for (GrantedAuthority auth : authentication.getAuthorities()) {
             if ("ROLE_ADMIN".equals(auth.getAuthority())) {
                 redirectUrl = "/weekly-plan";

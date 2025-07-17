@@ -96,48 +96,66 @@
         </div>
         <div class="flex items-center">
             
-            <div sec:authorize="isAuthenticated()" class="relative" id="user-dropdown">
-                <button id="user-dropdown-button" onclick="toggleDropdown()" class="flex items-center text-gray-700 hover:text-primary transition-colors">
-                    <img th:src="${#authentication.principal.attributes['picture']}" class="w-8 h-8 rounded-full mr-2" alt="User Avatar" referrerpolicy="no-referrer">
-                    <!-- <span th:text="${#authentication.principal.attributes['name']}" class="font-medium mr-1 hidden md:inline-block">John Doe</span>  -->
-                    <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
-                </button>
-                <!-- Enhanced dropdown for logout -->
-                <div id="user-dropdown-menu" class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200" style="display: none;">
-                    <div class="px-4 py-2 border-b border-gray-100">
-                        <p class="text-sm font-medium text-gray-900" th:text="${#authentication.principal.attributes['name']}">User Name</p>
-                        <p class="text-xs text-gray-500" th:text="${#authentication.principal.attributes['email']}">user@example.com</p>
+            <div class="relative" id="user-dropdown">
+                <!-- Show login for anonymous users -->
+                <a th:if="${!isAuthenticated}" th:href="@{/login}" class="flex items-center text-gray-700 hover:text-primary transition-colors">
+                    <i class="fa-solid fa-sign-in-alt mr-2"></i>
+                    <span class="font-medium">Sign In</span>
+                </a>
+                
+                <!-- Show user dropdown for authenticated users -->
+                <div th:if="${isAuthenticated}">
+                    <button id="user-dropdown-button" onclick="toggleDropdown()" class="flex items-center text-gray-700 hover:text-primary transition-colors">
+                        <img th:src="${#authentication.principal.attributes['picture']}" class="w-8 h-8 rounded-full mr-2" alt="User Avatar" referrerpolicy="no-referrer">
+                        <!-- <span th:text="${#authentication.principal.attributes['name']}" class="font-medium mr-1 hidden md:inline-block">John Doe</span>  -->
+                        <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
+                    </button>
+                    <!-- Enhanced dropdown for logout -->
+                    <div id="user-dropdown-menu" class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200" style="display: none;">
+                        <div class="px-4 py-2 border-b border-gray-100">
+                            <p class="text-sm font-medium text-gray-900" th:text="${#authentication.principal.attributes['name']}">User Name</p>
+                            <p class="text-xs text-gray-500" th:text="${#authentication.principal.attributes['email']}">user@example.com</p>
+                        </div>
+                        <form th:action="@{/logout}" method="post">
+                            <button type="submit" class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left flex items-center">
+                                <i class="fa-solid fa-sign-out-alt mr-2"></i>
+                                Sign Out
+                            </button>
+                        </form>
                     </div>
-                    <form th:action="@{/logout}" method="post">
-                        <button type="submit" class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left flex items-center">
-                            <i class="fa-solid fa-sign-out-alt mr-2"></i>
-                            Sign Out
-                        </button>
-                    </form>
                 </div>
             </div>
         </div>
     </header>
     
     <!-- User dropdown fragment for reuse -->
-    <div th:fragment="topnav-user" sec:authorize="isAuthenticated()" class="relative hidden md:block" id="user-dropdown">
-        <button id="user-dropdown-button" onclick="toggleDropdown()" class="flex items-center text-gray-700 hover:text-primary transition-colors">
-            <img th:src="${#authentication.principal.attributes['picture']}" class="w-8 h-8 rounded-full mr-2" alt="User Avatar" referrerpolicy="no-referrer">
-            <!-- <span th:text="${#authentication.principal.attributes['name']}" class="font-medium mr-1 hidden md:inline-block">John Doe</span> -->
-            <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
-        </button>
-        <!-- Enhanced dropdown for logout -->
-        <div id="user-dropdown-menu" class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200" style="display: none;">
-            <div class="px-4 py-2 border-b border-gray-100">
-                <p class="text-sm font-medium text-gray-900" th:text="${#authentication.principal.attributes['name']}">User Name</p>
-                <p class="text-xs text-gray-500" th:text="${#authentication.principal.attributes['email']}">user@example.com</p>
+    <div th:fragment="topnav-user" class="relative hidden md:block">
+        <!-- Show login for anonymous users -->
+        <a th:if="${!isAuthenticated}" th:href="@{/login}" class="flex items-center text-gray-700 hover:text-primary transition-colors">
+            <i class="fa-solid fa-sign-in-alt mr-2"></i>
+            <span class="font-medium">Sign In</span>
+        </a>
+        
+        <!-- Show user dropdown for authenticated users -->
+        <div th:if="${isAuthenticated}" id="user-dropdown">
+            <button id="user-dropdown-button" onclick="toggleDropdown()" class="flex items-center text-gray-700 hover:text-primary transition-colors">
+                <img th:src="${#authentication.principal.attributes['picture']}" class="w-8 h-8 rounded-full mr-2" alt="User Avatar" referrerpolicy="no-referrer">
+                <!-- <span th:text="${#authentication.principal.attributes['name']}" class="font-medium mr-1 hidden md:inline-block">John Doe</span> -->
+                <i class="fa-solid fa-chevron-down ml-2 text-xs"></i>
+            </button>
+            <!-- Enhanced dropdown for logout -->
+            <div id="user-dropdown-menu" class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200" style="display: none;">
+                <div class="px-4 py-2 border-b border-gray-100">
+                    <p class="text-sm font-medium text-gray-900" th:text="${#authentication.principal.attributes['name']}">User Name</p>
+                    <p class="text-xs text-gray-500" th:text="${#authentication.principal.attributes['email']}">user@example.com</p>
+                </div>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left flex items-center">
+                        <i class="fa-solid fa-sign-out-alt mr-2"></i>
+                        Sign Out
+                    </button>
+                </form>
             </div>
-            <form th:action="@{/logout}" method="post">
-                <button type="submit" class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left flex items-center">
-                    <i class="fa-solid fa-sign-out-alt mr-2"></i>
-                    Sign Out
-                </button>
-            </form>
         </div>
     </div>
 

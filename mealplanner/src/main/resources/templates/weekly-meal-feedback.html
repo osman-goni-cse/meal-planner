@@ -85,7 +85,13 @@
                 <a th:href="@{/}" class="text-gray-600 hover:text-primary cursor-pointer py-2 w-fit">Today's Menu</a>
                 <a th:href="@{/weekly-feedback}" class="text-primary font-semibold border-b-2 border-primary pb-1 cursor-pointer py-2 w-fit">Weekly Menu</a>
                 <div class="border-t border-gray-200 pt-3">
-                    <form th:action="@{/logout}" method="post" class="inline">
+                    <!-- Show login for anonymous users -->
+                    <a th:if="${!isAuthenticated}" th:href="@{/login}" class="text-gray-600 hover:text-primary cursor-pointer w-fit text-left py-2 flex items-center">
+                        <i class="fa-solid fa-sign-in-alt mr-2"></i>
+                        Sign In
+                    </a>
+                    <!-- Show logout for authenticated users -->
+                    <form th:if="${isAuthenticated}" th:action="@{/logout}" method="post" class="inline">
                         <button type="submit" class="text-gray-600 hover:text-primary cursor-pointer w-fit text-left py-2 flex items-center">
                             <i class="fa-solid fa-sign-out-alt mr-2"></i>
                             Sign Out
@@ -341,7 +347,7 @@
     <script th:inline="javascript">
     /*<![CDATA[*/
     let currentPage = 0;
-    const pageSize = 5;
+    const pageSize = 20;
     let currentDishId = /*[[${selectedDish != null} ? ${selectedDish.id} : 0]]*/ 0;
     
     let currentDate = /*[[${selectedDate}]]*/ '';
@@ -534,6 +540,18 @@
         if (reactionBtn) {
             reactionBtn.addEventListener('click', async function() {
                 if (!currentDishId) return;
+                
+                // Check if user is authenticated
+                const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
+                console.log('isAuthenticated', isAuthenticated);
+                if (!isAuthenticated) {
+                    // Save current URL and redirect to login
+                    const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                    console.log('redirecting to login', '/login?redirect=' + encodeURIComponent(currentUrl));
+                    window.location.href = '/login?redirect=' + encodeURIComponent(currentUrl);
+                    return;
+                }
+                
                 const icon = document.getElementById('reaction-icon');
                 const countSpan = document.getElementById('reaction-count');
                 let currentCount = parseInt(countSpan.textContent, 10);
@@ -571,6 +589,16 @@
         if (mobileReactionBtn) {
             mobileReactionBtn.addEventListener('click', async function() {
                 if (!currentDishId) return;
+                
+                // Check if user is authenticated
+                const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
+                if (!isAuthenticated) {
+                    // Save current URL and redirect to login
+                    const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                    window.location.href = '/login?redirect=' + encodeURIComponent(currentUrl);
+                    return;
+                }
+                
                 const icon = document.getElementById('mobile-reaction-icon');
                 const countSpan = document.getElementById('mobile-reaction-count');
                 let currentCount = parseInt(countSpan.textContent, 10);
@@ -632,6 +660,16 @@
             // Handle form submission
             mobileCommentForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
+                
+                // Check if user is authenticated
+                const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
+                if (!isAuthenticated) {
+                    // Save current URL and redirect to login
+                    const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                    window.location.href = '/login?redirect=' + encodeURIComponent(currentUrl);
+                    return false; // Prevent form submission
+                }
+                
                 const commentInput = this.querySelector('input[name="comment"]');
                 const commentText = commentInput.value;
                 
@@ -669,6 +707,32 @@
                 } catch (error) {
                     console.error('Error submitting comment:', error);
                     alert('Failed to submit comment. Please try again.');
+                }
+            });
+        }
+
+        // --- Desktop comment form guest login redirect ---
+        const feedbackForm = document.querySelector('#feedback-form form');
+        if (feedbackForm) {
+            feedbackForm.addEventListener('submit', function(e) {
+                const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
+                if (!isAuthenticated) {
+                    e.preventDefault();
+                    const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                    window.location.href = '/login?redirect=' + encodeURIComponent(currentUrl);
+                    return false;
+                }
+            });
+        }
+
+        // --- Desktop comment input guest login redirect on keyup ---
+        const feedbackFormInput = document.querySelector('#feedback-form input[name="comment"]');
+        if (feedbackFormInput) {
+            feedbackFormInput.addEventListener('keyup', function(e) {
+                const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
+                if (!isAuthenticated) {
+                    const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                    window.location.href = '/login?redirect=' + encodeURIComponent(currentUrl);
                 }
             });
         }
@@ -744,5 +808,14 @@
             }
         }
     </style>
+    <script th:inline="javascript">
+    /*<![CDATA[*/
+    var redirectUrl = sessionStorage.getItem('redirectAfterLogin');
+    if (redirectUrl) {
+        sessionStorage.removeItem('redirectAfterLogin');
+        window.location.href = redirectUrl;
+    }
+    /*]]>*/
+    </script>
 </body>
 </html> 
