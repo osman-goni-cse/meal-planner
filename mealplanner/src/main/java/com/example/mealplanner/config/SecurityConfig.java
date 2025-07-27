@@ -39,7 +39,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/login", "/error", "/webjars/**", "/css/**", "/js/**", "/images/**", "/test-auth", "/debug-user").permitAll()
                 .requestMatchers("/weekly-plan/**", "/dishes/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers("/", "/weekly-feedback/**", "/uploads/**").permitAll() // Allow anonymous access to home and weekly-feedback
+                .requestMatchers("/", "/weekly-feedback/**", "/food-committee", "/uploads/**").permitAll() // Allow anonymous access to home and weekly-feedback
                 .requestMatchers("/api/reactions", "/weekly-feedback/feedback").authenticated() // Require auth for interactions
                 .anyRequest().authenticated()
             )
@@ -52,7 +52,7 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout")
+                .logoutSuccessUrl("/")
                 .permitAll()
             )
             .exceptionHandling(exceptionHandling -> exceptionHandling

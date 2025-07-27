@@ -53,14 +53,15 @@
                         <!-- Upload Area -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Image *</label>
-                            <div class="relative border-2 border-dashed border-gray-light rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer bg-secondary">
+                            <div class="relative border-2 border-dashed border-gray-light rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer bg-secondary h-96 flex flex-col justify-center">
                                 <input type="file" id="dish-image" name="imageFile" accept="image/*"
                                     style="position:absolute;opacity:0;width:100%;height:100%;left:0;top:0;cursor:pointer;z-index:2;"
-                                    required onchange="previewImage(event)">
+                                    required onchange="validateAndPreviewImage(event, 'add')">
                                 <label for="dish-image" class="cursor-pointer z-1 relative block">
                                     <i class="fa-solid fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
                                     <p class="text-gray-600 mb-2">Click to upload or drag and drop</p>
                                     <p class="text-sm text-gray-500">PNG, JPG up to 5MB</p>
+                                    <p class="text-xs text-gray-400 mt-1">Image must be 1024x1024 pixels</p>
                                 </label>
                                 <div id="image-error" class="client-error text-red-600 text-xs mt-1"></div>
                             </div>
@@ -68,7 +69,7 @@
                         <!-- Image Preview -->
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Preview</label>
-                            <div id="image-preview" class="border border-gray-light rounded-lg p-4 bg-white h-40 flex items-center justify-center">
+                            <div id="image-preview" class="border border-gray-light rounded-lg p-4 bg-white h-96 flex items-center justify-center">
                                 <div class="text-center text-gray-400">
                                     <i class="fa-solid fa-image text-3xl mb-2"></i>
                                     <p class="text-sm">Image preview will appear here</p>
@@ -111,111 +112,3 @@
         </div>
     </div>
 </div>
-
-<script>
-function setupAddDishValidation() {
-    const form = document.getElementById('add-dish-form');
-    if (!form) return;
-    const nameInput = form.querySelector('[name="name"]');
-    const mealPeriodInput = form.querySelector('[name="mealPeriod"]');
-    const categoryInput = form.querySelector('[name="category"]');
-    const descriptionInput = form.querySelector('[name="description"]');
-    const imageInput = form.querySelector('[name="imageFile"]');
-    const submitBtn = document.getElementById('add-dish-submit');
-    if (!nameInput || !mealPeriodInput || !categoryInput || !descriptionInput || !imageInput || !submitBtn) return;
-
-    // Remove previous listeners to avoid duplicates
-    nameInput.oninput = null; nameInput.onblur = null;
-    mealPeriodInput.onchange = null; mealPeriodInput.onblur = null;
-    categoryInput.onchange = null; categoryInput.onblur = null;
-    descriptionInput.oninput = null; descriptionInput.onblur = null;
-    imageInput.onchange = null; imageInput.onblur = null;
-
-    // Error containers
-    const nameError = nameInput.parentElement.querySelector('.client-error') || createErrorDiv(nameInput);
-    const mealPeriodError = mealPeriodInput.parentElement.querySelector('.client-error') || createErrorDiv(mealPeriodInput);
-    const categoryError = categoryInput.parentElement.querySelector('.client-error') || createErrorDiv(categoryInput);
-    const descriptionError = descriptionInput.parentElement.querySelector('.client-error') || createErrorDiv(descriptionInput);
-    const imageError = document.getElementById('image-error');
-
-    // Track touched state
-    let touched = { name: false, mealPeriod: false, category: false, description: false, image: false };
-
-    function createErrorDiv(input) {
-        const div = document.createElement('div');
-        div.className = 'client-error text-red-600 text-xs mt-1';
-        input.parentElement.appendChild(div);
-        return div;
-    }
-
-    function validate(showAll = false) {
-        let valid = true;
-        // Name
-        if ((!nameInput.value || nameInput.value.trim().length < 5)) {
-            if (touched.name || showAll) nameError.textContent = 'Dish name must be at least 5 characters.';
-            else nameError.textContent = '';
-            valid = false;
-        } else {
-            nameError.textContent = '';
-        }
-        // Meal Period
-        if (!mealPeriodInput.value) {
-            if (touched.mealPeriod || showAll) mealPeriodError.textContent = 'Meal period is required.';
-            else mealPeriodError.textContent = '';
-            valid = false;
-        } else {
-            mealPeriodError.textContent = '';
-        }
-        // Category
-        if (!categoryInput.value) {
-            if (touched.category || showAll) categoryError.textContent = 'Category is required.';
-            else categoryError.textContent = '';
-            valid = false;
-        } else {
-            categoryError.textContent = '';
-        }
-        // Description
-        if (!descriptionInput.value || descriptionInput.value.trim().length < 30) {
-            if (touched.description || showAll) descriptionError.textContent = 'Description must be at least 30 characters.';
-            else descriptionError.textContent = '';
-            valid = false;
-        } else {
-            descriptionError.textContent = '';
-        }
-        // Image
-        if (!imageInput.files || imageInput.files.length === 0) {
-            if (touched.image || showAll) imageError.textContent = 'Image is required.';
-            else imageError.textContent = '';
-            valid = false;
-        } else {
-            imageError.textContent = '';
-        }
-        submitBtn.disabled = !valid;
-        return valid;
-    }
-
-    // Attach events
-    nameInput.addEventListener('input', function() { touched.name = true; validate(); });
-    nameInput.addEventListener('blur', function() { touched.name = true; validate(); });
-    mealPeriodInput.addEventListener('change', function() { touched.mealPeriod = true; validate(); });
-    mealPeriodInput.addEventListener('blur', function() { touched.mealPeriod = true; validate(); });
-    categoryInput.addEventListener('change', function() { touched.category = true; validate(); });
-    categoryInput.addEventListener('blur', function() { touched.category = true; validate(); });
-    descriptionInput.addEventListener('input', function() { touched.description = true; validate(); });
-    descriptionInput.addEventListener('blur', function() { touched.description = true; validate(); });
-    imageInput.addEventListener('change', function() { touched.image = true; validate(); });
-    imageInput.addEventListener('blur', function() { touched.image = true; validate(); });
-
-    // Initial validation (do not show errors)
-    validate(false);
-
-    // Prevent submit if invalid
-    form.addEventListener('submit', function(e) {
-        if (!imageInput.files || imageInput.files.length === 0) touched.image = true;
-        if (!validate(true)) {
-            if (!imageInput.files || imageInput.files.length === 0) imageInput.focus();
-            e.preventDefault();
-        }
-    });
-}
-</script>
