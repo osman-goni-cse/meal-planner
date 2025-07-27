@@ -61,7 +61,20 @@ module.exports = {
     'text-wrap',
     'text-pretty',
     'text-nowrap',
-    'text-balance'
+    'text-balance',
+    'object-cover',
+    'object-contain',
+    'object-fill',
+    'object-none',
+    'object-scale-down',
+    'aspect-square',
+    'aspect-video',
+    'aspect-auto',
+    'aspect-3/2',
+    'aspect-3/4',
+    'aspect-4/3',
+    'aspect-9/16',
+    'aspect-16/9'
   ],
   plugins: [],
 } 
