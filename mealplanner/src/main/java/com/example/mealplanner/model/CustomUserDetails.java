@@ -8,11 +8,13 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-public class CustomUserDetails implements OAuth2User, UserDetails, OidcUser {
+public class CustomUserDetails implements OAuth2User, UserDetails, OidcUser, Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final User user;
     private final Map<String, Object> attributes;
