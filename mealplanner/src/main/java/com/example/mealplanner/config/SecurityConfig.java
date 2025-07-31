@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import com.example.mealplanner.config.CustomAuthenticationSuccessHandler;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
 @EnableWebSecurity
@@ -32,12 +33,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .csrfTokenRepository(createCsrfTokenRepository())
                 .ignoringRequestMatchers("/api/reactions")
             )
 
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/login", "/error", "/webjars/**", "/css/**", "/js/**", "/images/**", "/test-auth", "/debug-user").permitAll()
+                .requestMatchers("/login", "/error", "/webjars/**", "/css/**", "/js/**", "/images/**", "/test-auth", "/debug-user", "/debug/**").permitAll()
                 .requestMatchers("/weekly-plan/**", "/dishes/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/", "/weekly-feedback/**", "/food-committee", "/uploads/**").permitAll() // Allow anonymous access to home and weekly-feedback
                 .requestMatchers("/api/reactions", "/weekly-feedback/feedback").authenticated() // Require auth for interactions
@@ -53,7 +54,16 @@ public class SecurityConfig {
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/")
+                .deleteCookies("SESSION", "XSRF-TOKEN")
+                .invalidateHttpSession(true)
                 .permitAll()
+            )
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .sessionFixation().none() // CRITICAL: Disable session fixation protection to prevent session ID regeneration
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(false)
+                .expiredUrl("/login")
             )
             .exceptionHandling(exceptionHandling -> exceptionHandling
                 .accessDeniedHandler(accessDeniedHandler())
@@ -62,6 +72,17 @@ public class SecurityConfig {
                 .requestCache(new org.springframework.security.web.savedrequest.HttpSessionRequestCache())
             );
         return http.build();
+    }
+
+    @Bean
+    public CookieCsrfTokenRepository createCsrfTokenRepository() {
+        CookieCsrfTokenRepository repository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+        repository.setCookieName("XSRF-TOKEN");
+        repository.setCookiePath("/");
+        repository.setCookieHttpOnly(false);
+        // Note: setCookieSecure and setCookieSameSite not available in this Spring Boot version
+        // These will be handled by the session cookie configuration instead
+        return repository;
     }
 
     @Bean

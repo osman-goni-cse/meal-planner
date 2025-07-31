@@ -11,11 +11,23 @@ public class SessionConfig {
     @Bean
     public CookieSerializer cookieSerializer() {
         DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+        
+        // Basic cookie settings
         serializer.setCookieName("SESSION");
         serializer.setCookiePath("/");
-        serializer.setCookieMaxAge(1800); // 30 minutes
+        serializer.setCookieMaxAge(3600); // 1 hour for better stability
+        
+        // Security settings
         serializer.setUseHttpOnlyCookie(true);
         serializer.setUseSecureCookie(false); // Set to true in production with HTTPS
+        
+        // CRITICAL: Chrome compatibility settings
+        serializer.setSameSite("Lax"); // Required for Chrome
+        serializer.setDomainNamePattern("^.+?\\.(\\w+\\.[a-z]+)$"); // For your domain
+        
+        // Disable base64 encoding to prevent cookie corruption
+        serializer.setUseBase64Encoding(false);
+        
         return serializer;
     }
 } 
