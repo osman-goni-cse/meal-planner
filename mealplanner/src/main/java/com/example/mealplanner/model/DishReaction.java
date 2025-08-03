@@ -28,7 +28,7 @@ public class DishReaction {
     private LocalDate reactionDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "reaction_type", nullable = false)
+    @Column(name = "reaction_type", nullable = false, length = 20)
     private ReactionType reactionType;
 
     public DishReaction() {}

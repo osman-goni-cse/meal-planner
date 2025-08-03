@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import com.example.mealplanner.model.ReactionType;
 
 @Controller
 public class WeeklyMealFeedbackController {
@@ -104,15 +105,30 @@ public class WeeklyMealFeedbackController {
             // Add reactions and userReacted
             long reactions = dishReactionService.getReactions(dish.getId());
             dto.put("reactions", reactions);
+            
+            // Add reaction counts for each type
+            Map<ReactionType, Long> reactionCounts = dishReactionService.getAllReactionCounts(dish.getId());
+            // Convert to String keys for frontend compatibility
+            Map<String, Long> reactionCountsString = new HashMap<>();
+            for (Map.Entry<ReactionType, Long> entry : reactionCounts.entrySet()) {
+                reactionCountsString.put(entry.getKey().name(), entry.getValue());
+            }
+            dto.put("reactionCounts", reactionCountsString);
+            
             boolean userReacted = false;
+            String userReactionType = null;
             if (oauth2User != null) {
                 String email = oauth2User.getAttribute("email");
                 User user = userRepository.findByEmail(email).orElse(null);
                 if (user != null) {
                     userReacted = dishReactionService.hasUserReacted(user.getId(), dish.getId());
+                    if (userReacted) {
+                        userReactionType = dishReactionService.getUserReactionType(user.getId(), dish.getId()).name();
+                    }
                 }
             }
             dto.put("userReacted", userReacted);
+            dto.put("userReactionType", userReactionType);
             dishDTOs.add(dto);
         }
 

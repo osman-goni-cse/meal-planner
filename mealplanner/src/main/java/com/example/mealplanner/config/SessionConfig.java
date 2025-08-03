@@ -19,7 +19,7 @@ public class SessionConfig {
         
         // Security settings
         serializer.setUseHttpOnlyCookie(true);
-        serializer.setUseSecureCookie(false); // Set to true in production with HTTPS
+        serializer.setUseSecureCookie(true); // Set to true in production with HTTPS
         
         // CRITICAL: Chrome compatibility settings
         serializer.setSameSite("Lax"); // Required for Chrome

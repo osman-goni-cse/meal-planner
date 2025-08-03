@@ -199,17 +199,17 @@
                     <!-- Left Column: Dish Image and Info -->
                     <div id="dish-info-column" class="w-full lg:w-[60%] p-6 bg-white">
                         <div id="dish-image-container" class="mb-6">
-                            <img class="w-full h-96 object-cover rounded-xl shadow-md" th:src="${selectedDish.imageUrl}" th:alt="${selectedDish.name}">
+                            <img class="w-full h-96 object-cover rounded-xl shadow-md" th:src="${selectedDish != null ? selectedDish.imageUrl : ''}" th:alt="${selectedDish != null ? selectedDish.name : 'Dish'}">
                         </div>
                         <div id="dish-details">
                             <div class="flex items-center justify-between mb-2">
-                                <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-dmSerifDisplay text-gray-800 break-words break-all" th:text="${selectedDish.name}">Dish Name</h1>
-                                <span th:if="${selectedDish.mealPeriod != null}" 
+                                <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-dmSerifDisplay text-gray-800 break-words break-all" th:text="${selectedDish != null ? selectedDish.name : 'Dish Name'}">Dish Name</h1>
+                                <span th:if="${selectedDish != null && selectedDish.mealPeriod != null}" 
                                       class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-sm font-medium whitespace-nowrap">
                                     <span th:text="${#strings.capitalize(selectedDish.mealPeriod)}">Lunch</span>
                                 </span>
                             </div>
-                            <p class="text-lg text-gray-600 mt-2 leading-relaxed break-words" th:text="${selectedDish.description}">Dish description</p>
+                            <p class="text-lg text-gray-600 mt-2 leading-relaxed break-words" th:text="${selectedDish != null ? selectedDish.description : 'Dish description'}">Dish description</p>
                         </div>
                     </div>
                     <!-- Right Column: Feedback -->
@@ -222,26 +222,71 @@
                             <div th:if="${error}" class="mb-3 p-2 bg-red-100 border border-red-300 text-red-700 rounded text-sm">
                                 <span th:text="${error}">Comment cannot be empty.</span>
                             </div>
-                            <div th:if="${!selectedDish.isEmpty() && !selectedDate.isAfter(T(java.time.LocalDate).now())}" class="flex items-center justify-between mb-4">
-                                <div class="flex items-center space-x-4">
-                                    <button id="reaction-btn" type="button" class="flex items-center space-x-1.5 text-gray-600 focus:outline-none group">
-                                        <i id="reaction-icon" class="fa-heart text-lg text-red-500" th:classappend="${selectedDish.userReacted} ? 'fa-solid' : 'fa-regular'"></i>
-                                        <span id="reaction-count" class="font-medium text-sm" th:text="${selectedDish.reactions}">0</span>
-                                        <span class="text-xs ml-1">Likes</span>
-                                    </button>
-                                    <div class="flex items-center space-x-1.5 text-gray-600">
+                            <div th:if="${selectedDish != null && !selectedDish.isEmpty() && !selectedDate.isAfter(T(java.time.LocalDate).now())}" class="space-y-3">
+                                <!-- Reaction count and comments on same line - FIRST -->
+                                <div class="flex items-center">
+                                    <!-- Reaction count display - left aligned -->
+                                    <div id="reaction-count-display" class="flex items-center space-x-1" th:style="${selectedDish != null && selectedDish.reactions > 0} ? 'display: flex' : 'display: none'">
+                                        <!-- Show reaction emojis side by side -->
+                                        <div class="flex items-center">
+                                            <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.DELICIOUS > 0}">😋</span>
+                                            <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.AVERAGE > 0}">😐</span>
+                                            <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.BAD > 0}">😞</span>
+                                        </div>
+                                        <!-- Show total count -->
+                                        <span class="text-sm text-gray-600" th:text="${selectedDish.reactions}">0</span>
+                                    </div>
+                                    <!-- Comments - always right aligned -->
+                                    <div class="ml-auto flex items-center space-x-1.5 text-gray-600">
                                         <i class="fa-regular fa-comment text-lg text-blue-500"></i>
-                                        <span class="font-medium text-sm" th:text="${selectedDish.commentsCount}">0</span>
-                                        <span class="text-xs ml-1">Comments</span>
+                                        <span class="font-medium text-sm" th:text="${selectedDish != null ? selectedDish.commentsCount : 0}">0</span>
+                                        <span class="text-sm ml-1">Comments</span>
                                     </div>
                                 </div>
-                                <button id="load-more-comments-btn" class="text-sm font-semibold text-primary hover:underline hidden">View more comments</button>
+                                <!-- Main reaction button on separate line - SECOND -->
+                                <div class="flex items-center">
+                                    <!-- Desktop Reaction System -->
+                                    <div class="relative">
+                                        <!-- Main reaction button with emoji and text -->
+                                        <button id="reaction-btn" type="button" class="flex items-center space-x-1.5 text-gray-600 hover:text-gray-800 focus:outline-none transition-colors duration-200 my-2">
+                                            <div class="relative flex items-center">
+                                                <span id="reaction-icon" class="text-lg transition-all duration-200" 
+                                                      data-reaction-type="NONE"
+                                                      th:data-reaction-type="${selectedDish != null && selectedDish.userReactionType != null ? selectedDish.userReactionType : 'NONE'}">
+                                                    <i th:if="${selectedDish == null || selectedDish.userReactionType == null}" class="fa-regular fa-smile text-gray-400"></i>
+                                                    <span th:if="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS'}">😋</span>
+                                                    <span th:if="${selectedDish != null && selectedDish.userReactionType == 'AVERAGE'}">😐</span>
+                                                    <span th:if="${selectedDish != null && selectedDish.userReactionType == 'BAD'}">😞</span>
+                                                </span>
+                                                <span id="reaction-text" class="font-medium text-sm ml-1"
+                                                      th:text="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'Delicious' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'Average' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'Bad' : 'React'))}"
+                                                      th:classappend="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'text-green-600' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'text-yellow-600' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'text-red-600' : 'text-gray-400'))}">
+                                                    React
+                                                </span>
+                                            </div>
+                                        </button>
+                                        <!-- Facebook-style Hover Menu -->
+                                        <div id="reaction-menu" class="absolute bottom-full left-0 mb-3 bg-white border border-gray-200 rounded-full shadow-xl p-2 hidden z-50 transform scale-100 transition-all duration-200">
+                                            <div class="flex space-x-1">
+                                                <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="DELICIOUS" data-emoji="😋" data-text="Delicious" title="Delicious">
+                                                    <span class="text-2xl filter drop-shadow-sm">😋</span>
+                                                </button>
+                                                <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="AVERAGE" data-emoji="😐" data-text="Average" title="Average">
+                                                    <span class="text-2xl filter drop-shadow-sm">😐</span>
+                                                </button>
+                                                <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="BAD" data-emoji="😞" data-text="Bad" title="Bad">
+                                                    <span class="text-2xl filter drop-shadow-sm">😞</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div th:if="${!selectedDate.isAfter(T(java.time.LocalDate).now())}" id="feedback-form" class="flex items-center space-x-2">
-                                <form th:action="@{/weekly-feedback/feedback}" method="post" class="flex w-full space-x-2">
+                                <form th:action="@{/weekly-feedback/feedback}" method="post" class="flex w-full">
                                     <input type="hidden" name="date" th:value="${selectedDate}">
-                                    <input type="hidden" name="dishId" th:value="${selectedDish.id}">
-                                    <input type="text" name="comment" placeholder="Share your thoughts..." class="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition">
+                                    <input type="hidden" name="dishId" th:value="${selectedDish != null ? selectedDish.id : ''}">
+                                    <input type="text" name="comment" placeholder="Share your thoughts..." class="w-full px-4 mr-1 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition">
                                     <button type="submit" class="bg-gray-800 text-white font-semibold px-4 py-2 rounded-lg hover:bg-gray-900 transition-colors text-sm">Submit</button>
                                 </form>
                             </div>
@@ -269,32 +314,80 @@
             <div th:if="${selectedDish != null}" class="bg-white rounded-lg shadow-sm border border-gray-200 grid grid-rows-[1fr_auto] h-[calc(100vh-200px)]">
                 <!-- Dish Image - Takes available space -->
                 <div class="relative min-h-0">
-                    <img class="w-full h-full object-cover rounded-t-lg" th:src="${selectedDish.imageUrl}" th:alt="${selectedDish.name}">
+                    <img class="w-full h-full object-cover rounded-t-lg" th:src="${selectedDish != null ? selectedDish.imageUrl : ''}" th:alt="${selectedDish != null ? selectedDish.name : 'Dish'}">
                 </div>
                 
                 <!-- Dish Details - Auto-sized based on content -->
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-3">
-                        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 break-words" th:text="${selectedDish.name}">Dish Name</h1>
-                        <span th:if="${selectedDish.mealPeriod != null}" 
+                        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 break-words" th:text="${selectedDish != null ? selectedDish.name : 'Dish Name'}">Dish Name</h1>
+                        <span th:if="${selectedDish != null && selectedDish.mealPeriod != null}" 
                               class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-sm font-medium whitespace-nowrap">
                             <span th:text="${#strings.capitalize(selectedDish.mealPeriod)}">Lunch</span>
                         </span>
                     </div>
-                    <p class="text-lg text-gray-600 mb-6 leading-relaxed break-words" th:text="${selectedDish.description}">Dish description</p>
+                    <p class="text-lg text-gray-600 mb-6 leading-relaxed break-words" th:text="${selectedDish != null ? selectedDish.description : 'Dish description'}">Dish description</p>
                     
                     <!-- Likes and Comments -->
-                    <div th:if="${!selectedDish.isEmpty() && !selectedDate.isAfter(T(java.time.LocalDate).now())}" class="flex items-center space-x-6">
-                        <button id="mobile-reaction-btn" type="button" class="flex items-center space-x-2 text-gray-600 focus:outline-none group">
-                            <i id="mobile-reaction-icon" class="fa-heart text-xl text-red-500" th:classappend="${selectedDish.userReacted} ? 'fa-solid' : 'fa-regular'"></i>
-                            <span id="mobile-reaction-count" class="font-medium text-base" th:text="${selectedDish.reactions}">0</span>
-                            <span class="text-sm">Likes</span>
-                        </button>
-                        <button id="mobile-comments-btn" type="button" class="flex items-center space-x-2 text-gray-600 focus:outline-none group">
-                            <i class="fa-regular fa-comment text-xl text-blue-500"></i>
-                            <span class="font-medium text-base" th:text="${selectedDish.commentsCount}">0</span>
-                            <span class="text-sm">Comments</span>
-                        </button>
+                    <div th:if="${selectedDish != null && !selectedDish.isEmpty() && !selectedDate.isAfter(T(java.time.LocalDate).now())}" class="space-y-3">
+                        <!-- Mobile reaction count and comments on same line - FIRST -->
+                        <div class="flex items-center">
+                            <!-- Mobile reaction count display - left aligned -->
+                            <div id="mobile-reaction-count-display" class="flex items-center space-x-1" th:style="${selectedDish != null && selectedDish.reactions > 0} ? 'display: flex' : 'display: none'">
+                                <!-- Show reaction emojis side by side -->
+                                <div class="flex items-center space-x-1">
+                                    <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.DELICIOUS > 0}">😋</span>
+                                    <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.AVERAGE > 0}">😐</span>
+                                    <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.BAD > 0}">😞</span>
+                                </div>
+                                <!-- Show total count -->
+                                <span class="text-sm text-gray-600" th:text="${selectedDish.reactions}">0</span>
+                            </div>
+                            <!-- Mobile comments - always right aligned -->
+                            <button id="mobile-comments-btn" type="button" class="ml-auto flex items-center space-x-2 text-gray-600 focus:outline-none group">
+                                <i class="fa-regular fa-comment text-xl text-blue-500"></i>
+                                <span class="font-medium text-base" th:text="${selectedDish != null ? selectedDish.commentsCount : 0}">0</span>
+                                <span class="text-sm">Comments</span>
+                            </button>
+                        </div>
+                        <!-- Main reaction button on separate line - SECOND -->
+                        <div class="flex items-center">
+                            <!-- Mobile Reaction System -->
+                            <div class="relative">
+                                <!-- Main reaction button with emoji and text -->
+                                <button id="mobile-reaction-btn" type="button" class="flex items-center space-x-2 text-gray-600 hover:text-gray-800 focus:outline-none transition-colors duration-200">
+                                    <div class="relative flex items-center">
+                                        <span id="mobile-reaction-icon" class="text-xl transition-all duration-200" 
+                                              data-reaction-type="NONE"
+                                              th:data-reaction-type="${selectedDish != null && selectedDish.userReactionType != null ? selectedDish.userReactionType : 'NONE'}">
+                                            <i th:if="${selectedDish == null || selectedDish.userReactionType == null}" class="fa-regular fa-smile text-gray-400"></i>
+                                            <span th:if="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS'}">😋</span>
+                                            <span th:if="${selectedDish != null && selectedDish.userReactionType == 'AVERAGE'}">😐</span>
+                                            <span th:if="${selectedDish != null && selectedDish.userReactionType == 'BAD'}">😞</span>
+                                        </span>
+                                        <span id="mobile-reaction-text" class="font-medium text-base ml-1"
+                                              th:text="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'Delicious' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'Average' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'Bad' : 'React'))}"
+                                              th:classappend="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'text-green-600' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'text-yellow-600' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'text-red-600' : 'text-gray-400'))}">
+                                            React
+                                        </span>
+                                    </div>
+                                </button>
+                                <!-- Facebook-style Hover Menu -->
+                                <div id="mobile-reaction-menu" class="absolute bottom-full left-0 mb-3 bg-white border border-gray-200 rounded-full shadow-xl p-2 hidden z-50 transform scale-100 transition-all duration-200">
+                                    <div class="flex space-x-1">
+                                        <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="DELICIOUS" data-emoji="😋" data-text="Delicious" title="Delicious">
+                                            <span class="text-2xl filter drop-shadow-sm">😋</span>
+                                        </button>
+                                        <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="AVERAGE" data-emoji="😐" data-text="Average" title="Average">
+                                            <span class="text-2xl filter drop-shadow-sm">😐</span>
+                                        </button>
+                                        <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="BAD" data-emoji="😞" data-text="Bad" title="Bad">
+                                            <span class="text-2xl filter drop-shadow-sm">😞</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -346,7 +439,7 @@
     /*<![CDATA[*/
     let currentPage = 0;
     const pageSize = 20;
-    let currentDishId = /*[[${selectedDish != null} ? ${selectedDish.id} : 0]]*/ 0;
+    let currentDishId = /*[[${selectedDish != null ? selectedDish.id : 0}]]*/ 0;
     
     let currentDate = /*[[${selectedDate}]]*/ '';
 
@@ -535,13 +628,62 @@
         
         // Desktop reaction functionality
         const reactionBtn = document.getElementById('reaction-btn');
+        const reactionMenu = document.getElementById('reaction-menu');
+        const reactionDisplay = document.getElementById('reaction-count-display'); // Updated selector
+        const reactionText = document.getElementById('reaction-text');
+        const reactionIcon = document.getElementById('reaction-icon'); // New element
+
+        // Initialize reaction state from server data
+        if (reactionDisplay) {
+            // Initialize the reaction count display
+            const reactionCounts = /*[[${selectedDish != null ? selectedDish.reactionCounts : null}]]*/ {};
+            const totalReactions = /*[[${selectedDish != null ? selectedDish.reactions : 0}]]*/ 0;
+            
+            // Update the reaction count display based on server data
+            updateReactionDisplay(reactionCounts, null);
+            
+            // Initialize the main reaction button
+            const userReactionType = /*[[${selectedDish != null ? selectedDish.userReactionType : null}]]*/ null;
+            updateReactionIcon(userReactionType);
+            
+            // Initialize the text
+            const currentText = reactionText.textContent;
+            reactionText.textContent = currentText;
+        }
+
         if (reactionBtn) {
-            reactionBtn.addEventListener('click', async function() {
-                if (!currentDishId) return;
-                
-                // Check if user is authenticated
+            let menuTimeout;
+            
+            // Show menu on hover
+            reactionBtn.addEventListener('mouseenter', function() {
+                clearTimeout(menuTimeout);
+                reactionMenu.classList.remove('hidden');
+            });
+
+            // Hide menu with delay when leaving the button
+            reactionBtn.addEventListener('mouseleave', function() {
+                menuTimeout = setTimeout(() => {
+                    reactionMenu.classList.add('hidden');
+                }, 100);
+            });
+
+            // Keep menu visible when hovering over menu
+            reactionMenu.addEventListener('mouseenter', function() {
+                clearTimeout(menuTimeout);
+            });
+
+            // Hide menu when leaving the menu
+            reactionMenu.addEventListener('mouseleave', function() {
+                reactionMenu.classList.add('hidden');
+            });
+
+            // Handle reaction option clicks directly
+            reactionMenu.addEventListener('click', function(e) {
+                const reactionOption = e.target.closest('.reaction-option');
+                if (!reactionOption) return;
+
+                // Check if user is authenticated first
                 const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
-                console.log('isAuthenticated', isAuthenticated);
                 if (!isAuthenticated) {
                     // Save current URL in a cookie and redirect to login
                     var currentUrl = window.location.pathname + window.location.search + window.location.hash;
@@ -549,46 +691,201 @@
                     window.location.href = '/login';
                     return;
                 }
-                
-                const icon = document.getElementById('reaction-icon');
-                const countSpan = document.getElementById('reaction-count');
-                let currentCount = parseInt(countSpan.textContent, 10);
-                const isReacted = icon.classList.contains('fa-solid');
-                // Optimistically update UI
-                icon.classList.remove('fa-solid', 'fa-regular');
-                if (isReacted) {
-                    icon.classList.add('fa-regular');
-                    countSpan.textContent = Math.max(0, currentCount - 1);
-                } else {
-                    icon.classList.add('fa-solid');
-                    countSpan.textContent = currentCount + 1;
-                }
-                // Send request
-                const res = await fetch('/api/reactions', {
+
+                const reactionType = reactionOption.dataset.reaction;
+                const emoji = reactionOption.dataset.emoji;
+                const text = reactionOption.dataset.text;
+                const currentReactionType = reactionIcon.dataset.reactionType;
+
+                // Send request with the actual reaction type
+                fetch('/api/reactions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dishId: currentDishId })
+                    body: JSON.stringify({ dishId: currentDishId, reactionType: reactionType })
+                })
+                .then(res => {
+                    if (res.redirected) {
+                        // Handle redirect to login
+                        window.location.href = res.url;
+                        return;
+                    }
+                    if (!res.ok) {
+                        return res.json().then(errorData => {
+                            throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
+                        }).catch(() => {
+                            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                        });
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data) { // Only process if we got data (not redirected)
+                        // Update reaction count display with server response
+                        updateReactionDisplay(data.reactionCounts, data.userReactionType);
+                        
+                        // Update main reaction button icon
+                        updateReactionIcon(data.userReactionType);
+                        
+                        // Update text based on user reaction
+                        if (data.userReactionType) {
+                            reactionText.textContent = getReactionText(data.userReactionType);
+                            reactionText.className = 'font-medium text-sm ml-1 ' + getReactionColorClass(data.userReactionType);
+                        } else {
+                            reactionText.textContent = 'React';
+                            reactionText.className = 'font-medium text-sm ml-1 text-gray-400';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting reaction:', error);
+                    alert('Failed to submit reaction. Please try again. Error: ' + error.message);
                 });
-                if (res.ok) {
-                    const data = await res.json();
-                    countSpan.textContent = data.reactions;
-                    icon.classList.remove('fa-solid', 'fa-regular');
-                    if (data.userReacted) {
-                        icon.classList.add('fa-solid');
-                    } else {
-                        icon.classList.add('fa-regular');
+
+                // Hide menu after selection
+                reactionMenu.classList.add('hidden');
+            });
+        }
+
+        // Helper functions for reaction display
+        function updateReactionDisplay(reactionCounts, userReactionType) {
+            if (!reactionDisplay) return;
+            
+            // Calculate total reactions
+            const totalReactions = reactionCounts ? 
+                (reactionCounts.DELICIOUS || 0) + (reactionCounts.AVERAGE || 0) + (reactionCounts.BAD || 0) : 0;
+            
+            if (totalReactions > 0) {
+                // Show the reaction count display
+                reactionDisplay.style.display = 'flex';
+                
+                // Clear existing display
+                reactionDisplay.innerHTML = '';
+                
+                // Create emoji container
+                const emojiContainer = document.createElement('div');
+                emojiContainer.className = 'flex items-center';
+                
+                // Add reaction emojis side by side
+                if (reactionCounts) {
+                    if (reactionCounts.DELICIOUS > 0) {
+                        const deliciousSpan = document.createElement('span');
+                        deliciousSpan.textContent = '😋';
+                        emojiContainer.appendChild(deliciousSpan);
+                    }
+                    
+                    if (reactionCounts.AVERAGE > 0) {
+                        const averageSpan = document.createElement('span');
+                        averageSpan.textContent = '😐';
+                        emojiContainer.appendChild(averageSpan);
+                    }
+                    
+                    if (reactionCounts.BAD > 0) {
+                        const badSpan = document.createElement('span');
+                        badSpan.textContent = '😞';
+                        emojiContainer.appendChild(badSpan);
                     }
                 }
-            });
+                
+                // Add emoji container
+                reactionDisplay.appendChild(emojiContainer);
+                
+                // Add total count
+                const countSpan = document.createElement('span');
+                countSpan.className = 'text-xs text-gray-600';
+                countSpan.textContent = totalReactions;
+                reactionDisplay.appendChild(countSpan);
+            } else {
+                // Hide the reaction count display when no reactions
+                reactionDisplay.style.display = 'none';
+            }
+        }
+
+        function updateReactionIcon(userReactionType) {
+            if (!reactionIcon) return;
+            
+            // Update the main reaction button icon
+            if (userReactionType) {
+                const emojiMap = {
+                    'DELICIOUS': '😋',
+                    'AVERAGE': '😐',
+                    'BAD': '😞'
+                };
+                reactionIcon.innerHTML = emojiMap[userReactionType] || '😋';
+                reactionIcon.dataset.reactionType = userReactionType;
+            } else {
+                reactionIcon.innerHTML = '<i class="fa-regular fa-smile text-gray-400"></i>';
+                reactionIcon.dataset.reactionType = 'NONE';
+            }
+        }
+
+        function getReactionText(reactionType) {
+            const textMap = {
+                'DELICIOUS': 'Delicious',
+                'AVERAGE': 'Average',
+                'BAD': 'Bad'
+            };
+            return textMap[reactionType] || 'React';
+        }
+
+        function getReactionColorClass(reactionType) {
+            const colorMap = {
+                'DELICIOUS': 'text-green-600',
+                'AVERAGE': 'text-yellow-600',
+                'BAD': 'text-red-600'
+            };
+            return colorMap[reactionType] || 'text-gray-600';
         }
 
         // Mobile reaction functionality
         const mobileReactionBtn = document.getElementById('mobile-reaction-btn');
+        const mobileReactionMenu = document.getElementById('mobile-reaction-menu');
+        const mobileReactionText = document.getElementById('mobile-reaction-text');
+        const mobileReactionIcon = document.getElementById('mobile-reaction-icon');
+        const mobileReactionDisplay = document.getElementById('mobile-reaction-count-display');
+
+        // Initialize mobile reaction state from server data
+        if (mobileReactionIcon) {
+            // Initialize the main reaction button
+            const mobileUserReactionType = /*[[${selectedDish != null ? selectedDish.userReactionType : null}]]*/ null;
+            updateMobileReactionIcon(mobileUserReactionType);
+            
+            // Initialize the text
+            const currentText = mobileReactionText.textContent;
+            mobileReactionText.textContent = currentText;
+        }
+
         if (mobileReactionBtn) {
-            mobileReactionBtn.addEventListener('click', async function() {
-                if (!currentDishId) return;
-                
-                // Check if user is authenticated
+            let mobileMenuTimeout;
+            
+            // Show menu on hover
+            mobileReactionBtn.addEventListener('mouseenter', function() {
+                clearTimeout(mobileMenuTimeout);
+                mobileReactionMenu.classList.remove('hidden');
+            });
+
+            // Hide menu with delay when leaving the button
+            mobileReactionBtn.addEventListener('mouseleave', function() {
+                mobileMenuTimeout = setTimeout(() => {
+                    mobileReactionMenu.classList.add('hidden');
+                }, 100);
+            });
+
+            // Keep menu visible when hovering over menu
+            mobileReactionMenu.addEventListener('mouseenter', function() {
+                clearTimeout(mobileMenuTimeout);
+            });
+
+            // Hide menu when leaving the menu
+            mobileReactionMenu.addEventListener('mouseleave', function() {
+                mobileReactionMenu.classList.add('hidden');
+            });
+
+            // Handle reaction option clicks directly
+            mobileReactionMenu.addEventListener('click', function(e) {
+                const reactionOption = e.target.closest('.reaction-option');
+                if (!reactionOption) return;
+
+                // Check if user is authenticated first
                 const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
                 if (!isAuthenticated) {
                     // Save current URL in a cookie and redirect to login
@@ -597,37 +894,131 @@
                     window.location.href = '/login';
                     return;
                 }
-                
-                const icon = document.getElementById('mobile-reaction-icon');
-                const countSpan = document.getElementById('mobile-reaction-count');
-                let currentCount = parseInt(countSpan.textContent, 10);
-                const isReacted = icon.classList.contains('fa-solid');
-                // Optimistically update UI
-                icon.classList.remove('fa-solid', 'fa-regular');
-                if (isReacted) {
-                    icon.classList.add('fa-regular');
-                    countSpan.textContent = Math.max(0, currentCount - 1);
-                } else {
-                    icon.classList.add('fa-solid');
-                    countSpan.textContent = currentCount + 1;
-                }
-                // Send request
-                const res = await fetch('/api/reactions', {
+
+                const reactionType = reactionOption.dataset.reaction;
+                const emoji = reactionOption.dataset.emoji;
+                const text = reactionOption.dataset.text;
+                const currentReactionType = mobileReactionIcon.dataset.reactionType;
+
+                // Send request with the actual reaction type
+                fetch('/api/reactions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dishId: currentDishId })
-                });
-                if (res.ok) {
-                    const data = await res.json();
-                    countSpan.textContent = data.reactions;
-                    icon.classList.remove('fa-solid', 'fa-regular');
-                    if (data.userReacted) {
-                        icon.classList.add('fa-solid');
-                    } else {
-                        icon.classList.add('fa-regular');
+                    body: JSON.stringify({ dishId: currentDishId, reactionType: reactionType })
+                })
+                .then(res => {
+                    if (res.redirected) {
+                        // Handle redirect to login
+                        window.location.href = res.url;
+                        return;
                     }
-                }
+                    if (!res.ok) {
+                        return res.json().then(errorData => {
+                            throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
+                        }).catch(() => {
+                            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                        });
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data) { // Only process if we got data (not redirected)
+                        // Update reaction count display with server response
+                        updateMobileReactionDisplay(data.reactionCounts, data.userReactionType);
+                        
+                        // Update main reaction button icon
+                        updateMobileReactionIcon(data.userReactionType);
+                        
+                        // Update text based on user reaction
+                        if (data.userReactionType) {
+                            mobileReactionText.textContent = getReactionText(data.userReactionType);
+                            mobileReactionText.className = 'font-medium text-base ml-1 ' + getReactionColorClass(data.userReactionType);
+                        } else {
+                            mobileReactionText.textContent = 'React';
+                            mobileReactionText.className = 'font-medium text-base ml-1 text-gray-400';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting reaction:', error);
+                    alert('Failed to submit reaction. Please try again. Error: ' + error.message);
+                });
+
+                // Hide menu after selection
+                mobileReactionMenu.classList.add('hidden');
             });
+        }
+
+        // Helper function for mobile reaction display
+        function updateMobileReactionDisplay(reactionCounts, userReactionType) {
+            if (!mobileReactionDisplay) return;
+            
+            // Clear existing display
+            mobileReactionDisplay.innerHTML = '';
+            
+            // Create emoji container
+            const emojiContainer = document.createElement('div');
+            emojiContainer.className = 'flex items-center space-x-1';
+            
+            // Add reaction emojis side by side
+            if (reactionCounts) {
+                if (reactionCounts.DELICIOUS > 0) {
+                    const deliciousSpan = document.createElement('span');
+                    deliciousSpan.textContent = '😋';
+                    emojiContainer.appendChild(deliciousSpan);
+                }
+                
+                if (reactionCounts.AVERAGE > 0) {
+                    const averageSpan = document.createElement('span');
+                    averageSpan.textContent = '😐';
+                    emojiContainer.appendChild(averageSpan);
+                }
+                
+                if (reactionCounts.BAD > 0) {
+                    const badSpan = document.createElement('span');
+                    badSpan.textContent = '😞';
+                    emojiContainer.appendChild(badSpan);
+                }
+            }
+            
+            // Calculate total reactions
+            const totalReactions = reactionCounts ? 
+                (reactionCounts.DELICIOUS || 0) + (reactionCounts.AVERAGE || 0) + (reactionCounts.BAD || 0) : 0;
+            
+            if (totalReactions > 0) {
+                // Add emoji container
+                mobileReactionDisplay.appendChild(emojiContainer);
+                
+                // Add total count
+                const countSpan = document.createElement('span');
+                countSpan.className = 'text-sm text-gray-600';
+                countSpan.textContent = totalReactions;
+                mobileReactionDisplay.appendChild(countSpan);
+            } else {
+                // Show default state if no reactions
+                const defaultSpan = document.createElement('span');
+                defaultSpan.className = 'text-gray-400';
+                defaultSpan.innerHTML = '<i class="fa-regular fa-smile"></i>';
+                mobileReactionDisplay.appendChild(defaultSpan);
+            }
+        }
+
+        function updateMobileReactionIcon(userReactionType) {
+            if (!mobileReactionIcon) return;
+            
+            // Update the main reaction button icon
+            if (userReactionType) {
+                const emojiMap = {
+                    'DELICIOUS': '😋',
+                    'AVERAGE': '😐',
+                    'BAD': '😞'
+                };
+                mobileReactionIcon.innerHTML = emojiMap[userReactionType] || '😋';
+                mobileReactionIcon.dataset.reactionType = userReactionType;
+            } else {
+                mobileReactionIcon.innerHTML = '<i class="fa-regular fa-smile text-gray-400"></i>';
+                mobileReactionIcon.dataset.reactionType = 'NONE';
+            }
         }
 
         // Mobile comments modal functionality
@@ -667,7 +1058,7 @@
                     var currentUrl = window.location.pathname + window.location.search + window.location.hash;
                     document.cookie = "redirectAfterLogin=" + encodeURIComponent(currentUrl) + "; path=/";
                     window.location.href = '/login';
-                    return false; // Prevent form submission
+                    return false;
                 }
                 
                 const commentInput = this.querySelector('input[name="comment"]');
@@ -782,6 +1173,54 @@
         /* Ensure smooth scrolling is disabled for mobile dish tabs */
         #mobile-dish-tabs {
             scroll-behavior: auto;
+        }
+        
+        /* Facebook-style reaction system */
+        .reaction-option {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .reaction-option:hover {
+            transform: scale(1.25);
+            z-index: 10;
+        }
+        
+        .reaction-option span {
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+        
+        .reaction-option:hover span {
+            animation: bounce 0.3s ease;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-2px); }
+        }
+        
+        /* Reaction menu positioning and visibility */
+        #reaction-menu, #mobile-reaction-menu {
+            opacity: 0;
+            transform: scale(0.8) translateY(10px);
+            transition: all 0.2s ease;
+            pointer-events: none;
+        }
+        
+        #reaction-menu:not(.hidden), #mobile-reaction-menu:not(.hidden) {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
+        
+        /* Reaction icon animations */
+        #reaction-icon, #mobile-reaction-icon {
+            transition: all 0.2s ease;
+        }
+        
+        #reaction-icon:hover, #mobile-reaction-icon:hover {
+            transform: scale(1.1);
         }
         
         /* Mobile responsive adjustments */
