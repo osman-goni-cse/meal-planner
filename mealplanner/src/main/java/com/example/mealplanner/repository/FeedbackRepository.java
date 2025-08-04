@@ -19,48 +19,58 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     // Efficiently count feedbacks (comments) for a given dish
     long countByDishId(Long dishId);
 
-    @Query("SELECT f.dishId, d.name, d.imageUrl, COUNT(f.id) as commentsCount " +
-           "FROM Feedback f JOIN Dish d ON f.dishId = d.id " +
-           "GROUP BY f.dishId, d.name, d.imageUrl " +
-           "ORDER BY commentsCount DESC")
-    List<Object[]> findDishCommentStats(Pageable pageable);
+    // Queries that include dishes with either comments OR reactions
+    @Query(value = "SELECT DISTINCT d.id as dishId, d.name, d.image_url as imageUrl, " +
+           "COALESCE(commentCount.count, 0) as commentsCount " +
+           "FROM dishes d " +
+           "LEFT JOIN (SELECT dish_id, COUNT(*) as count FROM feedback GROUP BY dish_id) commentCount ON d.id = commentCount.dish_id " +
+           "LEFT JOIN (SELECT dish_id, COUNT(*) as count FROM dish_reactions GROUP BY dish_id) reactionCount ON d.id = reactionCount.dish_id " +
+           "WHERE (commentCount.count > 0 OR reactionCount.count > 0) " +
+           "ORDER BY commentsCount DESC", nativeQuery = true)
+    List<Object[]> findDishesWithCommentsOrReactions(Pageable pageable);
 
-    @Query("SELECT f.dishId, d.name, d.imageUrl, COUNT(f.id) as commentsCount " +
-           "FROM Feedback f JOIN Dish d ON f.dishId = d.id " +
-           "WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-           "GROUP BY f.dishId, d.name, d.imageUrl " +
-           "ORDER BY commentsCount DESC")
-    List<Object[]> findDishCommentStatsBySearch(String searchTerm, Pageable pageable);
+    @Query(value = "SELECT DISTINCT d.id as dishId, d.name, d.image_url as imageUrl, " +
+           "COALESCE(commentCount.count, 0) as commentsCount " +
+           "FROM dishes d " +
+           "LEFT JOIN (SELECT dish_id, COUNT(*) as count FROM feedback GROUP BY dish_id) commentCount ON d.id = commentCount.dish_id " +
+           "LEFT JOIN (SELECT dish_id, COUNT(*) as count FROM dish_reactions GROUP BY dish_id) reactionCount ON d.id = reactionCount.dish_id " +
+           "WHERE (commentCount.count > 0 OR reactionCount.count > 0) " +
+           "AND LOWER(d.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+           "ORDER BY commentsCount DESC", nativeQuery = true)
+    List<Object[]> findDishesWithCommentsOrReactionsBySearch(@Param("searchTerm") String searchTerm, Pageable pageable);
 
-    @Query("SELECT f.dishId, d.name, d.imageUrl, COUNT(f.id) as commentsCount " +
-           "FROM Feedback f JOIN Dish d ON f.dishId = d.id " +
-           "GROUP BY f.dishId, d.name, d.imageUrl " +
-           "ORDER BY commentsCount DESC")
-    List<Object[]> findDishCommentStatsByComments(Pageable pageable);
+    @Query(value = "SELECT DISTINCT d.id as dishId, d.name, d.image_url as imageUrl, " +
+           "COALESCE(commentCount.count, 0) as commentsCount, " +
+           "(COALESCE(commentCount.count, 0) + COALESCE(reactionCount.count, 0)) as totalActivity " +
+           "FROM dishes d " +
+           "LEFT JOIN (SELECT dish_id, COUNT(*) as count FROM feedback GROUP BY dish_id) commentCount ON d.id = commentCount.dish_id " +
+           "LEFT JOIN (SELECT dish_id, COUNT(*) as count FROM dish_reactions GROUP BY dish_id) reactionCount ON d.id = reactionCount.dish_id " +
+           "WHERE (commentCount.count > 0 OR reactionCount.count > 0) " +
+           "ORDER BY totalActivity DESC", nativeQuery = true)
+    List<Object[]> findDishesWithCommentsOrReactionsByTotalActivity(Pageable pageable);
 
-    @Query("SELECT f.dishId, d.name, d.imageUrl, COUNT(f.id) as commentsCount " +
-           "FROM Feedback f JOIN Dish d ON f.dishId = d.id " +
-           "WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-           "GROUP BY f.dishId, d.name, d.imageUrl " +
-           "ORDER BY commentsCount DESC")
-    List<Object[]> findDishCommentStatsBySearchAndComments(String searchTerm, Pageable pageable);
+    @Query(value = "SELECT DISTINCT d.id as dishId, d.name, d.image_url as imageUrl, " +
+           "COALESCE(commentCount.count, 0) as commentsCount, " +
+           "(COALESCE(commentCount.count, 0) + COALESCE(reactionCount.count, 0)) as totalActivity " +
+           "FROM dishes d " +
+           "LEFT JOIN (SELECT dish_id, COUNT(*) as count FROM feedback GROUP BY dish_id) commentCount ON d.id = commentCount.dish_id " +
+           "LEFT JOIN (SELECT dish_id, COUNT(*) as count FROM dish_reactions GROUP BY dish_id) reactionCount ON d.id = reactionCount.dish_id " +
+           "WHERE (commentCount.count > 0 OR reactionCount.count > 0) " +
+           "AND LOWER(d.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
+           "ORDER BY totalActivity DESC", nativeQuery = true)
+    List<Object[]> findDishesWithCommentsOrReactionsByTotalActivityAndSearch(@Param("searchTerm") String searchTerm, Pageable pageable);
 
-    @Query("SELECT f.dishId, d.name, d.imageUrl, COUNT(f.id) as commentsCount " +
-           "FROM Feedback f JOIN Dish d ON f.dishId = d.id " +
-           "GROUP BY f.dishId, d.name, d.imageUrl " +
-           "ORDER BY commentsCount DESC")
-    List<Object[]> findDishCommentStatsByReactions(Pageable pageable);
+    // Count queries for dishes with comments OR reactions
+    @Query(value = "SELECT COUNT(DISTINCT d.id) FROM dishes d " +
+           "LEFT JOIN (SELECT dish_id, COUNT(*) as count FROM feedback GROUP BY dish_id) commentCount ON d.id = commentCount.dish_id " +
+           "LEFT JOIN (SELECT dish_id, COUNT(*) as count FROM dish_reactions GROUP BY dish_id) reactionCount ON d.id = reactionCount.dish_id " +
+           "WHERE (commentCount.count > 0 OR reactionCount.count > 0)", nativeQuery = true)
+    long countDishesWithCommentsOrReactions();
 
-    @Query("SELECT f.dishId, d.name, d.imageUrl, COUNT(f.id) as commentsCount " +
-           "FROM Feedback f JOIN Dish d ON f.dishId = d.id " +
-           "WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) " +
-           "GROUP BY f.dishId, d.name, d.imageUrl " +
-           "ORDER BY commentsCount DESC")
-    List<Object[]> findDishCommentStatsBySearchAndReactions(String searchTerm, Pageable pageable);
-
-    @Query("SELECT COUNT(DISTINCT f.dishId) FROM Feedback f JOIN Dish d ON f.dishId = d.id")
-    long countDishStats();
-
-    @Query("SELECT COUNT(DISTINCT f.dishId) FROM Feedback f JOIN Dish d ON f.dishId = d.id WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))")
-    long countDishStatsBySearch(@Param("searchTerm") String searchTerm);
+    @Query(value = "SELECT COUNT(DISTINCT d.id) FROM dishes d " +
+           "LEFT JOIN (SELECT dish_id, COUNT(*) as count FROM feedback GROUP BY dish_id) commentCount ON d.id = commentCount.dish_id " +
+           "LEFT JOIN (SELECT dish_id, COUNT(*) as count FROM dish_reactions GROUP BY dish_id) reactionCount ON d.id = reactionCount.dish_id " +
+           "WHERE (commentCount.count > 0 OR reactionCount.count > 0) " +
+           "AND LOWER(d.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))", nativeQuery = true)
+    long countDishesWithCommentsOrReactionsBySearch(@Param("searchTerm") String searchTerm);
 } 

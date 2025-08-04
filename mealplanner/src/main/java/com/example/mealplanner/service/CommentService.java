@@ -33,7 +33,7 @@ public class CommentService {
     private DishReactionService dishReactionService;
 
     public List<DishCommentStatsDTO> getMostCommentedDishes(int limit) {
-        List<Object[]> results = feedbackRepository.findDishCommentStats(PageRequest.of(0, limit));
+        List<Object[]> results = feedbackRepository.findDishesWithCommentsOrReactions(PageRequest.of(0, limit));
         List<DishCommentStatsDTO> dtos = new ArrayList<>();
         for (Object[] row : results) {
             DishCommentStatsDTO dto = new DishCommentStatsDTO();
@@ -53,18 +53,18 @@ public class CommentService {
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
             // Search with filtering
             if ("most-liked".equals(sortBy)) {
-                results = feedbackRepository.findDishCommentStatsBySearchAndReactions(searchTerm.trim(), PageRequest.of(0, limit));
+                results = feedbackRepository.findDishesWithCommentsOrReactionsByTotalActivityAndSearch(searchTerm.trim(), PageRequest.of(0, limit));
             } else {
                 // Default to most comments
-                results = feedbackRepository.findDishCommentStatsBySearchAndComments(searchTerm.trim(), PageRequest.of(0, limit));
+                results = feedbackRepository.findDishesWithCommentsOrReactionsBySearch(searchTerm.trim(), PageRequest.of(0, limit));
             }
         } else {
             // No search term
             if ("most-liked".equals(sortBy)) {
-                results = feedbackRepository.findDishCommentStatsByReactions(PageRequest.of(0, limit));
+                results = feedbackRepository.findDishesWithCommentsOrReactionsByTotalActivity(PageRequest.of(0, limit));
             } else {
                 // Default to most comments
-                results = feedbackRepository.findDishCommentStatsByComments(PageRequest.of(0, limit));
+                results = feedbackRepository.findDishesWithCommentsOrReactions(PageRequest.of(0, limit));
             }
         }
         
@@ -93,9 +93,17 @@ public class CommentService {
         List<DishCommentStatsDTO> dtos = new ArrayList<>();
 
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-            results = feedbackRepository.findDishCommentStatsBySearchAndComments(searchTerm.trim(), Pageable.unpaged());
+            if ("most-liked".equals(sortBy)) {
+                results = feedbackRepository.findDishesWithCommentsOrReactionsByTotalActivityAndSearch(searchTerm.trim(), Pageable.unpaged());
+            } else {
+                results = feedbackRepository.findDishesWithCommentsOrReactionsBySearch(searchTerm.trim(), Pageable.unpaged());
+            }
         } else {
-            results = feedbackRepository.findDishCommentStatsByComments(Pageable.unpaged());
+            if ("most-liked".equals(sortBy)) {
+                results = feedbackRepository.findDishesWithCommentsOrReactionsByTotalActivity(Pageable.unpaged());
+            } else {
+                results = feedbackRepository.findDishesWithCommentsOrReactions(Pageable.unpaged());
+            }
         }
 
         for (Object[] row : results) {
@@ -125,6 +133,14 @@ public class CommentService {
         return feedbackRepository.findAll().size();
     }
 
+    public long getDishCountWithCommentsOrReactions() {
+        return feedbackRepository.countDishesWithCommentsOrReactions();
+    }
+
+    public long getDishCountWithCommentsOrReactionsBySearch(String searchTerm) {
+        return feedbackRepository.countDishesWithCommentsOrReactionsBySearch(searchTerm);
+    }
+
     public DishDetailsDTO getDishDetailsWithComments(Long dishId) {
         Dish dish = dishRepository.findById(dishId).orElseThrow();
         List<Feedback> feedbacks = feedbackRepository.findAll().stream()
@@ -147,6 +163,8 @@ public class CommentService {
         // Add reactions and commentsCount for modal
         dto.setReactions(dishReactionService.getReactions(dishId));
         dto.setCommentsCount(comments.size());
+        // Add reaction counts for pie chart
+        dto.setReactionCounts(dishReactionService.getAllReactionCounts(dishId));
         return dto;
     }
 

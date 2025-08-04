@@ -24,7 +24,7 @@
                         <div class="relative w-full md:w-auto">
                             <select id="sort-select" name="sort" class="w-full md:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none pr-10">
                                 <option value="most-comments" th:selected="${sortBy == 'most-comments'}">Most Comments</option>
-                                <option value="most-liked" th:selected="${sortBy == 'most-liked'}">Most Loved</option>
+                                <option value="most-liked" th:selected="${sortBy == 'most-liked'}">Most Reacted</option>
                             </select>
                             <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                                 <i class="fa-solid fa-chevron-down text-gray-400"></i>
@@ -36,9 +36,9 @@
             <!-- Most Commented Dishes -->
             <div class="bg-white rounded-lg shadow-sm mb-8" id="top-dishes-section">
                 <div class="p-4 md:p-6 border-b border-gray-200 flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
-                    <h3 class="text-lg font-semibold text-gray-800 hidden md:block" id="section-title">Most Commented Dishes</h3>
+                    <h3 class="text-lg font-semibold text-gray-800 hidden md:block" id="section-title">Dishes with Comments or Reactions</h3>
                     <div class="flex flex-row items-center gap-2 text-sm text-gray-600 w-full md:w-auto flex-wrap justify-between">
-                        <span id="dish-count-display" class="text-xs md:text-sm text-gray-500" th:text="'Showing ' + (${currentPage * pageSize + 1}) + '-' + (${currentPage * pageSize + mostCommentedDishes.size()}) + ' of ' + ${dishesPage.totalElements} + ' dishes'"></span>
+                        <span id="dish-count-display" class="text-xs md:text-sm text-gray-500" th:text="'Showing ' + (${currentPage * pageSize + 1}) + '-' + (${currentPage * pageSize + mostCommentedDishes.size()}) + ' of ' + ${totalDishes} + ' dishes'"></span>
                         <!-- Pagination: Show on all screens, compact and scrollable on mobile -->
                         <nav class="flex items-center gap-1 overflow-x-auto" aria-label="Pagination" th:if="${dishesPage.totalPages > 1}">
                             <a th:href="@{/review-comments(page=${currentPage-1},size=${pageSize},search=${searchTerm},sort=${sortBy})}"
@@ -101,6 +101,8 @@
         <div th:replace="fragments/layout :: footer"></div>
     </div>
     <footer th:replace="fragments/layout :: footer-scripts"></footer>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Modal HTML (dynamic, hidden by default) -->
     <div id="dish-modal" style="display:none;" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30 overflow-y-auto">
         <div class="flex flex-col w-full max-w-4xl md:h-[550px] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden max-h-[90vh] md:max-h-none my-6">
@@ -112,12 +114,26 @@
             </div>
             <div class="flex flex-grow overflow-hidden flex-col md:flex-row">
                 <div class="w-full md:w-3/5 p-6 flex flex-col">
-                    <div id="dish-image-wrapper" class="w-full h-40 md:h-3/5 bg-gray-200 rounded-lg overflow-hidden mb-6">
-                        <img class="w-full h-full object-cover" src="" alt="Dish image">
-                    </div>
-                    <div>
-                        <h1 id="dish-title" class="text-2xl md:text-4xl font-bold text-brand-gray-900 mb-2"></h1>
-                        <p id="dish-description" class="text-brand-gray-500 text-base leading-relaxed"></p>
+                    <!-- Pie Chart Section -->
+                    <div class="flex-grow flex flex-col items-center justify-center">
+                        <h3 id="dish-title" class="text-xl md:text-2xl font-bold text-brand-gray-900 mb-4 text-center"></h3>
+                        <div class="relative w-full max-w-sm h-64 mb-4 flex items-center justify-center">
+                            <canvas id="reaction-chart" width="300" height="300" style="max-width: 100%; max-height: 100%;"></canvas>
+                            <!-- Fallback message when no data -->
+                            <div id="no-reactions-message" class="hidden text-center text-gray-500">
+                                <div class="text-6xl mb-4">📊</div>
+                                <p class="text-lg font-medium">No Reactions Yet</p>
+                                <p class="text-sm">This dish hasn't received any reactions yet.</p>
+                            </div>
+                        </div>
+                        <!-- Legend -->
+                        <div id="chart-legend" class="flex flex-wrap justify-center gap-4 text-sm">
+                            <!-- Legend items will be populated by JavaScript -->
+                        </div>
+                        <!-- Statistics Summary -->
+                        <div id="stats-summary" class="mt-4 text-center text-gray-600">
+                            <!-- Summary will be populated by JavaScript -->
+                        </div>
                     </div>
                 </div>
                 <div class="w-full md:w-2/5 border-t md:border-t-0 md:border-l border-gray-200 flex flex-col">
@@ -147,6 +163,7 @@
     let currentDishId = null;
     let currentPage = 0;
     const pageSize = 5;
+    let reactionChart = null; // Global variable to store chart instance
     // --- Removed all client-side search/filter JS ---
     // Keep only modal and comment loading JS below
 
@@ -156,15 +173,190 @@
         // Fetch dish details (name, desc, image)
         const response = await fetch(`/review-comments/dish/${currentDishId}`);
         const data = await response.json();
+        
+        console.log('Dish data received:', data); // Debug log
+        
+        // Set dish title
         document.getElementById('dish-title').textContent = data.name;
+        
         // Set like and comment counts in modal
         document.getElementById('modal-reaction-count').textContent = data.reactions ?? 0;
         document.getElementById('modal-comments-count').textContent = data.commentsCount ?? (data.comments ? data.comments.length : 0);
-        document.getElementById('dish-description').textContent = data.description;
-        document.querySelector('#dish-image-wrapper img').src = data.imageUrl;
+        
+        // Show modal first, then create chart
+        document.getElementById('dish-modal').style.display = 'flex';
+        
+        // Wait a bit for the modal to render, then create chart
+        setTimeout(() => {
+            createReactionChart(data.reactionCounts);
+        }, 100);
+        
         // Load first page of comments
         loadComments(true);
-        document.getElementById('dish-modal').style.display = 'flex';
+    }
+
+    function createReactionChart(reactionCounts) {
+        console.log('Creating chart with reaction counts:', reactionCounts); // Debug log
+        
+        // Destroy existing chart if it exists
+        if (reactionChart) {
+            reactionChart.destroy();
+        }
+
+        // Check if canvas exists
+        const canvas = document.getElementById('reaction-chart');
+        const noReactionsMessage = document.getElementById('no-reactions-message');
+        
+        if (!canvas) {
+            console.error('Canvas element not found!');
+            return;
+        }
+
+        // Prepare data for chart
+        const deliciousCount = reactionCounts?.DELICIOUS || 0;
+        const averageCount = reactionCounts?.AVERAGE || 0;
+        const badCount = reactionCounts?.BAD || 0;
+        const totalReactions = deliciousCount + averageCount + badCount;
+        
+        console.log('Chart data:', { deliciousCount, averageCount, badCount, totalReactions }); // Debug log
+
+        // Check if there are any reactions
+        if (totalReactions === 0) {
+            // Hide canvas and show no reactions message
+            canvas.style.display = 'none';
+            noReactionsMessage.classList.remove('hidden');
+            createCustomLegend(reactionCounts);
+            createStatsSummary(reactionCounts);
+            return;
+        }
+
+        // Show canvas and hide no reactions message
+        canvas.style.display = 'block';
+        noReactionsMessage.classList.add('hidden');
+
+        const chartData = {
+            labels: ['😋 Delicious', '😐 Average', '😞 Bad'],
+            datasets: [{
+                data: [deliciousCount, averageCount, badCount],
+                backgroundColor: [
+                    '#10B981', // Green for delicious
+                    '#F59E0B', // Yellow for average
+                    '#EF4444'  // Red for bad
+                ],
+                borderColor: [
+                    '#059669',
+                    '#D97706',
+                    '#DC2626'
+                ],
+                borderWidth: 2
+            }]
+        };
+
+        try {
+            // Create chart
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Could not get 2D context from canvas');
+                return;
+            }
+            
+            reactionChart = new Chart(ctx, {
+                type: 'pie',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false // We'll create custom legend
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                                    return `${context.label}: ${context.parsed} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            console.log('Chart created successfully'); // Debug log
+            
+            // Create custom legend
+            createCustomLegend(reactionCounts);
+            
+            // Create statistics summary
+            createStatsSummary(reactionCounts);
+            
+        } catch (error) {
+            console.error('Error creating chart:', error);
+            // Show fallback content
+            canvas.style.display = 'none';
+            noReactionsMessage.classList.remove('hidden');
+            document.getElementById('chart-legend').innerHTML = '<p class="text-red-500">Error loading chart</p>';
+        }
+    }
+
+    function createCustomLegend(reactionCounts) {
+        const legendContainer = document.getElementById('chart-legend');
+        legendContainer.innerHTML = '';
+        
+        const reactions = [
+            { type: 'DELICIOUS', emoji: '😋', label: 'Delicious', color: '#10B981' },
+            { type: 'AVERAGE', emoji: '😐', label: 'Average', color: '#F59E0B' },
+            { type: 'BAD', emoji: '😞', label: 'Bad', color: '#EF4444' }
+        ];
+
+        let hasAnyReactions = false;
+        reactions.forEach(reaction => {
+            const count = reactionCounts?.[reaction.type] || 0;
+            if (count > 0) {
+                hasAnyReactions = true;
+                const legendItem = document.createElement('div');
+                legendItem.className = 'flex items-center space-x-2';
+                legendItem.innerHTML = `
+                    <div class="w-3 h-3 rounded-full" style="background-color: ${reaction.color}"></div>
+                    <span class="text-lg">${reaction.emoji}</span>
+                    <span class="font-medium">${reaction.label}</span>
+                    <span class="text-gray-500">(${count})</span>
+                `;
+                legendContainer.appendChild(legendItem);
+            }
+        });
+
+        if (!hasAnyReactions) {
+            legendContainer.innerHTML = '<p class="text-gray-500 text-sm">No reactions available</p>';
+        }
+    }
+
+    function createStatsSummary(reactionCounts) {
+        const summaryContainer = document.getElementById('stats-summary');
+        const total = Object.values(reactionCounts || {}).reduce((sum, count) => sum + count, 0);
+        
+        if (total === 0) {
+            summaryContainer.innerHTML = '<p class="text-gray-500 text-sm">No reactions yet</p>';
+            return;
+        }
+
+        const delicious = reactionCounts?.DELICIOUS || 0;
+        const average = reactionCounts?.AVERAGE || 0;
+        const bad = reactionCounts?.BAD || 0;
+        
+        const deliciousPercent = total > 0 ? ((delicious / total) * 100).toFixed(1) : 0;
+        const averagePercent = total > 0 ? ((average / total) * 100).toFixed(1) : 0;
+        const badPercent = total > 0 ? ((bad / total) * 100).toFixed(1) : 0;
+
+        summaryContainer.innerHTML = `
+            <p class="text-sm text-gray-600 mb-2">Total Reactions: <span class="font-semibold">${total}</span></p>
+            <div class="flex justify-center space-x-4 text-xs">
+                <span class="text-green-600">😋 ${deliciousPercent}%</span>
+                <span class="text-yellow-600">😐 ${averagePercent}%</span>
+                <span class="text-red-600">😞 ${badPercent}%</span>
+            </div>
+        `;
     }
 
     async function loadComments(reset = false) {
@@ -203,11 +395,21 @@
 
     document.getElementById('close-modal-btn').onclick = function() {
         document.getElementById('dish-modal').style.display = 'none';
+        // Destroy chart when modal is closed
+        if (reactionChart) {
+            reactionChart.destroy();
+            reactionChart = null;
+        }
     };
     window.onclick = function(event) {
         const modal = document.getElementById('dish-modal');
         if (event.target === modal) {
             modal.style.display = 'none';
+            // Destroy chart when modal is closed
+            if (reactionChart) {
+                reactionChart.destroy();
+                reactionChart = null;
+            }
         }
     };
     // --- Instant search/sort and clear button logic ---

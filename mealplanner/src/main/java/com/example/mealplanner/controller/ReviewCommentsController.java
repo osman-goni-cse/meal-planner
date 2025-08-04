@@ -37,7 +37,12 @@ public class ReviewCommentsController {
         model.addAttribute("mostCommentedDishes", pagedDishes.getContent());
         model.addAttribute("dishesPage", pagedDishes);
         model.addAttribute("currentPath", request.getRequestURI());
-        model.addAttribute("pageTitle", "Review Comments");
+        model.addAttribute("pageTitle", "Review Feedbacks");
+        // Use new count method that includes dishes with comments OR reactions
+        long totalDishes = searchTerm != null && !searchTerm.trim().isEmpty() 
+            ? commentService.getDishCountWithCommentsOrReactionsBySearch(searchTerm.trim())
+            : commentService.getDishCountWithCommentsOrReactions();
+        model.addAttribute("totalDishes", totalDishes);
         model.addAttribute("commentCount", commentService.getCommentCount());
         model.addAttribute("searchTerm", searchTerm);
         model.addAttribute("sortBy", sortBy);
