@@ -253,15 +253,15 @@
                                                 <span id="reaction-icon" class="text-lg transition-all duration-200" 
                                                       data-reaction-type="NONE"
                                                       th:data-reaction-type="${selectedDish != null && selectedDish.userReactionType != null ? selectedDish.userReactionType : 'NONE'}">
-                                                    <i th:if="${selectedDish == null || selectedDish.userReactionType == null}" class="fa-regular fa-smile text-gray-400"></i>
+                                                    <img th:if="${selectedDish == null || selectedDish.userReactionType == null}" src="/images/delicious-emoji.png" alt="Delicious" class="w-5 h-5">
                                                     <span th:if="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS'}">😋</span>
                                                     <span th:if="${selectedDish != null && selectedDish.userReactionType == 'AVERAGE'}">😐</span>
                                                     <span th:if="${selectedDish != null && selectedDish.userReactionType == 'BAD'}">😞</span>
                                                 </span>
                                                 <span id="reaction-text" class="font-medium text-sm ml-1"
-                                                      th:text="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'Delicious' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'Average' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'Bad' : 'React'))}"
-                                                      th:classappend="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'text-green-600' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'text-yellow-600' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'text-red-600' : 'text-gray-400'))}">
-                                                    React
+                                                      th:text="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'Delicious' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'Average' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'Bad' : 'Delicious'))}"
+                                                      th:classappend="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'text-green-600' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'text-yellow-600' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'text-red-600' : 'text-gray-600'))}">
+                                                    Delicious
                                                 </span>
                                             </div>
                                         </button>
@@ -360,15 +360,15 @@
                                         <span id="mobile-reaction-icon" class="text-xl transition-all duration-200" 
                                               data-reaction-type="NONE"
                                               th:data-reaction-type="${selectedDish != null && selectedDish.userReactionType != null ? selectedDish.userReactionType : 'NONE'}">
-                                            <i th:if="${selectedDish == null || selectedDish.userReactionType == null}" class="fa-regular fa-smile text-gray-400"></i>
+                                            <img th:if="${selectedDish == null || selectedDish.userReactionType == null}" src="/images/delicious-emoji.png" alt="Delicious" class="w-6 h-6">
                                             <span th:if="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS'}">😋</span>
                                             <span th:if="${selectedDish != null && selectedDish.userReactionType == 'AVERAGE'}">😐</span>
                                             <span th:if="${selectedDish != null && selectedDish.userReactionType == 'BAD'}">😞</span>
                                         </span>
                                         <span id="mobile-reaction-text" class="font-medium text-base ml-1"
-                                              th:text="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'Delicious' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'Average' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'Bad' : 'React'))}"
-                                              th:classappend="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'text-green-600' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'text-yellow-600' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'text-red-600' : 'text-gray-400'))}">
-                                            React
+                                              th:text="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'Delicious' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'Average' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'Bad' : 'Delicious'))}"
+                                              th:classappend="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'text-green-600' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'text-yellow-600' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'text-red-600' : 'text-gray-600'))}">
+                                            Delicious
                                         </span>
                                     </div>
                                 </button>
@@ -677,6 +677,112 @@
                 reactionMenu.classList.add('hidden');
             });
 
+            // Handle direct click on main reaction button
+            reactionBtn.addEventListener('click', function(e) {
+                // Check if user is authenticated first
+                const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
+                if (!isAuthenticated) {
+                    // Save current URL in a cookie and redirect to login
+                    var currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                    document.cookie = "redirectAfterLogin=" + encodeURIComponent(currentUrl) + "; path=/";
+                    window.location.href = '/login';
+                    return;
+                }
+
+                const currentReactionType = reactionIcon.dataset.reactionType;
+                
+                // If no reaction is selected, set Delicious reaction
+                if (currentReactionType === 'NONE' || currentReactionType === null) {
+                    // Send request to set Delicious reaction
+                    fetch('/api/reactions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ dishId: currentDishId, reactionType: 'DELICIOUS' })
+                    })
+                    .then(res => {
+                        if (res.redirected) {
+                            // Handle redirect to login
+                            window.location.href = res.url;
+                            return;
+                        }
+                        if (!res.ok) {
+                            return res.json().then(errorData => {
+                                throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
+                            }).catch(() => {
+                                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                            });
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data) { // Only process if we got data (not redirected)
+                            // Update reaction count display with server response
+                            updateReactionDisplay(data.reactionCounts, data.userReactionType);
+                            
+                            // Update main reaction button icon
+                            updateReactionIcon(data.userReactionType);
+                            
+                            // Update text based on user reaction
+                            if (data.userReactionType) {
+                                reactionText.textContent = getReactionText(data.userReactionType);
+                                reactionText.className = 'font-medium text-sm ml-1 ' + getReactionColorClass(data.userReactionType);
+                            } else {
+                                reactionText.textContent = 'Delicious';
+                                reactionText.className = 'font-medium text-sm ml-1 text-gray-600';
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error submitting reaction:', error);
+                        alert('Failed to submit reaction. Please try again. Error: ' + error.message);
+                    });
+                } else {
+                    // If reaction is already selected, remove it by sending the same reaction type
+                    fetch('/api/reactions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ dishId: currentDishId, reactionType: currentReactionType })
+                    })
+                    .then(res => {
+                        if (res.redirected) {
+                            // Handle redirect to login
+                            window.location.href = res.url;
+                            return;
+                        }
+                        if (!res.ok) {
+                            return res.json().then(errorData => {
+                                throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
+                            }).catch(() => {
+                                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                            });
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data) { // Only process if we got data (not redirected)
+                            // Update reaction count display with server response
+                            updateReactionDisplay(data.reactionCounts, data.userReactionType);
+                            
+                            // Update main reaction button icon
+                            updateReactionIcon(data.userReactionType);
+                            
+                            // Update text based on user reaction
+                            if (data.userReactionType) {
+                                reactionText.textContent = getReactionText(data.userReactionType);
+                                reactionText.className = 'font-medium text-sm ml-1 ' + getReactionColorClass(data.userReactionType);
+                            } else {
+                                reactionText.textContent = 'Delicious';
+                                reactionText.className = 'font-medium text-sm ml-1 text-gray-600';
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error removing reaction:', error);
+                        alert('Failed to remove reaction. Please try again. Error: ' + error.message);
+                    });
+                }
+            });
+
             // Handle reaction option clicks directly
             reactionMenu.addEventListener('click', function(e) {
                 const reactionOption = e.target.closest('.reaction-option');
@@ -731,8 +837,8 @@
                             reactionText.textContent = getReactionText(data.userReactionType);
                             reactionText.className = 'font-medium text-sm ml-1 ' + getReactionColorClass(data.userReactionType);
                         } else {
-                            reactionText.textContent = 'React';
-                            reactionText.className = 'font-medium text-sm ml-1 text-gray-400';
+                            reactionText.textContent = 'Delicious';
+                            reactionText.className = 'font-medium text-sm ml-1 text-gray-600';
                         }
                     }
                 })
@@ -813,7 +919,7 @@
                 reactionIcon.innerHTML = emojiMap[userReactionType] || '😋';
                 reactionIcon.dataset.reactionType = userReactionType;
             } else {
-                reactionIcon.innerHTML = '<i class="fa-regular fa-smile text-gray-400"></i>';
+                reactionIcon.innerHTML = '<img src="/images/delicious-emoji.png" alt="Delicious" class="w-5 h-5">';
                 reactionIcon.dataset.reactionType = 'NONE';
             }
         }
@@ -824,7 +930,7 @@
                 'AVERAGE': 'Average',
                 'BAD': 'Bad'
             };
-            return textMap[reactionType] || 'React';
+            return textMap[reactionType] || 'Delicious';
         }
 
         function getReactionColorClass(reactionType) {
@@ -878,6 +984,112 @@
             // Hide menu when leaving the menu
             mobileReactionMenu.addEventListener('mouseleave', function() {
                 mobileReactionMenu.classList.add('hidden');
+            });
+
+            // Handle direct click on mobile reaction button
+            mobileReactionBtn.addEventListener('click', function(e) {
+                // Check if user is authenticated first
+                const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
+                if (!isAuthenticated) {
+                    // Save current URL in a cookie and redirect to login
+                    var currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                    document.cookie = "redirectAfterLogin=" + encodeURIComponent(currentUrl) + "; path=/";
+                    window.location.href = '/login';
+                    return;
+                }
+
+                const currentReactionType = mobileReactionIcon.dataset.reactionType;
+                
+                // If no reaction is selected, set Delicious reaction
+                if (currentReactionType === 'NONE' || currentReactionType === null) {
+                    // Send request to set Delicious reaction
+                    fetch('/api/reactions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ dishId: currentDishId, reactionType: 'DELICIOUS' })
+                    })
+                    .then(res => {
+                        if (res.redirected) {
+                            // Handle redirect to login
+                            window.location.href = res.url;
+                            return;
+                        }
+                        if (!res.ok) {
+                            return res.json().then(errorData => {
+                                throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
+                            }).catch(() => {
+                                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                            });
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data) { // Only process if we got data (not redirected)
+                            // Update reaction count display with server response
+                            updateMobileReactionDisplay(data.reactionCounts, data.userReactionType);
+                            
+                            // Update main reaction button icon
+                            updateMobileReactionIcon(data.userReactionType);
+                            
+                            // Update text based on user reaction
+                            if (data.userReactionType) {
+                                mobileReactionText.textContent = getReactionText(data.userReactionType);
+                                mobileReactionText.className = 'font-medium text-base ml-1 ' + getReactionColorClass(data.userReactionType);
+                            } else {
+                                mobileReactionText.textContent = 'Delicious';
+                                mobileReactionText.className = 'font-medium text-base ml-1 text-gray-600';
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error submitting reaction:', error);
+                        alert('Failed to submit reaction. Please try again. Error: ' + error.message);
+                    });
+                } else {
+                    // If reaction is already selected, remove it by sending the same reaction type
+                    fetch('/api/reactions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ dishId: currentDishId, reactionType: currentReactionType })
+                    })
+                    .then(res => {
+                        if (res.redirected) {
+                            // Handle redirect to login
+                            window.location.href = res.url;
+                            return;
+                        }
+                        if (!res.ok) {
+                            return res.json().then(errorData => {
+                                throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
+                            }).catch(() => {
+                                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                            });
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data) { // Only process if we got data (not redirected)
+                            // Update reaction count display with server response
+                            updateMobileReactionDisplay(data.reactionCounts, data.userReactionType);
+                            
+                            // Update main reaction button icon
+                            updateMobileReactionIcon(data.userReactionType);
+                            
+                            // Update text based on user reaction
+                            if (data.userReactionType) {
+                                mobileReactionText.textContent = getReactionText(data.userReactionType);
+                                mobileReactionText.className = 'font-medium text-base ml-1 ' + getReactionColorClass(data.userReactionType);
+                            } else {
+                                mobileReactionText.textContent = 'Delicious';
+                                mobileReactionText.className = 'font-medium text-base ml-1 text-gray-600';
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error removing reaction:', error);
+                        alert('Failed to remove reaction. Please try again. Error: ' + error.message);
+                    });
+                }
             });
 
             // Handle reaction option clicks directly
@@ -934,8 +1146,8 @@
                             mobileReactionText.textContent = getReactionText(data.userReactionType);
                             mobileReactionText.className = 'font-medium text-base ml-1 ' + getReactionColorClass(data.userReactionType);
                         } else {
-                            mobileReactionText.textContent = 'React';
-                            mobileReactionText.className = 'font-medium text-base ml-1 text-gray-400';
+                            mobileReactionText.textContent = 'Delicious';
+                            mobileReactionText.className = 'font-medium text-base ml-1 text-gray-600';
                         }
                     }
                 })
@@ -956,36 +1168,39 @@
             // Clear existing display
             mobileReactionDisplay.innerHTML = '';
             
-            // Create emoji container
-            const emojiContainer = document.createElement('div');
-            emojiContainer.className = 'flex items-center space-x-1';
-            
-            // Add reaction emojis side by side
-            if (reactionCounts) {
-                if (reactionCounts.DELICIOUS > 0) {
-                    const deliciousSpan = document.createElement('span');
-                    deliciousSpan.textContent = '😋';
-                    emojiContainer.appendChild(deliciousSpan);
-                }
-                
-                if (reactionCounts.AVERAGE > 0) {
-                    const averageSpan = document.createElement('span');
-                    averageSpan.textContent = '😐';
-                    emojiContainer.appendChild(averageSpan);
-                }
-                
-                if (reactionCounts.BAD > 0) {
-                    const badSpan = document.createElement('span');
-                    badSpan.textContent = '😞';
-                    emojiContainer.appendChild(badSpan);
-                }
-            }
-            
             // Calculate total reactions
             const totalReactions = reactionCounts ? 
                 (reactionCounts.DELICIOUS || 0) + (reactionCounts.AVERAGE || 0) + (reactionCounts.BAD || 0) : 0;
             
             if (totalReactions > 0) {
+                // Show the reaction count display
+                mobileReactionDisplay.style.display = 'flex';
+                
+                // Create emoji container
+                const emojiContainer = document.createElement('div');
+                emojiContainer.className = 'flex items-center space-x-1';
+                
+                // Add reaction emojis side by side
+                if (reactionCounts) {
+                    if (reactionCounts.DELICIOUS > 0) {
+                        const deliciousSpan = document.createElement('span');
+                        deliciousSpan.textContent = '😋';
+                        emojiContainer.appendChild(deliciousSpan);
+                    }
+                    
+                    if (reactionCounts.AVERAGE > 0) {
+                        const averageSpan = document.createElement('span');
+                        averageSpan.textContent = '😐';
+                        emojiContainer.appendChild(averageSpan);
+                    }
+                    
+                    if (reactionCounts.BAD > 0) {
+                        const badSpan = document.createElement('span');
+                        badSpan.textContent = '😞';
+                        emojiContainer.appendChild(badSpan);
+                    }
+                }
+                
                 // Add emoji container
                 mobileReactionDisplay.appendChild(emojiContainer);
                 
@@ -995,11 +1210,8 @@
                 countSpan.textContent = totalReactions;
                 mobileReactionDisplay.appendChild(countSpan);
             } else {
-                // Show default state if no reactions
-                const defaultSpan = document.createElement('span');
-                defaultSpan.className = 'text-gray-400';
-                defaultSpan.innerHTML = '<i class="fa-regular fa-smile"></i>';
-                mobileReactionDisplay.appendChild(defaultSpan);
+                // Hide the reaction count display when no reactions
+                mobileReactionDisplay.style.display = 'none';
             }
         }
 
@@ -1016,7 +1228,7 @@
                 mobileReactionIcon.innerHTML = emojiMap[userReactionType] || '😋';
                 mobileReactionIcon.dataset.reactionType = userReactionType;
             } else {
-                mobileReactionIcon.innerHTML = '<i class="fa-regular fa-smile text-gray-400"></i>';
+                mobileReactionIcon.innerHTML = '<img src="/images/delicious-emoji.png" alt="Delicious" class="w-5 h-5">';
                 mobileReactionIcon.dataset.reactionType = 'NONE';
             }
         }
