@@ -29,22 +29,8 @@ public class DishReactionService {
     private DishRepository dishRepository;
 
     @Transactional
-    public void toggleReaction(Long userId, Long dishId) {
-        Optional<DishReaction> existingReaction = dishReactionRepository.findByUserIdAndDishId(userId, dishId);
-
-        if (existingReaction.isPresent()) {
-            dishReactionRepository.delete(existingReaction.get()); // Remove reaction
-        } else {
-            User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-            Dish dish = dishRepository.findById(dishId).orElseThrow(() -> new RuntimeException("Dish not found"));
-            DishReaction newReaction = new DishReaction(user, dish, LocalDate.now(), ReactionType.HEART);
-            dishReactionRepository.save(newReaction); // Add reaction
-        }
-    }
-
-    @Transactional
-    public void addOrUpdateReaction(Long userId, Long dishId, ReactionType reactionType) {
-        Optional<DishReaction> existingReaction = dishReactionRepository.findByUserIdAndDishId(userId, dishId);
+    public void addOrUpdateReaction(Long userId, Long dishId, ReactionType reactionType, LocalDate date) {
+        Optional<DishReaction> existingReaction = dishReactionRepository.findByUserIdAndDishIdAndReactionDate(userId, dishId, date);
 
         if (existingReaction.isPresent()) {
             DishReaction reaction = existingReaction.get();
@@ -60,13 +46,34 @@ public class DishReactionService {
             // No existing reaction, create new one
             User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
             Dish dish = dishRepository.findById(dishId).orElseThrow(() -> new RuntimeException("Dish not found"));
-            DishReaction newReaction = new DishReaction(user, dish, LocalDate.now(), reactionType);
+            DishReaction newReaction = new DishReaction(user, dish, date, reactionType);
             dishReactionRepository.save(newReaction);
         }
     }
 
+    public long getReactions(Long dishId, LocalDate date) {
+        return dishReactionRepository.countByDishIdAndReactionDate(dishId, date);
+    }
+
+    public Map<ReactionType, Long> getAllReactionCounts(Long dishId, LocalDate date) {
+        Map<ReactionType, Long> counts = new HashMap<>();
+        for (ReactionType type : ReactionType.values()) {
+            counts.put(type, dishReactionRepository.countByDishIdAndReactionTypeAndReactionDate(dishId, type, date));
+        }
+        return counts;
+    }
+
+    public boolean hasUserReacted(Long userId, Long dishId, LocalDate date) {
+        return dishReactionRepository.findByUserIdAndDishIdAndReactionDate(userId, dishId, date).isPresent();
+    }
+
+    public ReactionType getUserReactionType(Long userId, Long dishId, LocalDate date) {
+        Optional<DishReaction> reaction = dishReactionRepository.findByUserIdAndDishIdAndReactionDate(userId, dishId, date);
+        return reaction.map(DishReaction::getReactionType).orElse(null);
+    }
+
+    // Overloaded methods for backward compatibility (for general statistics without date)
     public long getReactions(Long dishId) {
-        // Count all reaction types, not just HEART
         return dishReactionRepository.countByDishId(dishId);
     }
 
@@ -78,12 +85,5 @@ public class DishReactionService {
         return counts;
     }
 
-    public boolean hasUserReacted(Long userId, Long dishId) {
-        return dishReactionRepository.findByUserIdAndDishId(userId, dishId).isPresent();
-    }
-
-    public ReactionType getUserReactionType(Long userId, Long dishId) {
-        Optional<DishReaction> reaction = dishReactionRepository.findByUserIdAndDishId(userId, dishId);
-        return reaction.map(DishReaction::getReactionType).orElse(null);
-    }
+    
 } 

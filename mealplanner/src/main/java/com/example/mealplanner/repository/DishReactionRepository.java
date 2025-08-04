@@ -11,6 +11,9 @@ import java.util.Optional;
 @Repository
 public interface DishReactionRepository extends JpaRepository<DishReaction, Long> {
     Optional<DishReaction> findByUserIdAndDishId(Long userId, Long dishId);
+    Optional<DishReaction> findByUserIdAndDishIdAndReactionDate(Long userId, Long dishId, LocalDate reactionDate);
+    long countByDishIdAndReactionTypeAndReactionDate(Long dishId, ReactionType reactionType, LocalDate reactionDate);
+    long countByDishIdAndReactionDate(Long dishId, LocalDate reactionDate);
     long countByDishIdAndReactionType(Long dishId, ReactionType reactionType);
     long countByDishId(Long dishId);
 } 

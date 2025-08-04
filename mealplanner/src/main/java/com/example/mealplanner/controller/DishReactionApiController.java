@@ -46,21 +46,10 @@ public class DishReactionApiController {
                 return ResponseEntity.status(401).body("User not found in database");
             }
 
-            // Handle legacy requests (no reactionType specified)
-            if (reactionRequest.getReactionType() == null) {
-                dishReactionService.toggleReaction(user.getId(), reactionRequest.getDishId());
-                long reactions = dishReactionService.getReactions(reactionRequest.getDishId());
-                boolean userReacted = dishReactionService.hasUserReacted(user.getId(), reactionRequest.getDishId());
-                DishReactionResponse response = new DishReactionResponse(reactionRequest.getDishId(), reactions, userReacted);
-                return ResponseEntity.ok(response);
-            }
-
-            // Handle new reaction system
-            dishReactionService.addOrUpdateReaction(user.getId(), reactionRequest.getDishId(), reactionRequest.getReactionType());
-            
-            Map<ReactionType, Long> reactionCounts = dishReactionService.getAllReactionCounts(reactionRequest.getDishId());
-            ReactionType userReactionType = dishReactionService.getUserReactionType(user.getId(), reactionRequest.getDishId());
-            
+            // Handle reaction system
+            dishReactionService.addOrUpdateReaction(user.getId(), reactionRequest.getDishId(), reactionRequest.getReactionType(), reactionRequest.getDate());
+            Map<ReactionType, Long> reactionCounts = dishReactionService.getAllReactionCounts(reactionRequest.getDishId(), reactionRequest.getDate());
+            ReactionType userReactionType = dishReactionService.getUserReactionType(user.getId(), reactionRequest.getDishId(), reactionRequest.getDate());
             DishReactionResponse response = new DishReactionResponse(reactionRequest.getDishId(), reactionCounts, userReactionType);
             return ResponseEntity.ok(response);
             

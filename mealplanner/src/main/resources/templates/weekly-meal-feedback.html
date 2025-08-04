@@ -449,7 +449,7 @@
         if (!currentDishId || !currentDate) return;
         // Remove quotes if present
         //let dateParam = currentDate.replace(/^['"]|['"]$/g, '');
-        const res = await fetch(`/weekly-feedback/comments?dishId=${currentDishId}&page=${currentPage}&size=${pageSize}`);
+        const res = await fetch(`/weekly-feedback/comments?dishId=${currentDishId}&date=${currentDate}&page=${currentPage}&size=${pageSize}`);
         const data = await res.json();
         if (!data.comments || (data.comments.length === 0 && currentPage === 0)) {
             commentsList.innerHTML = '<div class="text-gray-500 text-sm">No comments yet.</div>';
@@ -500,7 +500,7 @@
             const commentCount = commentCountElement ? parseInt(commentCountElement.textContent, 10) : 0;
             
             // Load all comments for mobile view using the actual comment count
-            const res = await fetch(`/weekly-feedback/comments?dishId=${currentDishId}&page=0&size=${commentCount}`);
+            const res = await fetch(`/weekly-feedback/comments?dishId=${currentDishId}&date=${currentDate}&page=0&size=${commentCount}`);
             
             if (!res.ok) {
                 throw new Error('Failed to load comments');
@@ -697,7 +697,7 @@
                     fetch('/api/reactions', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ dishId: currentDishId, reactionType: 'DELICIOUS' })
+                        body: JSON.stringify({ dishId: currentDishId, reactionType: 'DELICIOUS', date: currentDate })
                     })
                     .then(res => {
                         if (res.redirected) {
@@ -741,7 +741,7 @@
                     fetch('/api/reactions', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ dishId: currentDishId, reactionType: currentReactionType })
+                        body: JSON.stringify({ dishId: currentDishId, reactionType: currentReactionType, date: currentDate })
                     })
                     .then(res => {
                         if (res.redirected) {
@@ -807,7 +807,7 @@
                 fetch('/api/reactions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dishId: currentDishId, reactionType: reactionType })
+                    body: JSON.stringify({ dishId: currentDishId, reactionType: reactionType, date: currentDate })
                 })
                 .then(res => {
                     if (res.redirected) {
@@ -1006,7 +1006,7 @@
                     fetch('/api/reactions', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ dishId: currentDishId, reactionType: 'DELICIOUS' })
+                        body: JSON.stringify({ dishId: currentDishId, reactionType: 'DELICIOUS', date: currentDate })
                     })
                     .then(res => {
                         if (res.redirected) {
@@ -1050,7 +1050,7 @@
                     fetch('/api/reactions', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ dishId: currentDishId, reactionType: currentReactionType })
+                        body: JSON.stringify({ dishId: currentDishId, reactionType: currentReactionType, date: currentDate })
                     })
                     .then(res => {
                         if (res.redirected) {
@@ -1116,7 +1116,7 @@
                 fetch('/api/reactions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ dishId: currentDishId, reactionType: reactionType })
+                    body: JSON.stringify({ dishId: currentDishId, reactionType: reactionType, date: currentDate })
                 })
                 .then(res => {
                     if (res.redirected) {

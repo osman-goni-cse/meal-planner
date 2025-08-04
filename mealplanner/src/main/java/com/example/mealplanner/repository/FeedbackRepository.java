@@ -18,6 +18,7 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
 
     // Efficiently count feedbacks (comments) for a given dish
     long countByDishId(Long dishId);
+    long countByDishIdAndDate(Long dishId, LocalDate date);
 
     // Queries that include dishes with either comments OR reactions
     @Query(value = "SELECT DISTINCT d.id as dishId, d.name, d.image_url as imageUrl, " +

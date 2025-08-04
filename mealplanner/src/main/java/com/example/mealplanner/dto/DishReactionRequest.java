@@ -5,6 +5,7 @@ import com.example.mealplanner.model.ReactionType;
 public class DishReactionRequest {
     private Long dishId;
     private ReactionType reactionType;
+    private java.time.LocalDate date;
 
     public Long getDishId() {
         return dishId;
@@ -20,5 +21,13 @@ public class DishReactionRequest {
 
     public void setReactionType(ReactionType reactionType) {
         this.reactionType = reactionType;
+    }
+
+    public java.time.LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(java.time.LocalDate date) {
+        this.date = date;
     }
 } 

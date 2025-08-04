@@ -7,7 +7,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "dish_reactions", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "dish_id"})
+    @UniqueConstraint(columnNames = {"user_id", "dish_id", "reaction_date"})
 })
 public class DishReaction {
 

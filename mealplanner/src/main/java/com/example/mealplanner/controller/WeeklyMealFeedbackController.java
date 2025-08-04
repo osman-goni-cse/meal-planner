@@ -100,14 +100,14 @@ public class WeeklyMealFeedbackController {
             }
             dto.put("feedbacks", feedbackList);
             // Use repository method to count all comments for this dish
-            int commentsCountTotal = (int) feedbackRepository.countByDishId(dish.getId());
+            int commentsCountTotal = (int) feedbackRepository.countByDishIdAndDate(dish.getId(), selectedDate);
             dto.put("commentsCount", commentsCountTotal);
             // Add reactions and userReacted
-            long reactions = dishReactionService.getReactions(dish.getId());
+            long reactions = dishReactionService.getReactions(dish.getId(), selectedDate);
             dto.put("reactions", reactions);
             
             // Add reaction counts for each type
-            Map<ReactionType, Long> reactionCounts = dishReactionService.getAllReactionCounts(dish.getId());
+            Map<ReactionType, Long> reactionCounts = dishReactionService.getAllReactionCounts(dish.getId(), selectedDate);
             // Convert to String keys for frontend compatibility
             Map<String, Long> reactionCountsString = new HashMap<>();
             for (Map.Entry<ReactionType, Long> entry : reactionCounts.entrySet()) {
@@ -121,9 +121,9 @@ public class WeeklyMealFeedbackController {
                 String email = oauth2User.getAttribute("email");
                 User user = userRepository.findByEmail(email).orElse(null);
                 if (user != null) {
-                    userReacted = dishReactionService.hasUserReacted(user.getId(), dish.getId());
+                    userReacted = dishReactionService.hasUserReacted(user.getId(), dish.getId(), selectedDate);
                     if (userReacted) {
-                        userReactionType = dishReactionService.getUserReactionType(user.getId(), dish.getId()).name();
+                        userReactionType = dishReactionService.getUserReactionType(user.getId(), dish.getId(), selectedDate).name();
                     }
                 }
             }
@@ -192,11 +192,12 @@ public class WeeklyMealFeedbackController {
     @ResponseBody
     public Map<String, Object> getWeeklyFeedbackComments(
         @RequestParam("dishId") Long dishId,
+        @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size
     ) {
         List<Feedback> all = feedbackRepository.findAll().stream()
-            .filter(fb -> dishId.equals(fb.getDishId()))
+            .filter(fb -> dishId.equals(fb.getDishId()) && date.equals(fb.getDate()))
             .collect(Collectors.toList());
         int from = page * size;
         int to = Math.min(from + size, all.size());
