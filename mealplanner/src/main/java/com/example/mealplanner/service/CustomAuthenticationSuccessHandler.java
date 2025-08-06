@@ -1,4 +1,4 @@
-package com.example.mealplanner.config;
+package com.example.mealplanner.service;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -30,6 +30,16 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         logger.info("User: {}", authentication.getName());
         logger.info("Original Session ID: {}", originalSessionId);
         logger.info("User Agent: {}", request.getHeader("User-Agent"));
+        logger.info("Remote Address: {}", request.getRemoteAddr());
+        logger.info("X-Forwarded-For: {}", request.getHeader("X-Forwarded-For"));
+        logger.info("Host: {}", request.getHeader("Host"));
+        
+        // Store user info in session for debugging
+        if (session != null) {
+            session.setAttribute("AUTHENTICATED_USER", authentication.getName());
+            session.setAttribute("AUTHENTICATION_TIME", System.currentTimeMillis());
+            logger.info("Session attributes set for user: {}", authentication.getName());
+        }
         
         String redirectUrl = "/";
         boolean isAdmin = authentication.getAuthorities().stream()

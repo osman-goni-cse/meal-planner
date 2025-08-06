@@ -9,8 +9,7 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2">
                     <a th:href="@{/}" class="cursor-pointer">
-                        <img src="/images/foodsi.svg" alt="Foodsi logo" class="w-12 h-12">
-                        <span class="font-bold text-3xl text-gray-800">Foodsi</span>
+                        <img src="/images/foodsi-logo-01.svg" alt="Foodsi logo" class="w-40 h-16">
                     </a>
                 </div>
                 <div class="flex items-center space-x-6">
@@ -28,13 +27,53 @@
                     </button>
                 </div>
             </div>
-            
         </div>
     </header>
-    <!-- Mobile Navbar (reuse fragment) -->
-    <div th:replace="fragments/layout :: mobile-navbar" class="md:hidden"></div>
-    <main class="container mx-auto px-4 py-8">
-        <section id="committee-intro" class="my-10">
+
+    <!-- Mobile Navigation Menu -->
+    <div id="mobile-menu" class="hidden md:hidden fixed top-20 right-4 z-[60] bg-white rounded-lg shadow-xl border border-gray-200 min-w-[250px]">
+        <div class="flex flex-col py-4">
+            <!-- Navigation Links -->
+            <div class="px-4 pb-3 border-b border-gray-200">
+                <a th:href="@{/}" class="block text-gray-700 hover:text-primary py-2 px-2 rounded transition-colors">
+                    <i class="fa-solid fa-home mr-3"></i>Today's Menu
+                </a>
+                <a th:href="@{/weekly-feedback}" class="block text-gray-700 hover:text-primary py-2 px-2 rounded transition-colors">
+                    <i class="fa-solid fa-calendar-week mr-3"></i>Weekly Menu
+                </a>
+            </div>
+            
+            <!-- Admin Links (if authenticated and admin) -->
+            <div th:if="${isAuthenticated}" sec:authorize="hasAuthority('ROLE_ADMIN')" class="px-4 pb-3 border-b border-gray-200">
+                <a th:href="@{/weekly-plan}" class="block text-gray-700 hover:text-primary py-2 px-2 rounded transition-colors">
+                    <i class="fa-solid fa-calendar-plus mr-3"></i>Manage Weekly Plan
+                </a>
+                <a th:href="@{/dishes}" class="block text-gray-700 hover:text-primary py-2 px-2 rounded transition-colors">
+                    <i class="fa-solid fa-drumstick-bite mr-3"></i>Dish Management
+                </a>
+                <a th:href="@{/review-comments}" class="block text-gray-700 hover:text-primary py-2 px-2 rounded transition-colors">
+                    <i class="fa-solid fa-comment-dots mr-3"></i>Review Feedbacks
+                </a>
+            </div>
+            
+            <!-- Authentication Section -->
+            <div class="px-4 pt-3">
+                <!-- Show login for anonymous users -->
+                <a th:if="${!isAuthenticated}" th:href="@{/login}" class="block text-gray-700 hover:text-primary py-2 px-2 rounded transition-colors">
+                    <i class="fa-solid fa-sign-in-alt mr-3"></i>Sign In
+                </a>
+                <!-- Show logout for authenticated users -->
+                <form th:if="${isAuthenticated}" th:action="@{/logout}" method="post" class="block">
+                    <button type="submit" class="w-full text-left text-gray-700 hover:text-primary py-2 px-2 rounded transition-colors">
+                        <i class="fa-solid fa-sign-out-alt mr-3"></i>Sign Out
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <main class="container mx-auto px-4 py-8 mt-24">
+        <section id="committee-intro" class="mb-10">
             <div class="bg-white rounded-lg shadow-sm p-8">
                 <h1 class="text-3xl font-bold text-dark mb-4">Meet Your Food Committee</h1>
                 <p class="text-gray-600 mb-6">
@@ -79,5 +118,47 @@
         </div>
     </main>
     <div th:replace="fragments/layout :: footer"></div>
+    
+    <script>
+        // Mobile menu toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                // Toggle menu on button click
+                mobileMenuButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const isHidden = mobileMenu.classList.contains('hidden');
+                    
+                    if (isHidden) {
+                        mobileMenu.classList.remove('hidden');
+                        mobileMenuButton.innerHTML = '<i class="fa-solid fa-times text-xl"></i>';
+                    } else {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenuButton.innerHTML = '<i class="fa-solid fa-bars text-xl"></i>';
+                    }
+                });
+                
+                // Close menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    const isClickInsideMenu = mobileMenu.contains(event.target);
+                    const isClickOnButton = mobileMenuButton.contains(event.target);
+                    
+                    if (!isClickInsideMenu && !isClickOnButton && !mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                        mobileMenuButton.innerHTML = '<i class="fa-solid fa-bars text-xl"></i>';
+                    }
+                });
+                
+                // Prevent menu from closing when clicking inside menu
+                mobileMenu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+        });
+    </script>
 </body>
 </html> 

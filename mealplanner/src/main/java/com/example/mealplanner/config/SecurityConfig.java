@@ -14,8 +14,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import com.example.mealplanner.config.CustomAuthenticationSuccessHandler;
+import com.example.mealplanner.service.CustomAuthenticationSuccessHandler;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+import org.springframework.security.web.savedrequest.RequestCache;
 
 @Configuration
 @EnableWebSecurity
@@ -56,22 +58,30 @@ public class SecurityConfig {
                 .logoutSuccessUrl("/")
                 .deleteCookies("SESSION", "XSRF-TOKEN")
                 .invalidateHttpSession(true)
+                .clearAuthentication(true)
                 .permitAll()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .sessionFixation().none() // CRITICAL: Disable session fixation protection to prevent session ID regeneration
+                .sessionFixation().changeSessionId() // ENABLE session fixation protection
                 .maximumSessions(1)
-                .maxSessionsPreventsLogin(false)
+                .maxSessionsPreventsLogin(true) // Prevent multiple sessions per user
                 .expiredUrl("/login")
             )
             .exceptionHandling(exceptionHandling -> exceptionHandling
                 .accessDeniedHandler(accessDeniedHandler())
             )
             .requestCache(requestCache -> requestCache
-                .requestCache(new org.springframework.security.web.savedrequest.HttpSessionRequestCache())
+                .requestCache(httpSessionRequestCache())
             );
         return http.build();
+    }
+
+    @Bean
+    public RequestCache httpSessionRequestCache() {
+        HttpSessionRequestCache requestCache = new HttpSessionRequestCache();
+        requestCache.setCreateSessionAllowed(false); // Prevent session creation during request caching
+        return requestCache;
     }
 
     @Bean
