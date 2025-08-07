@@ -445,6 +445,12 @@
     
     let currentDate = /*[[${selectedDate}]]*/ '';
 
+    // Helper function to get CSRF token from meta tag
+    function getCsrfToken() {
+        const metaTag = document.querySelector('meta[name="_csrf"]');
+        return metaTag ? metaTag.getAttribute('content') : '';
+    }
+
     async function loadComments(reset = false) {
         const commentsList = document.getElementById('comments-list');
         if (reset) commentsList.innerHTML = '';
@@ -698,7 +704,10 @@
                     // Send request to set Delicious reaction
                     fetch('/api/reactions', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-XSRF-TOKEN': getCsrfToken()
+                        },
                         body: JSON.stringify({ dishId: currentDishId, reactionType: 'DELICIOUS', date: currentDate })
                     })
                     .then(res => {
@@ -742,7 +751,10 @@
                     // If reaction is already selected, remove it by sending the same reaction type
                     fetch('/api/reactions', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-XSRF-TOKEN': getCsrfToken()
+                        },
                         body: JSON.stringify({ dishId: currentDishId, reactionType: currentReactionType, date: currentDate })
                     })
                     .then(res => {
@@ -808,7 +820,10 @@
                 // Send request with the actual reaction type
                 fetch('/api/reactions', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-XSRF-TOKEN': getCsrfToken()
+                    },
                     body: JSON.stringify({ dishId: currentDishId, reactionType: reactionType, date: currentDate })
                 })
                 .then(res => {
@@ -1007,7 +1022,10 @@
                     // Send request to set Delicious reaction
                     fetch('/api/reactions', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-XSRF-TOKEN': getCsrfToken()
+                        },
                         body: JSON.stringify({ dishId: currentDishId, reactionType: 'DELICIOUS', date: currentDate })
                     })
                     .then(res => {
@@ -1051,7 +1069,10 @@
                     // If reaction is already selected, remove it by sending the same reaction type
                     fetch('/api/reactions', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'X-XSRF-TOKEN': getCsrfToken()
+                        },
                         body: JSON.stringify({ dishId: currentDishId, reactionType: currentReactionType, date: currentDate })
                     })
                     .then(res => {
@@ -1117,7 +1138,10 @@
                 // Send request with the actual reaction type
                 fetch('/api/reactions', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-XSRF-TOKEN': getCsrfToken()
+                    },
                     body: JSON.stringify({ dishId: currentDishId, reactionType: reactionType, date: currentDate })
                 })
                 .then(res => {

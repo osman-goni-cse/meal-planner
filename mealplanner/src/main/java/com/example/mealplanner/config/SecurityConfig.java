@@ -36,7 +36,6 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf
                 .csrfTokenRepository(createCsrfTokenRepository())
-                .ignoringRequestMatchers("/api/reactions")
             )
 
             .authorizeHttpRequests(authorize -> authorize
