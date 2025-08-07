@@ -1,12 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head}">
-    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;500;600;700;800;900&display=swap">
-    <style>body { font-family: 'Inter', sans-serif !important; }</style> -->
     <style>
         /* Responsive text adjustments */
         .break-words {
@@ -64,7 +58,7 @@
             </div>
             
             <!-- Mobile Date Selector -->
-            <div class="md:hidden mt-4 pb-4 border-t border-gray-200">
+            <div class="md:hidden mt-4 pb-4">
                 <div class="flex items-center justify-between pt-4">
                     <div class="flex items-center space-x-3">
                         <i class="text-orange-600 text-lg fa-solid fa-calendar"></i>
@@ -216,7 +210,20 @@
                     </div>
                     <!-- Right Column: Feedback -->
                     <div id="feedback-column" class="w-full lg:w-[40%] bg-gray-50/50 border-l border-gray-200 flex flex-col p-6">
-                        <div th:if="${!selectedDate.isAfter(T(java.time.LocalDate).now())}" id="comments-list" class="flex-grow space-y-5 pr-2 -mr-2 overflow-y-auto h-64">
+                        <!-- Show login message for unauthenticated users -->
+                        <div th:if="${!isAuthenticated}" class="flex-grow flex items-center justify-center">
+                            <div class="text-center">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-2">Sign in to interact</h3>
+                                <p class="text-gray-600 mb-4">To provide your thoughts or react to this dish, please sign in to your account.</p>
+                                <a th:href="@{/login}" class="inline-flex items-center px-4 py-2 bg-primary text-customTomato font-medium rounded-lg hover:bg-primary/80 transition-colors">
+                                    <i class="fa-solid fa-sign-in-alt mr-2"></i>
+                                    Sign In
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Show comments for authenticated users only -->
+                        <div th:if="${isAuthenticated && !selectedDate.isAfter(T(java.time.LocalDate).now())}" id="comments-list" class="flex-grow space-y-5 pr-2 -mr-2 overflow-y-auto h-64">
                             <!-- Comments will be loaded here by JS -->
                         </div>
                         <div class="mt-4 pt-4 border-t border-gray-200">
@@ -224,7 +231,7 @@
                             <div th:if="${error}" class="mb-3 p-2 bg-red-100 border border-red-300 text-red-700 rounded text-sm">
                                 <span th:text="${error}">Comment cannot be empty.</span>
                             </div>
-                            <div th:if="${selectedDish != null && !selectedDish.isEmpty() && !selectedDate.isAfter(T(java.time.LocalDate).now())}" class="space-y-3">
+                            <div th:if="${isAuthenticated && selectedDish != null && !selectedDish.isEmpty() && !selectedDate.isAfter(T(java.time.LocalDate).now())}" class="space-y-3">
                                 <!-- Reaction count and comments on same line - FIRST -->
                                 <div class="flex items-center">
                                     <!-- Reaction count display - left aligned -->
@@ -284,7 +291,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div th:if="${!selectedDate.isAfter(T(java.time.LocalDate).now())}" id="feedback-form" class="flex items-center space-x-2">
+                            <div th:if="${isAuthenticated && !selectedDate.isAfter(T(java.time.LocalDate).now())}" id="feedback-form" class="flex items-center space-x-2">
                                 <form th:action="@{/weekly-feedback/feedback}" method="post" class="flex w-full">
                                     <input type="hidden" name="date" th:value="${selectedDate}">
                                     <input type="hidden" name="dishId" th:value="${selectedDish != null ? selectedDish.id : ''}">
@@ -302,9 +309,9 @@
         </div>
 
         <!-- Mobile Layout -->
-        <div class="md:hidden pt-32">
+        <div class="md:hidden pt-28">
             <!-- Dish Tabs - Horizontally Scrollable -->
-            <div id="mobile-dish-tabs" class="flex items-center space-x-6 my-8 overflow-x-auto pb-2 scrollbar-hide">
+            <div id="mobile-dish-tabs" class="mobile-dish-tabs flex items-center space-x-6 px-4 py-5 overflow-x-auto scrollbar-hide">
                 <button th:each="dish,iter : ${dishes}" th:text="${dish.name}"
                     th:classappend="${iter.index} == ${selectedDishIndex} ? 'tab-button active-tab text-base font-semibold text-orange-600 border-b-2 border-orange-600 py-3 shadow-sm transition-all duration-200 whitespace-nowrap flex-shrink-0' : 'tab-button text-base font-medium hover:text-orange-600 py-3 transition-all duration-200 whitespace-nowrap flex-shrink-0'"
                     th:onclick="|window.location='@{/weekly-feedback(date=${selectedDate},dish=${iter.index})}'|">
@@ -312,69 +319,49 @@
                 </button>
             </div>
 
-            <!-- Mobile Dish Content -->
-            <div th:if="${selectedDish != null}" class="bg-white rounded-lg shadow-sm border border-gray-200 grid grid-rows-[1fr_auto] h-[calc(100vh-200px)]">
-                <!-- Dish Image - Takes available space -->
-                <div class="relative min-h-0">
-                    <img class="w-full h-full object-cover rounded-t-lg" th:src="${selectedDish != null ? selectedDish.imageUrl : ''}" th:alt="${selectedDish != null ? selectedDish.name : 'Dish'}">
+            <!-- Mobile Dish Content - Instagram-style Post -->
+            <div th:if="${selectedDish != null}" class="mobile-dish-post bg-white">
+                <!-- Dish Image - Instagram-style square/landscape -->
+                <div class="w-full relative overflow-hidden" style="aspect-ratio: 1/1; min-height: 250px; max-height: 400px;">
+                    <img class="w-full h-full object-cover mobile-dish-image" th:src="${selectedDish != null ? selectedDish.imageUrl : ''}" th:alt="${selectedDish != null ? selectedDish.name : 'Dish'}">
                 </div>
                 
-                <!-- Dish Details - Auto-sized based on content -->
-                <div class="p-6">
-                    <div class="flex items-center justify-between mb-3">
-                        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 break-words" th:text="${selectedDish != null ? selectedDish.name : 'Dish Name'}">Dish Name</h1>
+                <!-- Post Content - Instagram-style padding and spacing -->
+                <div class="px-4 py-3 space-y-3">
+                    <!-- Dish Title and Meal Period -->
+                    <div class="flex items-start justify-between">
+                        <h1 class="mobile-dish-title text-lg sm:text-xl font-bold text-gray-900 break-words flex-1 mr-3" th:text="${selectedDish != null ? selectedDish.name : 'Dish Name'}">Dish Name</h1>
                         <span th:if="${selectedDish != null && selectedDish.mealPeriod != null}" 
-                              class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-sm font-medium whitespace-nowrap">
+                              class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0">
                             <span th:text="${#strings.capitalize(selectedDish.mealPeriod)}">Lunch</span>
                         </span>
                     </div>
-                    <p class="text-lg text-gray-600 mb-6 leading-relaxed break-words" th:text="${selectedDish != null ? selectedDish.description : 'Dish description'}">Dish description</p>
                     
-                    <!-- Likes and Comments -->
-                    <div th:if="${selectedDish != null && !selectedDish.isEmpty() && !selectedDate.isAfter(T(java.time.LocalDate).now())}" class="space-y-3">
-                        <!-- Mobile reaction count and comments on same line - FIRST -->
-                        <div class="flex items-center">
-                            <!-- Mobile reaction count display - left aligned -->
-                            <div id="mobile-reaction-count-display" class="flex items-center space-x-1" th:style="${selectedDish != null && selectedDish.reactions > 0} ? 'display: flex' : 'display: none'">
-                                <!-- Show reaction emojis side by side -->
-                                <div class="flex items-center space-x-1">
-                                    <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.DELICIOUS > 0}">😋</span>
-                                    <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.AVERAGE > 0}">😐</span>
-                                    <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.BAD > 0}">😞</span>
-                                </div>
-                                <!-- Show total count -->
-                                <span class="text-sm text-gray-600" th:text="${selectedDish.reactions}">0</span>
-                            </div>
-                            <!-- Mobile comments - always right aligned -->
-                            <button id="mobile-comments-btn" type="button" class="ml-auto flex items-center space-x-2 text-gray-600 focus:outline-none group">
-                                <i class="fa-regular fa-comment text-xl text-blue-500"></i>
-                                <span class="font-medium text-base" th:text="${selectedDish != null ? selectedDish.commentsCount : 0}">0</span>
-                                <span class="text-sm">Comments</span>
-                            </button>
-                        </div>
-                        <!-- Main reaction button on separate line - SECOND -->
-                        <div class="flex items-center">
+                    <!-- Dish Description -->
+                    <p class="mobile-dish-description text-gray-700 text-sm leading-relaxed break-words" th:text="${selectedDish != null ? selectedDish.description : 'Dish description'}">Dish description</p>
+                    
+                    <!-- Reactions and Comments Row - Instagram-style -->
+                    <div th:if="${isAuthenticated && selectedDish != null && !selectedDish.isEmpty() && !selectedDate.isAfter(T(java.time.LocalDate).now())}" class="flex items-center justify-between py-2 border-t border-gray-100">
+                        <!-- Left: Reaction Button -->
+                        <div class="flex items-center space-x-4">
                             <!-- Mobile Reaction System -->
                             <div class="relative">
-                                <!-- Main reaction button with emoji and text -->
-                                <button id="mobile-reaction-btn" type="button" class="flex items-center space-x-2 text-gray-600 hover:text-gray-800 focus:outline-none transition-colors duration-200">
-                                    <div class="relative flex items-center">
-                                        <span id="mobile-reaction-icon" class="text-xl transition-all duration-200" 
-                                              data-reaction-type="NONE"
-                                              th:data-reaction-type="${selectedDish != null && selectedDish.userReactionType != null ? selectedDish.userReactionType : 'NONE'}">
-                                            <img th:if="${selectedDish == null || selectedDish.userReactionType == null}" src="/images/delicious-emoji.png" alt="Delicious" class="w-6 h-6">
-                                            <span th:if="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS'}">😋</span>
-                                            <span th:if="${selectedDish != null && selectedDish.userReactionType == 'AVERAGE'}">😐</span>
-                                            <span th:if="${selectedDish != null && selectedDish.userReactionType == 'BAD'}">😞</span>
-                                        </span>
-                                        <span id="mobile-reaction-text" class="font-medium text-base ml-1"
-                                              th:text="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'Delicious' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'Average' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'Bad' : 'Delicious'))}"
-                                              th:classappend="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'text-green-600' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'text-yellow-600' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'text-red-600' : 'text-gray-600'))}">
-                                            Delicious
-                                        </span>
-                                    </div>
+                                <button id="mobile-reaction-btn" type="button" class="flex items-center space-x-2 text-gray-600 hover:text-gray-800 focus:outline-none transition-colors duration-200 py-1">
+                                    <span id="mobile-reaction-icon" class="text-xl transition-all duration-200" 
+                                          data-reaction-type="NONE"
+                                          th:data-reaction-type="${selectedDish != null && selectedDish.userReactionType != null ? selectedDish.userReactionType : 'NONE'}">
+                                        <img th:if="${selectedDish == null || selectedDish.userReactionType == null}" src="/images/delicious-emoji.png" alt="Delicious" class="w-6 h-6">
+                                        <span th:if="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS'}">😋</span>
+                                        <span th:if="${selectedDish != null && selectedDish.userReactionType == 'AVERAGE'}">😐</span>
+                                        <span th:if="${selectedDish != null && selectedDish.userReactionType == 'BAD'}">😞</span>
+                                    </span>
+                                    <span id="mobile-reaction-text" class="font-medium text-sm"
+                                          th:text="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'Delicious' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'Average' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'Bad' : 'Delicious'))}"
+                                          th:classappend="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'text-green-600' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'text-yellow-600' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'text-red-600' : 'text-gray-600'))}">
+                                        Delicious
+                                    </span>
                                 </button>
-                                <!-- Facebook-style Hover Menu -->
+                                <!-- Reaction Menu -->
                                 <div id="mobile-reaction-menu" class="absolute bottom-full left-0 mb-3 bg-white border border-gray-200 rounded-full shadow-xl p-2 hidden z-50 transform scale-100 transition-all duration-200">
                                     <div class="flex space-x-1">
                                         <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="DELICIOUS" data-emoji="😋" data-text="Delicious" title="Delicious">
@@ -390,6 +377,34 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Right: Comments Button -->
+                        <button id="mobile-comments-btn" type="button" class="flex items-center space-x-2 text-gray-600 focus:outline-none py-1">
+                            <i class="fa-regular fa-comment text-lg"></i>
+                            <span class="font-medium text-sm" th:text="${selectedDish != null ? selectedDish.commentsCount : 0} + ' Comments'">0 Comments</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Reaction Count Display - Instagram-style -->
+                    <div th:if="${isAuthenticated && selectedDish != null && selectedDish.reactions > 0}" id="mobile-reaction-count-display" class="flex items-center space-x-2 text-sm text-gray-600">
+                        <div class="flex items-center space-x-1">
+                            <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.DELICIOUS > 0}">😋</span>
+                            <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.AVERAGE > 0}">😐</span>
+                            <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.BAD > 0}">😞</span>
+                        </div>
+                        <span th:text="${selectedDish.reactions}">0</span>
+                    </div>
+                    
+                    <!-- Login Message for Unauthenticated Users -->
+                    <div th:if="${!isAuthenticated}" class="text-center py-4 border-t border-gray-100">
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                            <h3 class="text-base font-semibold text-gray-800 mb-2">Sign in to interact</h3>
+                            <p class="text-gray-600 mb-3 text-sm">To provide your thoughts or react to this dish, please sign in to your account.</p>
+                            <a th:href="@{/login}" class="inline-flex items-center px-4 py-2 bg-primary text-customTomato font-medium rounded-lg hover:bg-primary/80 transition-colors text-sm">
+                                <i class="fa-solid fa-sign-in-alt mr-2"></i>
+                                Sign In
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -401,35 +416,48 @@
     </main>
 
     <!-- Mobile Comments Modal -->
-    <div id="mobile-comments-modal" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex flex-col">
-        <div class="flex-1 flex flex-col bg-white">
+    <div id="mobile-comments-modal" class="hidden md:hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
+        <div class="w-full bg-white rounded-t-2xl shadow-xl transform transition-transform duration-300 ease-out translate-y-0 flex flex-col max-h-[85vh]">
             <!-- Modal Header -->
-            <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-white">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200 bg-white rounded-t-2xl">
                 <h3 class="text-lg font-semibold text-gray-800">Comments</h3>
-                <button id="close-comments-modal" class="text-gray-500 hover:text-gray-700">
-                    <i class="fa-solid fa-times text-xl"></i>
+                <button id="close-comments-modal" class="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fa-solid fa-times text-lg"></i>
                 </button>
             </div>
             
+            <!-- Modal Handle for better UX -->
+            <div class="flex justify-center py-2 bg-white">
+                <div class="w-10 h-1 bg-gray-300 rounded-full"></div>
+            </div>
+            
             <!-- Comments List -->
-            <div id="mobile-comments-list" class="flex-1 overflow-y-auto p-4 space-y-4">
-                <!-- Comments will be loaded here by JS -->
+            <div id="mobile-comments-list" class="flex-1 overflow-y-auto px-4 py-2 space-y-4 min-h-0">
+                <!-- Show simple message for unauthenticated users -->
+                <div th:if="${!isAuthenticated}" class="flex items-center justify-center h-full min-h-[200px]">
+                    <div class="text-center">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Sign in to see comments</h3>
+                        <p class="text-gray-600">Please sign in to view and add comments.</p>
+                    </div>
+                </div>
+                <!-- Comments will be loaded here by JS for authenticated users -->
             </div>
             
             <!-- Comment Input -->
-            <div th:if="${!selectedDate.isAfter(T(java.time.LocalDate).now())}" class="border-t border-gray-200 p-4 bg-white">
+            <div th:if="${!selectedDate.isAfter(T(java.time.LocalDate).now())}" class="border-t border-gray-200 p-4 bg-white rounded-b-2xl">
                 <!-- Error message -->
                 <div th:if="${error}" class="mb-3 p-2 bg-red-100 border border-red-300 text-red-700 rounded text-sm">
                     <span th:text="${error}">Comment cannot be empty.</span>
                 </div>
                 
-                <form id="mobile-comment-form" th:action="@{/weekly-feedback/feedback}" method="post" class="flex items-center space-x-3">
+                <!-- Show comment form for authenticated users only -->
+                <form th:if="${isAuthenticated}" id="mobile-comment-form" th:action="@{/weekly-feedback/feedback}" method="post" class="flex items-center space-x-3">
                     <input type="hidden" name="date" th:value="${selectedDate}">
                     <input type="hidden" name="dishId" th:value="${selectedDish != null ? selectedDish.id : ''}">
                     <div class="flex-1 relative">
                         <input type="text" name="comment" placeholder="Write a comment..." class="w-full px-4 py-3 pr-12 text-sm border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition">
                     </div>
-                    <button type="submit" class="text-primary">
+                    <button type="submit" class="text-primary p-2 rounded-full hover:bg-primary/10 transition-colors">
                         <i class="fa-regular fa-paper-plane text-lg"></i>
                     </button>
                 </form>
@@ -449,6 +477,13 @@
     function getCsrfToken() {
         const metaTag = document.querySelector('meta[name="_csrf"]');
         return metaTag ? metaTag.getAttribute('content') : '';
+    }
+
+    // Helper function to set redirect cookie and navigate to login
+    function setRedirectAndLogin() {
+        const currentUrl = window.location.pathname + window.location.search + window.location.hash;
+        document.cookie = "redirectAfterLogin=" + encodeURIComponent(currentUrl) + "; path=/";
+        window.location.href = '/login';
     }
 
     async function loadComments(reset = false) {
@@ -549,6 +584,15 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        // Add click handlers for all login links
+        const loginLinks = document.querySelectorAll('a[href="/login"]');
+        loginLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                setRedirectAndLogin();
+            });
+        });
+
         // Scroll active dish tab into view on page load
         function scrollActiveTabIntoView() {
             const mobileDishTabs = document.getElementById('mobile-dish-tabs');
@@ -628,21 +672,22 @@
             });
         }
 
-        // Desktop comments functionality
-        if (document.getElementById('comments-list') && currentDishId && currentDate) {
+        // Desktop comments functionality - only for authenticated users
+        const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
+        if (isAuthenticated && document.getElementById('comments-list') && currentDishId && currentDate) {
             currentPage = 0;
             loadComments(true);
         }
         
-        // Desktop reaction functionality
+        // Desktop reaction functionality - only for authenticated users
         const reactionBtn = document.getElementById('reaction-btn');
         const reactionMenu = document.getElementById('reaction-menu');
         const reactionDisplay = document.getElementById('reaction-count-display'); // Updated selector
         const reactionText = document.getElementById('reaction-text');
         const reactionIcon = document.getElementById('reaction-icon'); // New element
 
-        // Initialize reaction state from server data
-        if (reactionDisplay) {
+        // Initialize reaction state from server data - only for authenticated users
+        if (isAuthenticated && reactionDisplay) {
             // Initialize the reaction count display
             const reactionCounts = /*[[${selectedDish != null ? selectedDish.reactionCounts : null}]]*/ {};
             const totalReactions = /*[[${selectedDish != null ? selectedDish.reactions : 0}]]*/ 0;
@@ -659,7 +704,7 @@
             reactionText.textContent = currentText;
         }
 
-        if (reactionBtn) {
+        if (isAuthenticated && reactionBtn) {
             let menuTimeout;
             
             // Show menu on hover
@@ -959,15 +1004,15 @@
             return colorMap[reactionType] || 'text-gray-600';
         }
 
-        // Mobile reaction functionality
+        // Mobile reaction functionality - only for authenticated users
         const mobileReactionBtn = document.getElementById('mobile-reaction-btn');
         const mobileReactionMenu = document.getElementById('mobile-reaction-menu');
         const mobileReactionText = document.getElementById('mobile-reaction-text');
         const mobileReactionIcon = document.getElementById('mobile-reaction-icon');
         const mobileReactionDisplay = document.getElementById('mobile-reaction-count-display');
 
-        // Initialize mobile reaction state from server data
-        if (mobileReactionIcon) {
+        // Initialize mobile reaction state from server data - only for authenticated users
+        if (isAuthenticated && mobileReactionIcon) {
             // Initialize the main reaction button
             const mobileUserReactionType = /*[[${selectedDish != null ? selectedDish.userReactionType : null}]]*/ null;
             updateMobileReactionIcon(mobileUserReactionType);
@@ -977,7 +1022,7 @@
             mobileReactionText.textContent = currentText;
         }
 
-        if (mobileReactionBtn) {
+        if (isAuthenticated && mobileReactionBtn) {
             let mobileMenuTimeout;
             
             // Show menu on hover
@@ -1259,29 +1304,50 @@
             }
         }
 
-        // Mobile comments modal functionality
+        // Mobile comments modal functionality - only for authenticated users
         const mobileCommentsBtn = document.getElementById('mobile-comments-btn');
         const mobileCommentsModal = document.getElementById('mobile-comments-modal');
         const closeCommentsModal = document.getElementById('close-comments-modal');
         const mobileCommentsList = document.getElementById('mobile-comments-list');
         const mobileCommentForm = document.getElementById('mobile-comment-form');
 
-        if (mobileCommentsBtn && mobileCommentsModal && mobileCommentsList && mobileCommentForm) {
+        if (isAuthenticated && mobileCommentsBtn && mobileCommentsModal && mobileCommentsList && mobileCommentForm) {
             mobileCommentsBtn.addEventListener('click', function() {
+                // Show modal with animation
                 mobileCommentsModal.classList.remove('hidden');
+                // Force a reflow to ensure the hidden class is removed before animation
+                mobileCommentsModal.offsetHeight;
+                // Trigger the slide-up animation
+                const modalContent = mobileCommentsModal.querySelector('.transform');
+                modalContent.style.transform = 'translateY(0)';
+                
                 // Reset page and load comments for the modal
                 currentPage = 0;
                 loadMobileComments(true);
             });
 
             closeCommentsModal.addEventListener('click', function() {
-                mobileCommentsModal.classList.add('hidden');
+                // Trigger slide-down animation
+                const modalContent = mobileCommentsModal.querySelector('.transform');
+                modalContent.style.transform = 'translateY(100%)';
+                
+                // Hide modal after animation completes
+                setTimeout(() => {
+                    mobileCommentsModal.classList.add('hidden');
+                }, 300);
             });
 
-            // Close modal when clicking outside
+            // Close modal when clicking outside with animation
             mobileCommentsModal.addEventListener('click', function(e) {
                 if (e.target === mobileCommentsModal) {
-                    mobileCommentsModal.classList.add('hidden');
+                    // Trigger slide-down animation
+                    const modalContent = mobileCommentsModal.querySelector('.transform');
+                    modalContent.style.transform = 'translateY(100%)';
+                    
+                    // Hide modal after animation completes
+                    setTimeout(() => {
+                        mobileCommentsModal.classList.add('hidden');
+                    }, 300);
                 }
             });
 
@@ -1339,48 +1405,49 @@
                 }
             });
         }
-
-        // --- Desktop comment form guest login redirect ---
-        const feedbackForm = document.querySelector('#feedback-form form');
-        if (feedbackForm) {
-            feedbackForm.addEventListener('submit', function(e) {
-                const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
-                if (!isAuthenticated) {
-                    e.preventDefault();
-                    var currentUrl = window.location.pathname + window.location.search + window.location.hash;
-                    document.cookie = "redirectAfterLogin=" + encodeURIComponent(currentUrl) + "; path=/";
-                    window.location.href = '/login';
-                    return false;
-                }
-            });
-        }
-
-        // --- Desktop comment input guest login redirect on keyup ---
-        const feedbackFormInput = document.querySelector('#feedback-form input[name="comment"]');
-        if (feedbackFormInput) {
-            feedbackFormInput.addEventListener('keyup', function(e) {
-                const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
-                if (!isAuthenticated) {
-                    var currentUrl = window.location.pathname + window.location.search + window.location.hash;
-                    document.cookie = "redirectAfterLogin=" + encodeURIComponent(currentUrl) + "; path=/";
-                    window.location.href = '/login';
-                }
-            });
-        }
-
-        // Scroll active tab into view after page load and after navigation
-        scrollActiveTabIntoView();
-        
-        // Also scroll active tab into view when window is resized (orientation change)
-        window.addEventListener('resize', function() {
-            setTimeout(scrollActiveTabIntoView, 100); // Small delay to ensure DOM is updated
-        });
     });
 
     document.getElementById('load-more-comments-btn').onclick = function() {
         currentPage++;
         loadComments(false);
     };
+
+    // --- Desktop comment form guest login redirect ---
+    const feedbackForm = document.querySelector('#feedback-form form');
+    if (feedbackForm) {
+        feedbackForm.addEventListener('submit', function(e) {
+            // Authentication is already checked in the template, so this is just for safety
+            const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
+            if (!isAuthenticated) {
+                e.preventDefault();
+                var currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                document.cookie = "redirectAfterLogin=" + encodeURIComponent(currentUrl) + "; path=/";
+                window.location.href = '/login';
+                return false;
+            }
+        });
+    }
+
+    // --- Desktop comment input guest login redirect on keyup ---
+    const feedbackFormInput = document.querySelector('#feedback-form input[name="comment"]');
+    if (feedbackFormInput) {
+        feedbackFormInput.addEventListener('keyup', function(e) {
+            const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
+            if (!isAuthenticated) {
+                var currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                document.cookie = "redirectAfterLogin=" + encodeURIComponent(currentUrl) + "; path=/";
+                window.location.href = '/login';
+            }
+        });
+    }
+
+    // Scroll active tab into view after page load and after navigation
+    scrollActiveTabIntoView();
+    
+    // Also scroll active tab into view when window is resized (orientation change)
+    window.addEventListener('resize', function() {
+        setTimeout(scrollActiveTabIntoView, 100); // Small delay to ensure DOM is updated
+    });
     /*]]>*/
     </script>
     <style>
@@ -1467,9 +1534,40 @@
                 padding-top: 0; /* Remove extra padding since we have mt-32 */
             }
             
-            /* Ensure modal takes full height */
+            /* Mobile Comments Modal - Instagram-style bottom sheet */
             #mobile-comments-modal {
-                height: 100vh;
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
+            }
+            
+            #mobile-comments-modal .transform {
+                transform: translateY(100%);
+            }
+            
+            #mobile-comments-modal:not(.hidden) .transform {
+                transform: translateY(0);
+            }
+            
+            /* Modal content responsive sizing */
+            #mobile-comments-modal .max-h-\[85vh\] {
+                max-height: 85vh;
+                min-height: 40vh;
+            }
+            
+            /* Better spacing for smaller screens */
+            @media (max-height: 600px) {
+                #mobile-comments-modal .max-h-\[85vh\] {
+                    max-height: 90vh;
+                    min-height: 50vh;
+                }
+            }
+            
+            /* Very small screens */
+            @media (max-height: 500px) {
+                #mobile-comments-modal .max-h-\[85vh\] {
+                    max-height: 95vh;
+                    min-height: 60vh;
+                }
             }
             
             /* Mobile comments list styling */
@@ -1484,6 +1582,135 @@
             #mobile-comments-list::-webkit-scrollbar-thumb {
                 background: #3B82F6;
                 border-radius: 4px;
+            }
+            
+            /* Instagram-style mobile post layout */
+            .mobile-dish-post {
+                max-width: 100vw;
+                margin: 0 auto;
+                background: white;
+                border-radius: 0;
+            }
+            
+            /* Responsive image container - Instagram style */
+            .mobile-dish-image {
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: cover !important;
+                display: block !important;
+            }
+            
+            /* Image container responsive sizing */
+            .mobile-dish-post .w-full[style*="aspect-ratio"] {
+                width: 100%;
+                min-height: 250px;
+                max-height: 400px;
+            }
+            
+            /* Content spacing - Instagram style */
+            .mobile-dish-post .px-4 {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            .mobile-dish-post .py-3 {
+                padding-top: 0.75rem;
+                padding-bottom: 0.75rem;
+            }
+            
+            /* Typography improvements */
+            .mobile-dish-title {
+                font-size: 1.125rem !important;
+                font-weight: 700 !important;
+                line-height: 1.4 !important;
+                color: #111827 !important;
+            }
+            
+            .mobile-dish-description {
+                font-size: 0.875rem !important;
+                line-height: 1.5 !important;
+                color: #374151 !important;
+            }
+            
+            /* Better text sizing for smaller screens */
+            @media (max-width: 480px) {
+                .mobile-dish-post .px-4 {
+                    padding-left: 0.875rem;
+                    padding-right: 0.875rem;
+                }
+                
+                .mobile-dish-title {
+                    font-size: 1rem !important;
+                    line-height: 1.3 !important;
+                }
+                
+                .mobile-dish-description {
+                    font-size: 0.8125rem !important;
+                    line-height: 1.4 !important;
+                }
+                
+                .mobile-dish-post .w-full[style*="aspect-ratio"] {
+                    min-height: 200px;
+                    max-height: 350px;
+                }
+                
+                /* Smaller modal on very small screens */
+                #mobile-comments-modal .max-h-\[85vh\] {
+                    min-height: 45vh;
+                }
+            }
+            
+            /* Very small screens (iPhone SE, etc.) */
+            @media (max-width: 375px) {
+                .mobile-dish-post .px-4 {
+                    padding-left: 0.75rem;
+                    padding-right: 0.75rem;
+                }
+                
+                .mobile-dish-tabs {
+                    padding-left: 0.75rem;
+                    padding-right: 0.75rem;
+                }
+                
+                .mobile-dish-post .w-full[style*="aspect-ratio"] {
+                    min-height: 180px;
+                    max-height: 320px;
+                }
+            }
+            
+            /* Landscape orientation on mobile */
+            @media (max-height: 500px) and (orientation: landscape) {
+                .mobile-dish-post .w-full[style*="aspect-ratio"] {
+                    aspect-ratio: 16/9 !important;
+                    max-height: 40vh;
+                    min-height: 150px;
+                }
+                
+                .mobile-dish-post {
+                    padding-bottom: 1rem;
+                }
+                
+                /* Adjust modal for landscape */
+                #mobile-comments-modal .max-h-\[85vh\] {
+                    max-height: 95vh;
+                    min-height: 70vh;
+                }
+            }
+            
+            /* Large mobile screens (iPhone Plus, etc.) */
+            @media (min-width: 414px) and (max-width: 768px) {
+                .mobile-dish-title {
+                    font-size: 1.25rem !important;
+                }
+                
+                .mobile-dish-description {
+                    font-size: 0.9375rem !important;
+                }
+                
+                .mobile-dish-post .w-full[style*="aspect-ratio"] {
+                    min-height: 280px;
+                    max-height: 450px;
+                }
             }
         }
     </style>
