@@ -432,7 +432,7 @@
             </div>
             
             <!-- Comments List -->
-            <div id="mobile-comments-list" class="flex-1 overflow-y-auto px-4 py-2 space-y-4 min-h-0">
+            <div id="mobile-comments-list" class="flex-1 overflow-y-auto px-4 py-2 space-y-4 min-h-0 relative">
                 <!-- Show simple message for unauthenticated users -->
                 <div th:if="${!isAuthenticated}" class="flex items-center justify-center h-full min-h-[200px]">
                     <div class="text-center">
@@ -441,6 +441,14 @@
                     </div>
                 </div>
                 <!-- Comments will be loaded here by JS for authenticated users -->
+                
+                <!-- Scroll indicator for many comments -->
+                <div id="mobile-scroll-indicator" class="hidden sticky bottom-0 left-0 right-0 text-center py-2 bg-gradient-to-t from-white to-transparent">
+                    <div class="text-xs text-gray-500 flex items-center justify-center space-x-1">
+                        <i class="fa-solid fa-chevron-down text-xs"></i>
+                        <span>Scroll for more comments</span>
+                    </div>
+                </div>
             </div>
             
             <!-- Comment Input -->
@@ -520,6 +528,7 @@
 
     async function loadMobileComments(reset = false) {
         const mobileCommentsList = document.getElementById('mobile-comments-list');
+        const scrollIndicator = document.getElementById('mobile-scroll-indicator');
         if (!mobileCommentsList) return;
         
         if (reset) {
@@ -535,7 +544,7 @@
         try {
             // Show loading state
             if (reset) {
-                mobileCommentsList.innerHTML = '<div class="text-gray-500 text-sm text-center py-8">Loading comments...</div>';
+                mobileCommentsList.innerHTML = '<div class="comments-loading"><div class="spinner"></div><span>Loading comments...</span></div>';
             }
             
             // Get the comment count from the dish data
@@ -557,10 +566,11 @@
             
             if (!data.comments || (data.comments.length === 0 && currentPage === 0)) {
                 mobileCommentsList.innerHTML = '<div class="text-gray-500 text-sm text-center py-8">No comments yet. Be the first to comment!</div>';
+                if (scrollIndicator) scrollIndicator.classList.add('hidden');
             } else {
                 data.comments.forEach(comment => {
                     mobileCommentsList.innerHTML += `
-                        <div class="flex items-start space-x-3">
+                        <div class="comment-item flex items-start space-x-3">
                             <img src="${comment.avatarUrl}" alt="${comment.userName}" class="w-10 h-10 rounded-full object-cover border-2 border-white shadow flex-shrink-0">
                             <div class="flex-1">
                                 <p class="font-semibold text-gray-800 text-sm">${comment.userName}</p>
@@ -570,16 +580,37 @@
                     `;
                 });
                 
+                // Check if scroll is needed and show indicator
+                setTimeout(() => {
+                    if (mobileCommentsList.scrollHeight > mobileCommentsList.clientHeight) {
+                        if (scrollIndicator) {
+                            scrollIndicator.classList.remove('hidden');
+                            // Hide indicator after scroll or timeout
+                            setTimeout(() => {
+                                if (scrollIndicator) scrollIndicator.classList.add('hidden');
+                            }, 3000);
+                        }
+                    }
+                }, 100);
+                
                 // Scroll to bottom to show the latest comment
                 if (reset) {
                     setTimeout(() => {
                         mobileCommentsList.scrollTop = mobileCommentsList.scrollHeight;
                     }, 100);
                 }
+                
+                // Add scroll event listener to hide indicator
+                mobileCommentsList.addEventListener('scroll', function() {
+                    if (scrollIndicator && !scrollIndicator.classList.contains('hidden')) {
+                        scrollIndicator.classList.add('hidden');
+                    }
+                }, { once: true });
             }
         } catch (error) {
             console.error('Error loading mobile comments:', error);
             mobileCommentsList.innerHTML = '<div class="text-red-500 text-sm text-center py-8">Failed to load comments. Please try again.</div>';
+            if (scrollIndicator) scrollIndicator.classList.add('hidden');
         }
     }
 
@@ -1574,14 +1605,63 @@
             #mobile-comments-list {
                 scrollbar-width: thin;
                 scrollbar-color: #3B82F6 #F3F4F6;
+                scroll-behavior: smooth;
+                /* Add padding for scroll indicator */
+                padding-bottom: 1rem;
             }
             #mobile-comments-list::-webkit-scrollbar {
-                width: 4px;
+                width: 6px;
                 background: #F3F4F6;
+                border-radius: 3px;
             }
             #mobile-comments-list::-webkit-scrollbar-thumb {
                 background: #3B82F6;
-                border-radius: 4px;
+                border-radius: 3px;
+                min-height: 30px;
+            }
+            #mobile-comments-list::-webkit-scrollbar-thumb:hover {
+                background: #2563EB;
+            }
+            
+            /* Scroll indicator styling */
+            #mobile-scroll-indicator {
+                pointer-events: none;
+                z-index: 10;
+            }
+            
+            /* Better visual separation for comment items */
+            #mobile-comments-list .comment-item {
+                padding: 0.75rem 0;
+                border-bottom: 1px solid #F3F4F6;
+                transition: background-color 0.2s ease;
+            }
+            
+            #mobile-comments-list .comment-item:last-child {
+                border-bottom: none;
+            }
+            
+            /* Loading state for many comments */
+            .comments-loading {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 2rem;
+                color: #6B7280;
+            }
+            
+            .comments-loading .spinner {
+                width: 20px;
+                height: 20px;
+                border: 2px solid #E5E7EB;
+                border-top: 2px solid #3B82F6;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin-right: 0.5rem;
+            }
+            
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
             }
             
             /* Instagram-style mobile post layout */
