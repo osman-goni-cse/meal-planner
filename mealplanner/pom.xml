@@ -69,6 +69,16 @@
             <groupId>org.springframework.session</groupId>
             <artifactId>spring-session-jdbc</artifactId>
         </dependency>
+        <!-- WebJars: Lottie locally served -->
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>lottie-web</artifactId>
+            <version>5.12.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>webjars-locator-core</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
