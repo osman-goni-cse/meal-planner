@@ -1079,8 +1079,212 @@
                 mobileReactionMenu.classList.add('hidden');
             });
 
+            // --- Long press to open reaction menu (mobile) + touch feedback ---
+            const LONG_PRESS_MS = 450;
+            const MOVE_TOLERANCE_PX = 10;
+            let mobileLongPressTimer = null;
+            let mobileLongPressTriggered = false;
+            let suppressMobileClick = false;
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let lastQuickTapTs = 0; // prevent duplicate click after touch
+            let menuSelectionArmed = false; // require touchstart in menu before selecting
+
+            // Helper to send mobile reaction and update UI
+            function sendMobileReaction(reactionType) {
+                return fetch('/api/reactions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-XSRF-TOKEN': getCsrfToken()
+                    },
+                    body: JSON.stringify({ dishId: currentDishId, reactionType: reactionType, date: currentDate })
+                })
+                .then(res => {
+                    if (res.redirected) {
+                        window.location.href = res.url;
+                        return null;
+                    }
+                    if (!res.ok) {
+                        return res.json().then(errorData => {
+                            throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
+                        }).catch(() => {
+                            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                        });
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (!data) return;
+                    updateMobileReactionDisplay(data.reactionCounts, data.userReactionType);
+                    updateMobileReactionIcon(data.userReactionType);
+                    if (data.userReactionType) {
+                        mobileReactionText.textContent = getReactionText(data.userReactionType);
+                        mobileReactionText.className = 'font-medium text-base ml-1 ' + getReactionColorClass(data.userReactionType);
+                    } else {
+                        mobileReactionText.textContent = 'Delicious';
+                        mobileReactionText.className = 'font-medium text-base ml-1 text-gray-600';
+                    }
+                });
+            }
+
+            function handleMobileQuickTap() {
+                const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
+                if (!isAuthenticated) {
+                    var currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                    document.cookie = "redirectAfterLogin=" + encodeURIComponent(currentUrl) + "; path=/";
+                    window.location.href = '/login';
+                    return;
+                }
+                const currentReactionType = mobileReactionIcon.dataset.reactionType;
+                const typeToSend = (currentReactionType === 'NONE' || currentReactionType === null) ? 'DELICIOUS' : currentReactionType;
+                sendMobileReaction(typeToSend)
+                .catch(error => {
+                    console.error('Error submitting reaction:', error);
+                    alert('Failed to submit reaction. Please try again. Error: ' + error.message);
+                });
+            }
+
+            // Capture-phase click listener to suppress default click after long-press
+            mobileReactionBtn.addEventListener('click', function(e) {
+                if (suppressMobileClick) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    suppressMobileClick = false;
+                }
+            }, true);
+
+            mobileReactionBtn.addEventListener('touchstart', function(e) {
+                if (!e.touches || e.touches.length === 0) return;
+                e.preventDefault(); // prevent text selection/callout
+                const t = e.touches[0];
+                touchStartX = t.clientX;
+                touchStartY = t.clientY;
+                mobileLongPressTriggered = false;
+                mobileReactionBtn.classList.add('mobile-touch-active');
+                clearTimeout(mobileLongPressTimer);
+                mobileLongPressTimer = setTimeout(function() {
+                    mobileLongPressTriggered = true;
+                    suppressMobileClick = true;
+                    mobileReactionMenu.classList.remove('hidden');
+                    menuSelectionArmed = false; // opened via long-press; ignore immediate lift
+                    // Clear any accidental text selection on long-press
+                    try {
+                        const sel = document.getSelection && document.getSelection();
+                        if (sel && sel.removeAllRanges) sel.removeAllRanges();
+                    } catch (err) { /* ignore */ }
+                }, LONG_PRESS_MS);
+            }, { passive: false });
+            
+            mobileReactionBtn.addEventListener('touchmove', function(e) {
+                if (!e.touches || e.touches.length === 0) return;
+                const t = e.touches[0];
+                const dx = Math.abs(t.clientX - touchStartX);
+                const dy = Math.abs(t.clientY - touchStartY);
+                if (dx > MOVE_TOLERANCE_PX || dy > MOVE_TOLERANCE_PX) {
+                    clearTimeout(mobileLongPressTimer);
+                }
+            }, { passive: true });
+
+            function clearMobileTouchState() {
+                clearTimeout(mobileLongPressTimer);
+                mobileReactionBtn.classList.remove('mobile-touch-active');
+            }
+
+            mobileReactionBtn.addEventListener('touchend', function() {
+                clearMobileTouchState();
+                if (mobileLongPressTriggered) {
+                    // Keep menu open and suppress the immediate click generated by touchend
+                    setTimeout(function() {
+                        mobileLongPressTriggered = false;
+                        suppressMobileClick = false;
+                    }, 350);
+                } else {
+                    // Quick tap path
+                    lastQuickTapTs = Date.now();
+                    handleMobileQuickTap();
+                }
+            }, { passive: true });
+
+            mobileReactionBtn.addEventListener('touchcancel', function() {
+                clearMobileTouchState();
+                mobileLongPressTriggered = false;
+                suppressMobileClick = false;
+            }, { passive: true });
+
+            // Touch feedback for emoji options
+            if (mobileReactionMenu) {
+                mobileReactionMenu.addEventListener('touchstart', function(e) {
+                    const option = e.target.closest('.reaction-option');
+                    if (option) option.classList.add('touch-active');
+                    menuSelectionArmed = true; // arm selection only after explicit touch in menu
+                }, { passive: true });
+                ['touchend','touchcancel'].forEach(function(evt) {
+                    mobileReactionMenu.addEventListener(evt, function(e) {
+                        const option = e.target.closest('.reaction-option');
+                        if (option) option.classList.remove('touch-active');
+                    }, { passive: true });
+                });
+
+                // Direct emoji selection on touch
+                mobileReactionMenu.addEventListener('touchend', function(e) {
+                    if (!menuSelectionArmed) return; // ignore lift from long-press
+                    const reactionOption = e.target.closest('.reaction-option');
+                    if (!reactionOption) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    lastQuickTapTs = Date.now();
+
+                    // Check if user is authenticated first
+                    const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
+                    if (!isAuthenticated) {
+                        var currentUrl = window.location.pathname + window.location.search + window.location.hash;
+                        document.cookie = "redirectAfterLogin=" + encodeURIComponent(currentUrl) + "; path=/";
+                        window.location.href = '/login';
+                        return;
+                    }
+
+                    const reactionType = reactionOption.dataset.reaction;
+                    sendMobileReaction(reactionType)
+                    .catch(error => {
+                        console.error('Error submitting reaction:', error);
+                        alert('Failed to submit reaction. Please try again. Error: ' + error.message);
+                    })
+                    .finally(() => {
+                        mobileReactionMenu.classList.add('hidden');
+                        menuSelectionArmed = false;
+                    });
+                }, { passive: false });
+            }
+
+            // Outside-tap dismissal for mobile reaction menu
+            function isOutsideMobileReaction(target) {
+                return mobileReactionMenu && !mobileReactionMenu.contains(target) && !mobileReactionBtn.contains(target);
+            }
+            ;['touchstart','click'].forEach(function(evt) {
+                document.addEventListener(evt, function(e) {
+                    if (!mobileReactionMenu || mobileReactionMenu.classList.contains('hidden')) return;
+                    if (isOutsideMobileReaction(e.target)) {
+                        mobileReactionMenu.classList.add('hidden');
+                        menuSelectionArmed = false;
+                    }
+                }, { passive: true, capture: true });
+            });
+            // Escape to close
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && mobileReactionMenu && !mobileReactionMenu.classList.contains('hidden')) {
+                    mobileReactionMenu.classList.add('hidden');
+                    menuSelectionArmed = false;
+                }
+            });
+
             // Handle direct click on mobile reaction button
             mobileReactionBtn.addEventListener('click', function(e) {
+                // Ignore if a touch quick tap just fired
+                if (Date.now() - lastQuickTapTs < 400) {
+                    e.preventDefault();
+                    return;
+                }
                 // Check if user is authenticated first
                 const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
                 if (!isAuthenticated) {
@@ -1193,6 +1397,12 @@
 
             // Handle reaction option clicks directly
             mobileReactionMenu.addEventListener('click', function(e) {
+                // Skip if this click immediately follows a touch selection
+                if (Date.now() - lastQuickTapTs < 400) {
+                    e.preventDefault();
+                    return;
+                }
+                if (!menuSelectionArmed) return; // require explicit menu interaction
                 const reactionOption = e.target.closest('.reaction-option');
                 if (!reactionOption) return;
 
@@ -1260,6 +1470,7 @@
 
                 // Hide menu after selection
                 mobileReactionMenu.classList.add('hidden');
+                menuSelectionArmed = false;
             });
         }
 
@@ -1791,6 +2002,25 @@
                     min-height: 280px;
                     max-height: 450px;
                 }
+            }
+
+            /* Touch feedback styles for mobile */
+            .mobile-touch-active {
+                background-color: rgba(0, 0, 0, 0.06);
+                border-radius: 9999px;
+            }
+            .reaction-option.touch-active {
+                background-color: #e5e7eb;
+            }
+
+            /* Prevent long-press selection/callout on mobile reaction button */
+            #mobile-reaction-btn,
+            #mobile-reaction-btn * {
+                -webkit-user-select: none;
+                user-select: none;
+                -webkit-touch-callout: none;
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
             }
         }
     </style>
