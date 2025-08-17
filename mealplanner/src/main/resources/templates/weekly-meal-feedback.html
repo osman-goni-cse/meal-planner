@@ -232,27 +232,15 @@
                                 <span th:text="${error}">Comment cannot be empty.</span>
                             </div>
                             <div th:if="${isAuthenticated && selectedDish != null && !selectedDish.isEmpty() && !selectedDate.isAfter(T(java.time.LocalDate).now())}" class="space-y-3">
-                                <!-- Reaction count and comments on same line - FIRST -->
-                                <div class="flex items-center">
-                                    <!-- Reaction count display - left aligned -->
-                                    <div id="reaction-count-display" class="flex items-center space-x-1" th:style="${selectedDish != null && selectedDish.reactions > 0} ? 'display: flex' : 'display: none'">
-                                        <!-- Show reaction emojis side by side -->
-                                        <div class="flex items-center">
-                                            <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.DELICIOUS > 0}">😋</span>
-                                            <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.AVERAGE > 0}">😐</span>
-                                            <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.BAD > 0}">😞</span>
-                                        </div>
-                                        <!-- Show total count -->
-                                        <span class="text-sm text-gray-600" th:text="${selectedDish.reactions}">0</span>
-                                    </div>
-                                    <!-- Comments - always right aligned -->
-                                    <div class="ml-auto flex items-center space-x-1.5 text-gray-600">
+                                <!-- Comments count display -->
+                                <div class="flex items-center justify-end">
+                                    <div class="flex items-center space-x-1.5 text-gray-600">
                                         <i class="fa-regular fa-comment text-lg text-blue-500"></i>
                                         <span class="font-medium text-sm" th:text="${selectedDish != null ? selectedDish.commentsCount : 0}">0</span>
                                         <span class="text-sm ml-1">Comments</span>
                                     </div>
                                 </div>
-                                <!-- Main reaction button on separate line - SECOND -->
+                                <!-- Main reaction button -->
                                 <div class="flex items-center">
                                     <!-- Desktop Reaction System -->
                                     <div class="relative">
@@ -383,16 +371,6 @@
                             <i class="fa-regular fa-comment text-lg"></i>
                             <span class="font-medium text-sm" th:text="${selectedDish != null ? selectedDish.commentsCount : 0} + ' Comments'">0 Comments</span>
                         </button>
-                    </div>
-                    
-                    <!-- Reaction Count Display - Instagram-style -->
-                    <div th:if="${isAuthenticated && selectedDish != null && selectedDish.reactions > 0}" id="mobile-reaction-count-display" class="flex items-center space-x-2 text-sm text-gray-600">
-                        <div class="flex items-center space-x-1">
-                            <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.DELICIOUS > 0}">😋</span>
-                            <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.AVERAGE > 0}">😐</span>
-                            <span th:if="${selectedDish.reactionCounts != null && selectedDish.reactionCounts.BAD > 0}">😞</span>
-                        </div>
-                        <span th:text="${selectedDish.reactions}">0</span>
                     </div>
                     
                     <!-- Login Message for Unauthenticated Users -->
@@ -713,19 +691,11 @@
         // Desktop reaction functionality - only for authenticated users
         const reactionBtn = document.getElementById('reaction-btn');
         const reactionMenu = document.getElementById('reaction-menu');
-        const reactionDisplay = document.getElementById('reaction-count-display'); // Updated selector
         const reactionText = document.getElementById('reaction-text');
-        const reactionIcon = document.getElementById('reaction-icon'); // New element
+        const reactionIcon = document.getElementById('reaction-icon');
 
         // Initialize reaction state from server data - only for authenticated users
-        if (isAuthenticated && reactionDisplay) {
-            // Initialize the reaction count display
-            const reactionCounts = /*[[${selectedDish != null ? selectedDish.reactionCounts : null}]]*/ {};
-            const totalReactions = /*[[${selectedDish != null ? selectedDish.reactions : 0}]]*/ 0;
-            
-            // Update the reaction count display based on server data
-            updateReactionDisplay(reactionCounts, null);
-            
+        if (isAuthenticated && reactionIcon) {
             // Initialize the main reaction button
             const userReactionType = /*[[${selectedDish != null ? selectedDish.userReactionType : null}]]*/ null;
             updateReactionIcon(userReactionType);
@@ -804,7 +774,7 @@
                     .then(data => {
                         if (data) { // Only process if we got data (not redirected)
                             // Update reaction count display with server response
-                            updateReactionDisplay(data.reactionCounts, data.userReactionType);
+                            //updateReactionDisplay(data.reactionCounts, data.userReactionType);
                             
                             // Update main reaction button icon
                             updateReactionIcon(data.userReactionType);
@@ -850,9 +820,6 @@
                     })
                     .then(data => {
                         if (data) { // Only process if we got data (not redirected)
-                            // Update reaction count display with server response
-                            updateReactionDisplay(data.reactionCounts, data.userReactionType);
-                            
                             // Update main reaction button icon
                             updateReactionIcon(data.userReactionType);
                             
@@ -919,9 +886,6 @@
                 })
                 .then(data => {
                     if (data) { // Only process if we got data (not redirected)
-                        // Update reaction count display with server response
-                        updateReactionDisplay(data.reactionCounts, data.userReactionType);
-                        
                         // Update main reaction button icon
                         updateReactionIcon(data.userReactionType);
                         
@@ -945,59 +909,6 @@
             });
         }
 
-        // Helper functions for reaction display
-        function updateReactionDisplay(reactionCounts, userReactionType) {
-            if (!reactionDisplay) return;
-            
-            // Calculate total reactions
-            const totalReactions = reactionCounts ? 
-                (reactionCounts.DELICIOUS || 0) + (reactionCounts.AVERAGE || 0) + (reactionCounts.BAD || 0) : 0;
-            
-            if (totalReactions > 0) {
-                // Show the reaction count display
-                reactionDisplay.style.display = 'flex';
-                
-                // Clear existing display
-                reactionDisplay.innerHTML = '';
-                
-                // Create emoji container
-                const emojiContainer = document.createElement('div');
-                emojiContainer.className = 'flex items-center';
-                
-                // Add reaction emojis side by side
-                if (reactionCounts) {
-                    if (reactionCounts.DELICIOUS > 0) {
-                        const deliciousSpan = document.createElement('span');
-                        deliciousSpan.textContent = '😋';
-                        emojiContainer.appendChild(deliciousSpan);
-                    }
-                    
-                    if (reactionCounts.AVERAGE > 0) {
-                        const averageSpan = document.createElement('span');
-                        averageSpan.textContent = '😐';
-                        emojiContainer.appendChild(averageSpan);
-                    }
-                    
-                    if (reactionCounts.BAD > 0) {
-                        const badSpan = document.createElement('span');
-                        badSpan.textContent = '😞';
-                        emojiContainer.appendChild(badSpan);
-                    }
-                }
-                
-                // Add emoji container
-                reactionDisplay.appendChild(emojiContainer);
-                
-                // Add total count
-                const countSpan = document.createElement('span');
-                countSpan.className = 'text-xs text-gray-600';
-                countSpan.textContent = totalReactions;
-                reactionDisplay.appendChild(countSpan);
-            } else {
-                // Hide the reaction count display when no reactions
-                reactionDisplay.style.display = 'none';
-            }
-        }
 
         function updateReactionIcon(userReactionType) {
             if (!reactionIcon) return;
@@ -1040,7 +951,6 @@
         const mobileReactionMenu = document.getElementById('mobile-reaction-menu');
         const mobileReactionText = document.getElementById('mobile-reaction-text');
         const mobileReactionIcon = document.getElementById('mobile-reaction-icon');
-        const mobileReactionDisplay = document.getElementById('mobile-reaction-count-display');
 
         // Initialize mobile reaction state from server data - only for authenticated users
         if (isAuthenticated && mobileReactionIcon) {
@@ -1116,7 +1026,6 @@
                 })
                 .then(data => {
                     if (!data) return;
-                    updateMobileReactionDisplay(data.reactionCounts, data.userReactionType);
                     updateMobileReactionIcon(data.userReactionType);
                     if (data.userReactionType) {
                         mobileReactionText.textContent = getReactionText(data.userReactionType);
@@ -1325,8 +1234,6 @@
                     })
                     .then(data => {
                         if (data) { // Only process if we got data (not redirected)
-                            // Update reaction count display with server response
-                            updateMobileReactionDisplay(data.reactionCounts, data.userReactionType);
                             
                             // Update main reaction button icon
                             updateMobileReactionIcon(data.userReactionType);
@@ -1372,9 +1279,6 @@
                     })
                     .then(data => {
                         if (data) { // Only process if we got data (not redirected)
-                            // Update reaction count display with server response
-                            updateMobileReactionDisplay(data.reactionCounts, data.userReactionType);
-                            
                             // Update main reaction button icon
                             updateMobileReactionIcon(data.userReactionType);
                             
@@ -1447,9 +1351,6 @@
                 })
                 .then(data => {
                     if (data) { // Only process if we got data (not redirected)
-                        // Update reaction count display with server response
-                        updateMobileReactionDisplay(data.reactionCounts, data.userReactionType);
-                        
                         // Update main reaction button icon
                         updateMobileReactionIcon(data.userReactionType);
                         
@@ -1474,59 +1375,6 @@
             });
         }
 
-        // Helper function for mobile reaction display
-        function updateMobileReactionDisplay(reactionCounts, userReactionType) {
-            if (!mobileReactionDisplay) return;
-            
-            // Clear existing display
-            mobileReactionDisplay.innerHTML = '';
-            
-            // Calculate total reactions
-            const totalReactions = reactionCounts ? 
-                (reactionCounts.DELICIOUS || 0) + (reactionCounts.AVERAGE || 0) + (reactionCounts.BAD || 0) : 0;
-            
-            if (totalReactions > 0) {
-                // Show the reaction count display
-                mobileReactionDisplay.style.display = 'flex';
-                
-                // Create emoji container
-                const emojiContainer = document.createElement('div');
-                emojiContainer.className = 'flex items-center space-x-1';
-                
-                // Add reaction emojis side by side
-                if (reactionCounts) {
-                    if (reactionCounts.DELICIOUS > 0) {
-                        const deliciousSpan = document.createElement('span');
-                        deliciousSpan.textContent = '😋';
-                        emojiContainer.appendChild(deliciousSpan);
-                    }
-                    
-                    if (reactionCounts.AVERAGE > 0) {
-                        const averageSpan = document.createElement('span');
-                        averageSpan.textContent = '😐';
-                        emojiContainer.appendChild(averageSpan);
-                    }
-                    
-                    if (reactionCounts.BAD > 0) {
-                        const badSpan = document.createElement('span');
-                        badSpan.textContent = '😞';
-                        emojiContainer.appendChild(badSpan);
-                    }
-                }
-                
-                // Add emoji container
-                mobileReactionDisplay.appendChild(emojiContainer);
-                
-                // Add total count
-                const countSpan = document.createElement('span');
-                countSpan.className = 'text-sm text-gray-600';
-                countSpan.textContent = totalReactions;
-                mobileReactionDisplay.appendChild(countSpan);
-            } else {
-                // Hide the reaction count display when no reactions
-                mobileReactionDisplay.style.display = 'none';
-            }
-        }
 
         function updateMobileReactionIcon(userReactionType) {
             if (!mobileReactionIcon) return;
