@@ -232,50 +232,52 @@
                                 <span th:text="${error}">Comment cannot be empty.</span>
                             </div>
                             <div th:if="${isAuthenticated && selectedDish != null && !selectedDish.isEmpty() && !selectedDate.isAfter(T(java.time.LocalDate).now())}" class="space-y-3">
-                                <!-- Comments count display -->
-                                <div class="flex items-center justify-end">
+                                <!-- Reactions and Comments Row -->
+                                <div class="flex items-center justify-between py-2 border-t border-gray-100">
+                                    <!-- Left: Reaction Button -->
+                                    <div class="flex items-center space-x-4">
+                                        <!-- Desktop Reaction System -->
+                                        <div class="relative">
+                                            <!-- Main reaction button with emoji and text -->
+                                            <button id="reaction-btn" type="button" class="flex items-center space-x-1.5 text-gray-600 hover:text-gray-800 focus:outline-none transition-colors duration-200 py-1">
+                                                <div class="relative flex items-center">
+                                                    <span id="reaction-icon" class="text-lg transition-all duration-200" 
+                                                          data-reaction-type="NONE"
+                                                          th:data-reaction-type="${selectedDish != null && selectedDish.userReactionType != null ? selectedDish.userReactionType : 'NONE'}">
+                                                        <img th:if="${selectedDish == null || selectedDish.userReactionType == null}" src="/images/delicious-emoji.png" alt="Delicious" class="w-5 h-5">
+                                                        <span th:if="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS'}">😋</span>
+                                                        <span th:if="${selectedDish != null && selectedDish.userReactionType == 'AVERAGE'}">😐</span>
+                                                        <span th:if="${selectedDish != null && selectedDish.userReactionType == 'BAD'}">😞</span>
+                                                    </span>
+                                                    <span id="reaction-text" class="font-medium text-sm ml-1"
+                                                          th:text="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'Delicious' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'Average' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'Bad' : 'Delicious'))}"
+                                                          th:classappend="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'text-green-600' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'text-yellow-600' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'text-red-600' : 'text-gray-600'))}">
+                                                        Delicious
+                                                    </span>
+                                                </div>
+                                            </button>
+                                            <!-- Facebook-style Hover Menu -->
+                                            <div id="reaction-menu" class="absolute bottom-full left-0 mb-3 bg-white border border-gray-200 rounded-full shadow-xl p-2 hidden z-50 transform scale-100 transition-all duration-200">
+                                                <div class="flex space-x-1">
+                                                    <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="DELICIOUS" data-emoji="😋" data-text="Delicious" title="Delicious">
+                                                        <span class="text-2xl filter drop-shadow-sm">😋</span>
+                                                    </button>
+                                                    <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="AVERAGE" data-emoji="😐" data-text="Average" title="Average">
+                                                        <span class="text-2xl filter drop-shadow-sm">😐</span>
+                                                    </button>
+                                                    <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="BAD" data-emoji="😞" data-text="Bad" title="Bad">
+                                                        <span class="text-2xl filter drop-shadow-sm">😞</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Right: Comments Count -->
                                     <div class="flex items-center space-x-1.5 text-gray-600">
                                         <i class="fa-regular fa-comment text-lg text-blue-500"></i>
                                         <span class="font-medium text-sm" th:text="${selectedDish != null ? selectedDish.commentsCount : 0}">0</span>
                                         <span class="text-sm ml-1">Comments</span>
-                                    </div>
-                                </div>
-                                <!-- Main reaction button -->
-                                <div class="flex items-center">
-                                    <!-- Desktop Reaction System -->
-                                    <div class="relative">
-                                        <!-- Main reaction button with emoji and text -->
-                                        <button id="reaction-btn" type="button" class="flex items-center space-x-1.5 text-gray-600 hover:text-gray-800 focus:outline-none transition-colors duration-200 my-2">
-                                            <div class="relative flex items-center">
-                                                <span id="reaction-icon" class="text-lg transition-all duration-200" 
-                                                      data-reaction-type="NONE"
-                                                      th:data-reaction-type="${selectedDish != null && selectedDish.userReactionType != null ? selectedDish.userReactionType : 'NONE'}">
-                                                    <img th:if="${selectedDish == null || selectedDish.userReactionType == null}" src="/images/delicious-emoji.png" alt="Delicious" class="w-5 h-5">
-                                                    <span th:if="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS'}">😋</span>
-                                                    <span th:if="${selectedDish != null && selectedDish.userReactionType == 'AVERAGE'}">😐</span>
-                                                    <span th:if="${selectedDish != null && selectedDish.userReactionType == 'BAD'}">😞</span>
-                                                </span>
-                                                <span id="reaction-text" class="font-medium text-sm ml-1"
-                                                      th:text="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'Delicious' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'Average' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'Bad' : 'Delicious'))}"
-                                                      th:classappend="${selectedDish != null && selectedDish.userReactionType == 'DELICIOUS' ? 'text-green-600' : (selectedDish != null && selectedDish.userReactionType == 'AVERAGE' ? 'text-yellow-600' : (selectedDish != null && selectedDish.userReactionType == 'BAD' ? 'text-red-600' : 'text-gray-600'))}">
-                                                    Delicious
-                                                </span>
-                                            </div>
-                                        </button>
-                                        <!-- Facebook-style Hover Menu -->
-                                        <div id="reaction-menu" class="absolute bottom-full left-0 mb-3 bg-white border border-gray-200 rounded-full shadow-xl p-2 hidden z-50 transform scale-100 transition-all duration-200">
-                                            <div class="flex space-x-1">
-                                                <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="DELICIOUS" data-emoji="😋" data-text="Delicious" title="Delicious">
-                                                    <span class="text-2xl filter drop-shadow-sm">😋</span>
-                                                </button>
-                                                <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="AVERAGE" data-emoji="😐" data-text="Average" title="Average">
-                                                    <span class="text-2xl filter drop-shadow-sm">😐</span>
-                                                </button>
-                                                <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="BAD" data-emoji="😞" data-text="Bad" title="Bad">
-                                                    <span class="text-2xl filter drop-shadow-sm">😞</span>
-                                                </button>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -495,13 +497,7 @@
                 `;
             });
         }
-        // Show/hide Load More button
-        const loadMoreBtn = document.getElementById('load-more-comments-btn');
-        if (data.hasMore) {
-            loadMoreBtn.classList.remove('hidden');
-        } else {
-            loadMoreBtn.classList.add('hidden');
-        }
+        
     }
 
     async function loadMobileComments(reset = false) {
@@ -1497,10 +1493,7 @@
         }
     });
 
-    document.getElementById('load-more-comments-btn').onclick = function() {
-        currentPage++;
-        loadComments(false);
-    };
+    
 
     // --- Desktop comment form guest login redirect ---
     const feedbackForm = document.querySelector('#feedback-form form');
