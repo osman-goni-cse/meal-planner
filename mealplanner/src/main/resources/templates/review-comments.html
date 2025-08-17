@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head}"></head>
+<head th:replace="~{fragments/layout :: head}">
+    <!-- Lottie Animation Library -->
+    <script src="https://unpkg.com/lottie-web@5.12.2/build/player/lottie.min.js"></script>
+</head>
 <body class="font-sans bg-gray-50 flex flex-col min-h-screen">
     <!-- Desktop Sidebar (Desktop Only) -->
     <div th:replace="fragments/layout :: sidebar" class="hidden md:block"></div>
@@ -213,12 +216,13 @@
         }
 
         // Prepare data for chart
-        const deliciousCount = reactionCounts?.DELICIOUS || 0;
-        const averageCount = reactionCounts?.AVERAGE || 0;
-        const badCount = reactionCounts?.BAD || 0;
-        const totalReactions = deliciousCount + averageCount + badCount;
+        const goodCount = reactionCounts?.GOOD || 0;
+        const okayCount = reactionCounts?.OKAY || 0;
+        const notGonnaWorkCount = reactionCounts?.NOT_GONNA_WORK || 0;
+        const needsImprovementCount = reactionCounts?.NEEDS_IMPROVEMENT || 0;
+        const totalReactions = goodCount + okayCount + notGonnaWorkCount + needsImprovementCount;
         
-        console.log('Chart data:', { deliciousCount, averageCount, badCount, totalReactions }); // Debug log
+        console.log('Chart data:', { goodCount, okayCount, notGonnaWorkCount, needsImprovementCount, totalReactions }); // Debug log
 
         // Check if there are any reactions
         if (totalReactions === 0) {
@@ -235,18 +239,20 @@
         noReactionsMessage.classList.add('hidden');
 
         const chartData = {
-            labels: ['😋 Delicious', '😐 Average', '😞 Bad'],
+            labels: ['Good', 'Okay', 'Not Gonna Work', 'Needs Improvement'],
             datasets: [{
-                data: [deliciousCount, averageCount, badCount],
+                data: [goodCount, okayCount, notGonnaWorkCount, needsImprovementCount],
                 backgroundColor: [
-                    '#10B981', // Green for delicious
-                    '#F59E0B', // Yellow for average
-                    '#EF4444'  // Red for bad
+                    '#10B981', // Green for good
+                    '#F59E0B', // Yellow for okay
+                    '#EF4444', // Red for not gonna work
+                    '#F97316'  // Orange for needs improvement
                 ],
                 borderColor: [
                     '#059669',
                     '#D97706',
-                    '#DC2626'
+                    '#DC2626',
+                    '#EA580C'
                 ],
                 borderWidth: 2
             }]
@@ -305,13 +311,14 @@
         legendContainer.innerHTML = '';
         
         const reactions = [
-            { type: 'DELICIOUS', emoji: '😋', label: 'Delicious', color: '#10B981' },
-            { type: 'AVERAGE', emoji: '😐', label: 'Average', color: '#F59E0B' },
-            { type: 'BAD', emoji: '😞', label: 'Bad', color: '#EF4444' }
+            { type: 'GOOD', animation: '/images/reaction-menus/good.json', label: 'Good', color: '#10B981' },
+            { type: 'OKAY', animation: '/images/reaction-menus/okayish.json', label: 'Okay', color: '#F59E0B' },
+            { type: 'NOT_GONNA_WORK', animation: '/images/reaction-menus/not-gonna-work.json', label: 'Not Gonna Work', color: '#EF4444' },
+            { type: 'NEEDS_IMPROVEMENT', animation: '/images/reaction-menus/needs-improvement.json', label: 'Needs Improvement', color: '#F97316' }
         ];
 
         let hasAnyReactions = false;
-        reactions.forEach(reaction => {
+        reactions.forEach((reaction, index) => {
             const count = reactionCounts?.[reaction.type] || 0;
             if (count > 0) {
                 hasAnyReactions = true;
@@ -319,11 +326,25 @@
                 legendItem.className = 'flex items-center space-x-2';
                 legendItem.innerHTML = `
                     <div class="w-3 h-3 rounded-full" style="background-color: ${reaction.color}"></div>
-                    <span class="text-lg">${reaction.emoji}</span>
+                    <div id="legend-animation-${index}" style="width: 24px; height: 24px;"></div>
                     <span class="font-medium">${reaction.label}</span>
                     <span class="text-gray-500">(${count})</span>
                 `;
                 legendContainer.appendChild(legendItem);
+                
+                // Initialize Lottie animation for this legend item
+                setTimeout(() => {
+                    const animationContainer = document.getElementById(`legend-animation-${index}`);
+                    if (animationContainer) {
+                        lottie.loadAnimation({
+                            container: animationContainer,
+                            renderer: 'svg',
+                            loop: true,
+                            autoplay: true,
+                            path: reaction.animation
+                        });
+                    }
+                }, 100);
             }
         });
 
@@ -341,22 +362,85 @@
             return;
         }
 
-        const delicious = reactionCounts?.DELICIOUS || 0;
-        const average = reactionCounts?.AVERAGE || 0;
-        const bad = reactionCounts?.BAD || 0;
+        const good = reactionCounts?.GOOD || 0;
+        const okay = reactionCounts?.OKAY || 0;
+        const notGonnaWork = reactionCounts?.NOT_GONNA_WORK || 0;
+        const needsImprovement = reactionCounts?.NEEDS_IMPROVEMENT || 0;
         
-        const deliciousPercent = total > 0 ? ((delicious / total) * 100).toFixed(1) : 0;
-        const averagePercent = total > 0 ? ((average / total) * 100).toFixed(1) : 0;
-        const badPercent = total > 0 ? ((bad / total) * 100).toFixed(1) : 0;
+        const goodPercent = total > 0 ? ((good / total) * 100).toFixed(1) : 0;
+        const okayPercent = total > 0 ? ((okay / total) * 100).toFixed(1) : 0;
+        const notGonnaWorkPercent = total > 0 ? ((notGonnaWork / total) * 100).toFixed(1) : 0;
+        const needsImprovementPercent = total > 0 ? ((needsImprovement / total) * 100).toFixed(1) : 0;
 
         summaryContainer.innerHTML = `
             <p class="text-sm text-gray-600 mb-2">Total Reactions: <span class="font-semibold">${total}</span></p>
-            <div class="flex justify-center space-x-4 text-xs">
-                <span class="text-green-600">😋 ${deliciousPercent}%</span>
-                <span class="text-yellow-600">😐 ${averagePercent}%</span>
-                <span class="text-red-600">😞 ${badPercent}%</span>
+            <div class="flex justify-center space-x-6 text-xs items-center">
+                <div class="flex items-center space-x-1">
+                    <div id="stats-good-animation" style="width: 20px; height: 20px;"></div>
+                    <span class="text-green-600">${goodPercent}%</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <div id="stats-okay-animation" style="width: 20px; height: 20px;"></div>
+                    <span class="text-yellow-600">${okayPercent}%</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <div id="stats-notgonnawork-animation" style="width: 20px; height: 20px;"></div>
+                    <span class="text-red-600">${notGonnaWorkPercent}%</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <div id="stats-needsimprovement-animation" style="width: 20px; height: 20px;"></div>
+                    <span class="text-orange-600">${needsImprovementPercent}%</span>
+                </div>
             </div>
         `;
+        
+        // Initialize stats animations
+        setTimeout(() => {
+            // Always show all animations regardless of count
+            const goodContainer = document.getElementById('stats-good-animation');
+            if (goodContainer) {
+                lottie.loadAnimation({
+                    container: goodContainer,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: '/images/reaction-menus/good.json'
+                });
+            }
+            
+            const okayContainer = document.getElementById('stats-okay-animation');
+            if (okayContainer) {
+                lottie.loadAnimation({
+                    container: okayContainer,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: '/images/reaction-menus/okayish.json'
+                });
+            }
+            
+            const notGonnaWorkContainer = document.getElementById('stats-notgonnawork-animation');
+            if (notGonnaWorkContainer) {
+                lottie.loadAnimation({
+                    container: notGonnaWorkContainer,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: '/images/reaction-menus/not-gonna-work.json'
+                });
+            }
+            
+            const needsImprovementContainer = document.getElementById('stats-needsimprovement-animation');
+            if (needsImprovementContainer) {
+                lottie.loadAnimation({
+                    container: needsImprovementContainer,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: '/images/reaction-menus/needs-improvement.json'
+                });
+            }
+        }, 150);
     }
 
     async function loadComments(reset = false) {
