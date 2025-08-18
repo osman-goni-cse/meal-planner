@@ -268,7 +268,7 @@
                                 </div>
                             </div>
                             <!-- Remove button for template entries -->
-                            <form th:action="@{/weekly-plan/remove-template}" method="post" class="remove-template-form">
+                            <form th:action="@{/weekly-plan/remove-template}" method="post" class="remove-template-form" data-ajax="true">
                                 <input type="hidden" name="dishId" th:value="${dishMap.dish?.id}" />
                                 <input type="hidden" name="date" th:value="${selectedDate}" />
                                 <input type="hidden" name="mealPeriod" th:value="${meal}" />
@@ -289,7 +289,7 @@
                 </div>
                 
                 <!-- Add Dish Dropdown -->
-                <form th:action="@{/weekly-plan/add}" method="post" class="w-full add-dish-form">
+                <form th:action="@{/weekly-plan/add}" method="post" class="w-full add-dish-form" data-ajax="true">
                     <input type="hidden" name="date" th:value="${selectedDate}" />
                     <input type="hidden" name="mealPeriod" th:value="${meal}" />
                     <input type="hidden" name="dishId" class="mobile-dish-id-input" />

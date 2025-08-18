@@ -346,7 +346,7 @@
                                              style="width: 28px; height: 28px;">
                                         </div>
                                     </span>
-                                    <span id="mobile-reaction-text" class="font-medium text-sm text-gray-600">
+                                    <span id="mobile-reaction-text" class="font-medium text-xs md:text-sm text-gray-600">
                                         Good
                                     </span>
                                 </button>
@@ -441,7 +441,7 @@
                 </div>
                 
                 <!-- Show comment form for authenticated users only -->
-                <form th:if="${isAuthenticated}" id="mobile-comment-form" th:action="@{/weekly-feedback/feedback}" method="post" class="flex items-center space-x-3">
+                <form th:if="${isAuthenticated}" id="mobile-comment-form" data-ajax="true" th:action="@{/weekly-feedback/feedback}" method="post" class="flex items-center space-x-3">
                     <input type="hidden" name="date" th:value="${selectedDate}">
                     <input type="hidden" name="dishId" th:value="${selectedDish != null ? selectedDish.id : ''}">
                     <div class="flex-1 relative">
@@ -967,15 +967,24 @@
                 'NEEDS_IMPROVEMENT': { text: 'Needs Improvement', class: 'text-orange-600' }
             };
             
-            // Remove all color classes
-            textElement.classList.remove('text-green-600', 'text-yellow-600', 'text-red-600', 'text-orange-600', 'text-gray-600');
-            
             if (reactionType && textMap[reactionType]) {
                 textElement.textContent = textMap[reactionType].text;
-                textElement.classList.add(textMap[reactionType].class);
+                if (isDesktop) {
+                    // Desktop: remove old classes and add new ones
+                    textElement.classList.remove('text-green-600', 'text-yellow-600', 'text-red-600', 'text-orange-600', 'text-gray-600');
+                    textElement.classList.add(textMap[reactionType].class);
+                } else {
+                    // Mobile: set complete className with responsive classes
+                    textElement.className = 'font-medium text-xs md:text-sm ' + textMap[reactionType].class;
+                }
             } else {
                 textElement.textContent = 'Good';
-                textElement.classList.add('text-gray-600');
+                if (isDesktop) {
+                    textElement.classList.remove('text-green-600', 'text-yellow-600', 'text-red-600', 'text-orange-600', 'text-gray-600');
+                    textElement.classList.add('text-gray-600');
+                } else {
+                    textElement.className = 'font-medium text-xs md:text-sm text-gray-600';
+                }
             }
         }
 
@@ -1125,10 +1134,10 @@
                     updateMobileReactionIcon(data.userReactionType);
                     if (data.userReactionType) {
                         mobileReactionText.textContent = getReactionText(data.userReactionType);
-                        mobileReactionText.className = 'font-medium text-base ml-1 ' + getReactionColorClass(data.userReactionType);
+                        mobileReactionText.className = 'font-medium text-xs md:text-sm ' + getReactionColorClass(data.userReactionType);
                     } else {
                         mobileReactionText.textContent = 'Good';
-                        mobileReactionText.className = 'font-medium text-base ml-1 text-gray-600';
+                        mobileReactionText.className = 'font-medium text-xs md:text-sm text-gray-600';
                     }
                 });
             }
@@ -1337,10 +1346,10 @@
                             // Update text based on user reaction
                             if (data.userReactionType) {
                                 mobileReactionText.textContent = getReactionText(data.userReactionType);
-                                mobileReactionText.className = 'font-medium text-base ml-1 ' + getReactionColorClass(data.userReactionType);
+                                mobileReactionText.className = 'font-medium text-xs md:text-sm ' + getReactionColorClass(data.userReactionType);
                             } else {
                                 mobileReactionText.textContent = 'Good';
-                                mobileReactionText.className = 'font-medium text-base ml-1 text-gray-600';
+                                mobileReactionText.className = 'font-medium text-xs md:text-sm text-gray-600';
                             }
                         }
                     })
@@ -1556,6 +1565,7 @@
                 }
                 
                 const commentInput = this.querySelector('input[name="comment"]');
+                const submitButton = this.querySelector('button[type="submit"]');
                 const commentText = commentInput.value;
                 
                 if (!commentText.trim()) {
@@ -1563,7 +1573,15 @@
                     return;
                 }
                 
+                // Create FormData before disabling inputs
                 const formData = new FormData(this);
+                
+                // Show loading state after capturing form data
+                const originalButtonContent = submitButton.innerHTML;
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                commentInput.disabled = true;
+                
                 try {
                     const res = await fetch('/weekly-feedback/feedback', {
                         method: 'POST',
@@ -1578,7 +1596,7 @@
                         const commentCountElement = document.querySelector('#mobile-comments-btn span');
                         if (commentCountElement) {
                             const currentCount = parseInt(commentCountElement.textContent, 10);
-                            commentCountElement.textContent = currentCount + 1;
+                            commentCountElement.textContent = currentCount + 1 + ' Comments';
                         }
                         
                         // Reload comments to show the new comment
@@ -1592,6 +1610,11 @@
                 } catch (error) {
                     console.error('Error submitting comment:', error);
                     alert('Failed to submit comment. Please try again.');
+                } finally {
+                    // Reset loading state
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonContent;
+                    commentInput.disabled = false;
                 }
             });
         }

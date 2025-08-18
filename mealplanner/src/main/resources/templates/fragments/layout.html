@@ -120,7 +120,12 @@
                     showLoader();
                 } catch (_) {}
             });
-            document.addEventListener('submit', function() { ensureLoader(); showLoader(); });
+            document.addEventListener('submit', function(e) { 
+                // Skip AJAX forms that handle their own loading states
+                if (e.target.dataset.ajax === 'true') return;
+                ensureLoader(); 
+                showLoader(); 
+            });
         })();
     </script>
 </head>
