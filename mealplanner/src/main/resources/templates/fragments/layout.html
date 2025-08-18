@@ -213,6 +213,12 @@
                             <p class="text-sm font-medium text-gray-900" th:text="${#authentication.principal.attributes['name']}">User Name</p>
                             <p class="text-xs text-gray-500" th:text="${#authentication.principal.attributes['email']}">user@example.com</p>
                         </div>
+                        <!-- Admin Panel Link - Only visible for admins -->
+                        <a th:href="@{/weekly-plan}" sec:authorize="hasAuthority('ROLE_ADMIN')" class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left flex items-center">
+                            <i class="fa-solid fa-cog mr-2 text-blue-600"></i>
+                            <span class="text-blue-600 font-medium">Admin Panel</span>
+                        </a>
+                        <div th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}" class="border-b border-gray-100 my-1"></div>
                         <form th:action="@{/logout}" method="post">
                             <button type="submit" class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left flex items-center">
                                 <i class="fa-solid fa-sign-out-alt mr-2"></i>
@@ -245,6 +251,12 @@
                     <p class="text-sm font-medium text-gray-900" th:text="${#authentication.principal.attributes['name']}">User Name</p>
                     <p class="text-xs text-gray-500" th:text="${#authentication.principal.attributes['email']}">user@example.com</p>
                 </div>
+                <!-- Admin Panel Link - Only visible for admins -->
+                <a th:href="@{/weekly-plan}" sec:authorize="hasAuthority('ROLE_ADMIN')" class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left flex items-center">
+                    <i class="fa-solid fa-cog mr-2 text-blue-600"></i>
+                    <span class="text-blue-600 font-medium">Admin Panel</span>
+                </a>
+                <div th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}" class="border-b border-gray-100 my-1"></div>
                 <form th:action="@{/logout}" method="post">
                     <button type="submit" class="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left flex items-center">
                         <i class="fa-solid fa-sign-out-alt mr-2"></i>
