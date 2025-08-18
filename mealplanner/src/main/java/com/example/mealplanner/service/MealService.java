@@ -22,7 +22,7 @@ public class MealService {
 
     public String getCurrentMealPeriod(LocalTime time) {
         
-        if (!time.isBefore(LocalTime.of(0, 0)) && time.isBefore(LocalTime.of(16, 30))) {
+        if (time.isBefore(LocalTime.of(16, 00))) {
             return "lunch";
         }
         return "snacks";
