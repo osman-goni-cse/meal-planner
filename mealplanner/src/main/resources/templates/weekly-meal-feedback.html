@@ -250,7 +250,7 @@
                                                              style="width: 24px; height: 24px;">
                                                         </div>
                                                     </span>
-                                                    <span id="reaction-text" class="font-medium text-sm ml-1 text-gray-600">
+                                                    <span id="reaction-text" class="font-medium text-sm ml-1 text-gray-400">
                                                         Good
                                                     </span>
                                                 </div>
@@ -264,11 +264,11 @@
                                                     <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="OKAY" data-animation="okayish.json" data-text="Okay" title="Okay">
                                                         <div class="reaction-animation" data-animation="okayish.json" style="width: 32px; height: 32px;"></div>
                                                     </button>
-                                                    <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="NOT_GONNA_WORK" data-animation="not-gonna-work.json" data-text="Not Gonna Work" title="Not Gonna Work">
-                                                        <div class="reaction-animation" data-animation="not-gonna-work.json" style="width: 32px; height: 32px;"></div>
-                                                    </button>
                                                     <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="NEEDS_IMPROVEMENT" data-animation="needs-improvement.json" data-text="Needs Improvement" title="Needs Improvement">
                                                         <div class="reaction-animation" data-animation="needs-improvement.json" style="width: 32px; height: 32px;"></div>
+                                                    </button>
+                                                    <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="NOT_GONNA_WORK" data-animation="not-gonna-work.json" data-text="Not Gonna Work" title="Not Gonna Work">
+                                                        <div class="reaction-animation" data-animation="not-gonna-work.json" style="width: 32px; height: 32px;"></div>
                                                     </button>
                                                 </div>
                                             </div>
@@ -346,7 +346,7 @@
                                              style="width: 28px; height: 28px;">
                                         </div>
                                     </span>
-                                    <span id="mobile-reaction-text" class="font-medium text-xs md:text-sm text-gray-600">
+                                    <span id="mobile-reaction-text" class="font-medium text-xs md:text-sm text-gray-400">
                                         Good
                                     </span>
                                 </button>
@@ -359,11 +359,11 @@
                                         <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="OKAY" data-animation="okayish.json" data-text="Okay" title="Okay">
                                             <div class="reaction-animation" data-animation="okayish.json" style="width: 32px; height: 32px;"></div>
                                         </button>
-                                        <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="NOT_GONNA_WORK" data-animation="not-gonna-work.json" data-text="Not Gonna Work" title="Not Gonna Work">
-                                            <div class="reaction-animation" data-animation="not-gonna-work.json" style="width: 32px; height: 32px;"></div>
-                                        </button>
                                         <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="NEEDS_IMPROVEMENT" data-animation="needs-improvement.json" data-text="Needs Improvement" title="Needs Improvement">
                                             <div class="reaction-animation" data-animation="needs-improvement.json" style="width: 32px; height: 32px;"></div>
+                                        </button>
+                                        <button class="reaction-option p-2 hover:scale-125 transition-all duration-200 rounded-full hover:bg-gray-50" data-reaction="NOT_GONNA_WORK" data-animation="not-gonna-work.json" data-text="Not Gonna Work" title="Not Gonna Work">
+                                            <div class="reaction-animation" data-animation="not-gonna-work.json" style="width: 32px; height: 32px;"></div>
                                         </button>
                                     </div>
                                 </div>
@@ -479,7 +479,7 @@
                 renderer: 'svg',
                 loop: true,
                 autoplay: true,
-                path: '/images/reaction-menus/good.json'
+                path: '/images/reaction-menus/default-good.json'
             });
         }
 
@@ -491,7 +491,7 @@
                 renderer: 'svg',
                 loop: true,
                 autoplay: true,
-                path: '/images/reaction-menus/good.json'
+                path: '/images/reaction-menus/default-good.json'
             });
         }
 
@@ -981,9 +981,9 @@
                 textElement.textContent = 'Good';
                 if (isDesktop) {
                     textElement.classList.remove('text-green-600', 'text-yellow-600', 'text-red-600', 'text-orange-600', 'text-gray-600');
-                    textElement.classList.add('text-gray-600');
+                    textElement.classList.add('text-gray-400');
                 } else {
-                    textElement.className = 'font-medium text-xs md:text-sm text-gray-600';
+                    textElement.className = 'font-medium text-xs md:text-sm text-gray-400';
                 }
             }
         }
@@ -999,7 +999,7 @@
                     'NOT_GONNA_WORK': '/images/reaction-menus/not-gonna-work.json',
                     'NEEDS_IMPROVEMENT': '/images/reaction-menus/needs-improvement.json'
                 };
-                const newPath = animationMap[userReactionType] || '/images/reaction-menus/good.json';
+                const newPath = animationMap[userReactionType] || '/images/reaction-menus/default-good.json';
                 
                 // Destroy and recreate animation with new path
                 mainReactionAnim.destroy();
@@ -1022,7 +1022,7 @@
                     renderer: 'svg',
                     loop: true,
                     autoplay: true,
-                    path: '/images/reaction-menus/good.json'
+                    path: '/images/reaction-menus/default-good.json'
                 });
                 
                 reactionIcon.dataset.reactionType = 'NONE';
@@ -1046,7 +1046,7 @@
                 'NOT_GONNA_WORK': 'text-red-600',
                 'NEEDS_IMPROVEMENT': 'text-orange-600'
             };
-            return colorMap[reactionType] || 'text-gray-600';
+            return colorMap[reactionType] || 'text-gray-400';
         }
 
         // Mobile reaction functionality - only for authenticated users
@@ -1137,7 +1137,7 @@
                         mobileReactionText.className = 'font-medium text-xs md:text-sm ' + getReactionColorClass(data.userReactionType);
                     } else {
                         mobileReactionText.textContent = 'Good';
-                        mobileReactionText.className = 'font-medium text-xs md:text-sm text-gray-600';
+                        mobileReactionText.className = 'font-medium text-xs md:text-sm text-gray-400';
                     }
                 });
             }
@@ -1349,7 +1349,7 @@
                                 mobileReactionText.className = 'font-medium text-xs md:text-sm ' + getReactionColorClass(data.userReactionType);
                             } else {
                                 mobileReactionText.textContent = 'Good';
-                                mobileReactionText.className = 'font-medium text-xs md:text-sm text-gray-600';
+                                mobileReactionText.className = 'font-medium text-xs md:text-sm text-gray-400';
                             }
                         }
                     })
@@ -1473,7 +1473,7 @@
                     'NOT_GONNA_WORK': '/images/reaction-menus/not-gonna-work.json',
                     'NEEDS_IMPROVEMENT': '/images/reaction-menus/needs-improvement.json'
                 };
-                const newPath = animationMap[userReactionType] || '/images/reaction-menus/good.json';
+                const newPath = animationMap[userReactionType] || '/images/reaction-menus/default-good.json';
                 
                 // Destroy and recreate animation with new path
                 mobileMainReactionAnim.destroy();
@@ -1496,7 +1496,7 @@
                     renderer: 'svg',
                     loop: true,
                     autoplay: true,
-                    path: '/images/reaction-menus/good.json'
+                    path: '/images/reaction-menus/default-good.json'
                 });
                 
                 mobileReactionIcon.dataset.reactionType = 'NONE';
