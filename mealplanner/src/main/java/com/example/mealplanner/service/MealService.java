@@ -19,28 +19,13 @@ public class MealService {
     @Autowired
     private MenuTemplateEntryRepository templateRepo;
 
-    /**
-     * Determines the current meal period based on the current time.
-     * Breakfast: 6:00 AM - 9:59 AM
-     * Lunch: 11:00 AM - 1:59 PM
-     * Snacks: 2:00 PM - 4:59 PM
-     * @return A string representing the current meal period ("breakfast", "lunch", "snacks") or null if no meal is being served.
-     */
-    public String getCurrentMealPeriod() {
-        return getCurrentMealPeriod(LocalTime.now());
-    }
 
     public String getCurrentMealPeriod(LocalTime time) {
-        if (!time.isBefore(LocalTime.of(8, 0)) && time.isBefore(LocalTime.of(10, 0))) {
-            return "breakfast";
-        }
-        if (!time.isBefore(LocalTime.of(13, 0)) && time.isBefore(LocalTime.of(17, 0))) {
+        
+        if (!time.isBefore(LocalTime.of(0, 0)) && time.isBefore(LocalTime.of(16, 30))) {
             return "lunch";
         }
-        if (!time.isBefore(LocalTime.of(17, 0)) && time.isBefore(LocalTime.of(20, 0))) {
-            return "snacks";
-        }
-        return null;
+        return "snacks";
     }
 
     /**

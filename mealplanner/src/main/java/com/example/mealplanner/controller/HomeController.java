@@ -133,7 +133,7 @@ public class HomeController {
         model.addAttribute("bottomMealDescription", bottomMeal.description);
 
         // Serving time string based on meal period
-        String servingTime = "01:00 PM – 5:00 PM"; // Default to lunch time
+        String servingTime = "01:30 PM – 4:00 PM"; // Default to lunch time
          if ("snacks".equalsIgnoreCase(currentMealPeriod)) {
             servingTime = "5:00 PM – 8:00 PM";
         } 
